@@ -165,7 +165,6 @@
     <p>Sports photography for local games &amp; events. Select a package and fill out the form below.</p>
   </div>
 
-  <!-- 01 PACKAGES -->
   <div class="block">
     <div class="block-label">01 — Packages</div>
     <div class="pkg-grid">
@@ -209,7 +208,6 @@
     </div>
   </div>
 
-  <!-- 02 ADD-ONS -->
   <div class="block">
     <div class="block-label">02 — Add-ons</div>
     <div class="addons-grid">
@@ -252,7 +250,6 @@
     </div>
   </div>
 
-  <!-- 03 TRAVEL -->
   <div class="block">
     <div class="block-label">03 — Travel estimate</div>
     <div class="travel-box">
@@ -279,35 +276,37 @@
     </div>
   </div>
 
-  <!-- 04 BOOKING FORM -->
   <div class="block" id="book">
     <div class="block-label">04 — Your details</div>
     <div id="form-wrap">
-      <form onsubmit="handleSubmit(event)">
-        <input type="hidden" id="hidden-pkg"/>
-        <input type="hidden" id="hidden-addons"/>
-        <input type="hidden" id="hidden-total"/>
-        <input type="hidden" id="hidden-deposit"/>
-        <input type="hidden" id="hidden-travel"/>
+      <form action="https://formspree.io/f/xzdyygdl" method="POST" onsubmit="handleSubmit(event)">
+        
+        <input type="text" name="_gotcha" style="display:none" />
+        
+        <input type="hidden" name="Package" id="hidden-pkg"/>
+        <input type="hidden" name="Addons" id="hidden-addons"/>
+        <input type="hidden" name="Total_Price" id="hidden-total"/>
+        <input type="hidden" name="Deposit_Due" id="hidden-deposit"/>
+        <input type="hidden" name="Travel_Fee" id="hidden-travel"/>
 
         <div class="form-grid">
-          <div class="field"><label>First name</label><input type="text" id="fname" placeholder="Jordan" required/></div>
-          <div class="field"><label>Last name</label><input type="text" id="lname" placeholder="Smith" required/></div>
-          <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@email.com" required/></div>
-          <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(229) 555-0100"/></div>
+          <div class="field"><label>First name</label><input type="text" name="First_Name" id="fname" placeholder="Jordan" required/></div>
+          <div class="field"><label>Last name</label><input type="text" name="Last_Name" id="lname" placeholder="Smith" required/></div>
+          <div class="field"><label>Email</label><input type="email" name="Email" id="email" placeholder="you@email.com" required/></div>
+          <div class="field"><label>Phone</label><input type="tel" name="Phone" id="phone" placeholder="(229) 555-0100"/></div>
           <hr class="divider"/>
-          <div class="field"><label>Event date</label><input type="date" id="event-date" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
-          <div class="field"><label>Start time</label><input type="time" id="event-time" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
+          <div class="field"><label>Event date</label><input type="date" name="Event_Date" id="event-date" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
+          <div class="field"><label>Start time</label><input type="time" name="Event_Time" id="event-time" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
           <div class="field">
             <label>Sport / event type</label>
-            <select id="sport" required>
+            <select name="Sport_Type" id="sport" required>
               <option value="" disabled selected>Select...</option>
               <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
               <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
               <option>Wrestling</option><option>Swimming</option><option>Other</option>
             </select>
           </div>
-          <div class="field"><label>Venue / location</label><input type="text" id="location" placeholder="Valdosta High School Stadium" required/></div>
+          <div class="field"><label>Venue / location</label><input type="text" name="Location" id="location" placeholder="Valdosta High School Stadium" required/></div>
           <hr class="divider"/>
           <div class="field full"><label>Selected package</label><input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default;color:var(--muted)"/></div>
           <hr class="divider"/>
@@ -332,7 +331,7 @@
           <hr class="divider"/>
           <div class="field full">
             <label>How'd you find me?</label>
-            <select id="referral" required>
+            <select name="Referral_Source" id="referral" required>
               <option value="" disabled selected>Select...</option>
               <option>Instagram (@zacharyroutsongphotos)</option>
               <option>Word of mouth / friend</option>
@@ -342,7 +341,7 @@
               <option>Other</option>
             </select>
           </div>
-          <div class="field full"><label>Anything else? (optional)</label><textarea id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
+          <div class="field full"><label>Anything else? (optional)</label><textarea name="Notes" id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
           <div class="submit-row"><button type="submit" class="submit-btn">Send booking request</button></div>
         </div>
       </form>
@@ -371,11 +370,6 @@ var qtyPrints = 0;
 var activeAddons = [];
 var travelCost = 0;
 var focusedIdx = -1;
-
-var ORIGIN = { lat:30.8327, lng:-83.2785 };
-var GAS = 3.69;
-var MPG = 22.5;
-var FREE_MI = 15;
 
 var ORIGIN = { lat:30.8327, lng:-83.2785 };
 var GAS = 3.69;
@@ -547,13 +541,14 @@ function setLine(rowId,show,valId,val) {
 
 // ── SUBMIT ──
 function handleSubmit(e) {
-  e.preventDefault();
-  if (!selectedPkg) { alert('Please select a package first.'); return; }
-  document.getElementById('form-wrap').style.display='none';
-  document.getElementById('success').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
+  // e.preventDefault() REMOVED so form actually posts to Formspree
+  if (!selectedPkg) { 
+    e.preventDefault(); // Stop if no package selected
+    alert('Please select a package first.'); 
+    return; 
+  }
+  // Optional: You can add a small loading state here if you want
 }
-
 
 </script>
 </body>
