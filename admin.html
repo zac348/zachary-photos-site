@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0a0a;--s1:#111;--s2:#181818;--b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;--t1:#efefef;--t2:#aaa;--t3:#666;--accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);--red:#ff4d4d;--radius:8px;}
+:root{--bg:#0a0a0a;--s1:#111;--s2:#181818;--b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;--t1:#efefef;--t2:#aaa;--t3:#666;--accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);--red:#ff4d4d;--green:#22c55e;--yellow:#f59e0b;--radius:8px;}
 html,body{height:100%}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.6}
 .layout{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
@@ -34,7 +34,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-
 .stat-l{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:3px}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-input[type="text"],input[type="email"],select,textarea{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%;appearance:none;color-scheme:dark}
+input[type="text"],input[type="email"],input[type="time"],select,textarea{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%;appearance:none;color-scheme:dark}
 input:focus,select:focus,textarea:focus{border-color:var(--b2);background:var(--s2)}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 select option{background:var(--s2)}
@@ -84,6 +84,66 @@ select option{background:var(--s2)}
 input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
 .check-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .check-row label{font-size:12px;text-transform:none;letter-spacing:0;color:var(--t2);cursor:pointer}
+
+/* ── CALENDAR ── */
+.cal-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b1)}
+.cal-month{font-size:14px;font-weight:500;color:var(--t1)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:4px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cal-nav-btn:hover{color:var(--t1);border-color:var(--b3)}
+.cal-nav-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);text-align:center;padding:10px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--t2);position:relative;transition:background .1s;border:1px solid transparent;flex-direction:column;gap:2px}
+.cal-day:hover{background:var(--s2);color:var(--t1)}
+.cal-day.empty{cursor:default;pointer-events:none}
+.cal-day.today{color:var(--accent);font-weight:500}
+.cal-day.past{color:var(--b3);cursor:default;pointer-events:none}
+.cal-day.selected{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.cal-day.unavailable{background:rgba(255,77,77,.08);color:var(--red)}
+.cal-day.partial{background:rgba(245,158,11,.08);color:var(--yellow)}
+.cal-day.available{background:rgba(34,197,94,.08);color:var(--green)}
+.cal-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+.cal-dot.red{background:var(--red)}
+.cal-dot.yellow{background:var(--yellow)}
+.cal-dot.green{background:var(--green)}
+
+/* LEGEND */
+.cal-legend{display:flex;gap:16px;padding:12px 18px;border-top:1px solid var(--b1);flex-wrap:wrap}
+.cal-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* DAY EDITOR */
+.day-editor{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:18px;margin-bottom:20px;display:none}
+.day-editor.open{display:block}
+.day-editor-title{font-size:14px;font-weight:500;margin-bottom:14px;color:var(--t1)}
+.block-type-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.block-type-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--b2);background:none;border-radius:4px;padding:6px 12px;cursor:pointer;color:var(--t3);transition:all .15s}
+.block-type-btn:hover{border-color:var(--b3);color:var(--t2)}
+.block-type-btn.active.unavail{border-color:var(--red);color:var(--red);background:rgba(255,77,77,.08)}
+.block-type-btn.active.partial{border-color:var(--yellow);color:var(--yellow);background:rgba(245,158,11,.08)}
+.block-type-btn.active.avail{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08)}
+.block-type-btn.active.clear{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.time-row.hidden{display:none}
+.editor-actions{display:flex;gap:8px;margin-top:4px}
+.save-btn{background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.save-btn:hover{background:var(--accent-d)}
+.cancel-btn{background:none;border:1px solid var(--b2);color:var(--t3);border-radius:6px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.cancel-btn:hover{border-color:var(--b3);color:var(--t2)}
+
+/* BLOCKS LIST */
+.blocks-list{display:flex;flex-direction:column;gap:6px}
+.block-row{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:10px 14px;gap:10px;flex-wrap:wrap}
+.block-row-info{font-size:12px;color:var(--t2)}
+.block-row-info strong{color:var(--t1);margin-right:6px}
+.block-status{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid}
+.block-status.unavailable{color:var(--red);border-color:rgba(255,77,77,.3);background:rgba(255,77,77,.08)}
+.block-status.partial{color:var(--yellow);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+.block-status.available{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.del-block-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.del-block-btn:hover{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
@@ -95,12 +155,14 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <button class="sb-link" onclick="switchTab('upload',this)"><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Upload</button>
     <button class="sb-link" onclick="switchTab('galleries',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries</button>
     <button class="sb-link" onclick="switchTab('bookings',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bookings</button>
+    <button class="sb-link" onclick="switchTab('calendar',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg>Availability</button>
     <a class="sb-link" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View site</a>
   </nav>
   <div class="sidebar-footer"><button class="logout-btn" onclick="logout()">Sign out</button></div>
 </aside>
 <main class="main">
 
+  <!-- OVERVIEW -->
   <div class="tab active" id="tab-overview">
     <h1 class="main-title">Dashboard</h1><p class="main-sub">Welcome back, Zachary.</p>
     <div class="stats-row">
@@ -113,6 +175,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div class="booking-list" id="ov-bookings"><p class="no-data">No bookings yet.</p></div>
   </div>
 
+  <!-- UPLOAD -->
   <div class="tab" id="tab-upload">
     <h1 class="main-title">Upload photos</h1><p class="main-sub">Add photos to your portfolio or a client gallery.</p>
     <div class="field"><label>Sport / event</label>
@@ -131,6 +194,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div class="photos-grid" id="photos-grid"><p class="no-data">No photos yet.</p></div>
   </div>
 
+  <!-- GALLERIES -->
   <div class="tab" id="tab-galleries">
     <h1 class="main-title">Client galleries</h1><p class="main-sub">Create a private gallery link for each client.</p>
     <div class="gal-form">
@@ -141,10 +205,62 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div class="gal-list" id="gal-list"><p class="no-data">No galleries yet.</p></div>
   </div>
 
+  <!-- BOOKINGS -->
   <div class="tab" id="tab-bookings">
     <h1 class="main-title">Bookings</h1><p class="main-sub">Requests submitted through your booking form.</p>
     <div class="sec-label">all bookings</div>
     <div class="booking-list" id="all-bookings"><p class="no-data">No bookings yet.</p></div>
+  </div>
+
+  <!-- CALENDAR / AVAILABILITY -->
+  <div class="tab" id="tab-calendar">
+    <h1 class="main-title">Availability</h1>
+    <p class="main-sub">Click any date to mark it available, unavailable, or partially blocked. Clients see this on the booking page.</p>
+
+    <!-- CALENDAR -->
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <span class="cal-month" id="cal-month-label"></span>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="shiftMonth(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="cal-nav-btn" onclick="shiftMonth(1)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-dow-row">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+        <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--red)"></div>Unavailable (full day)</div>
+        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Partially blocked</div>
+        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--green)"></div>Available (marked)</div>
+      </div>
+    </div>
+
+    <!-- DAY EDITOR -->
+    <div class="day-editor" id="day-editor">
+      <div class="day-editor-title" id="editor-title">Select a date</div>
+      <div class="block-type-row">
+        <button class="block-type-btn unavail" id="btn-unavail" onclick="setBlockType('unavailable')">Full day — unavailable</button>
+        <button class="block-type-btn partial" id="btn-partial" onclick="setBlockType('partial')">Partial block</button>
+        <button class="block-type-btn avail" id="btn-avail" onclick="setBlockType('available')">Mark available</button>
+        <button class="block-type-btn clear" id="btn-clear" onclick="setBlockType('clear')">Clear / reset</button>
+      </div>
+      <div class="time-row hidden" id="time-row">
+        <div class="field" style="margin:0"><label>From</label><input type="time" id="block-start" value="09:00"/></div>
+        <div class="field" style="margin:0"><label>To</label><input type="time" id="block-end" value="17:00"/></div>
+      </div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="block-note" placeholder="e.g. Football game booked"/></div>
+      <div class="editor-actions">
+        <button class="save-btn" onclick="saveBlock()">Save</button>
+        <button class="cancel-btn" onclick="closeEditor()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- EXISTING BLOCKS LIST -->
+    <div class="sec-label">all blocks this month</div>
+    <div class="blocks-list" id="blocks-list"><p class="no-data">No blocks set for this month.</p></div>
   </div>
 
 </main>
@@ -154,97 +270,101 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-sb.auth.getSession().then(({data})=>{if(!data.session)window.location.href='login.html';else loadAll();});
-async function logout(){await sb.auth.signOut();window.location.href='login.html';}
-function switchTab(name,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  if(btn)btn.classList.add('active');
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+sb.auth.getSession().then(({data}) => { if (!data.session) window.location.href = 'login.html'; else loadAll(); });
+async function logout() { await sb.auth.signOut(); window.location.href = 'login.html'; }
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'calendar') renderCalendar();
 }
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
-let allPhotos=[],allGalleries=[],allBookings=[];
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); }
 
-async function loadAll(){
-  await Promise.all([loadPhotos(),loadGalleries(),loadBookings()]);
+let allPhotos = [], allGalleries = [], allBookings = [], allBlocks = [];
+
+async function loadAll() {
+  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks()]);
   updateStats();
 }
-async function loadPhotos(){
-  const{data}=await sb.from('portfolio_photos').select('*').order('created_at',{ascending:false});
-  allPhotos=data||[];renderPhotos();populateGalDrop();
+
+// ── PHOTOS ──
+async function loadPhotos() {
+  const { data } = await sb.from('portfolio_photos').select('*').order('created_at', { ascending: false });
+  allPhotos = data || []; renderPhotos(); populateGalDrop();
 }
-function renderPhotos(){
-  const g=document.getElementById('photos-grid');
-  if(!allPhotos.length){g.innerHTML='<p class="no-data">No photos yet.</p>';return;}
-  g.innerHTML=allPhotos.map(p=>`
+function renderPhotos() {
+  const g = document.getElementById('photos-grid');
+  if (!allPhotos.length) { g.innerHTML = '<p class="no-data">No photos yet.</p>'; return; }
+  g.innerHTML = allPhotos.map(p => `
     <div class="photo-card">
-      <img src="${p.url}" alt="${p.sport||''}"/>
+      <img src="${p.url}" alt="${p.sport || ''}"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${p.sport||'No sport'}</div>
+        <div class="photo-sport">${p.sport || 'No sport'}</div>
         <div class="photo-name">${p.file_name}</div>
       </div>
       <div class="photo-actions">
-        <button class="tog-hp ${p.show_on_homepage?'on':''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage?'On HP':'Add HP'}</button>
+        <button class="tog-hp ${p.show_on_homepage ? 'on' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage ? 'On HP' : 'Add HP'}</button>
         <button class="del-btn" onclick="delPhoto('${p.id}','${p.storage_path}')">Delete</button>
       </div>
     </div>`).join('');
 }
-async function togHP(id,cur){await sb.from('portfolio_photos').update({show_on_homepage:!cur}).eq('id',id);await loadPhotos();}
-async function delPhoto(id,path){
-  if(!confirm('Delete this photo?'))return;
+async function togHP(id, cur) { await sb.from('portfolio_photos').update({ show_on_homepage: !cur }).eq('id', id); await loadPhotos(); }
+async function delPhoto(id, path) {
+  if (!confirm('Delete this photo?')) return;
   await sb.storage.from('photos').remove([path]);
-  await sb.from('portfolio_photos').delete().eq('id',id);
-  await loadPhotos();toast('Photo deleted.');
+  await sb.from('portfolio_photos').delete().eq('id', id);
+  await loadPhotos(); toast('Photo deleted.');
 }
 
 // UPLOAD
-const dz=document.getElementById('drop-zone');
-const fi=document.getElementById('file-input');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');handleFiles(e.dataTransfer.files);});
-fi.addEventListener('change',()=>handleFiles(fi.files));
-async function handleFiles(files){
-  if(!files.length)return;
-  const sport=document.getElementById('up-sport').value;
-  const galId=document.getElementById('up-gallery').value;
-  const hp=document.getElementById('up-hp').checked;
-  const pw=document.getElementById('prog-wrap'),pb=document.getElementById('prog-bar'),st=document.getElementById('up-status');
-  pw.style.display='block';let done=0;
-  for(const file of files){
-    const ext=file.name.split('.').pop();
-    const path=`public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    st.textContent=`Uploading ${file.name}...`;
-    const{error}=await sb.storage.from('photos').upload(path,file,{cacheControl:'3600',upsert:false});
-    if(error){st.textContent=`Error: ${error.message}`;continue;}
-    const{data:u}=sb.storage.from('photos').getPublicUrl(path);
-    await sb.from('portfolio_photos').insert({file_name:file.name,storage_path:path,url:u.publicUrl,sport:sport||null,gallery_id:galId||null,show_on_homepage:hp});
-    done++;pb.style.width=`${(done/files.length)*100}%`;
+const dz = document.getElementById('drop-zone'), fi = document.getElementById('file-input');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fi.addEventListener('change', () => handleFiles(fi.files));
+async function handleFiles(files) {
+  if (!files.length) return;
+  const sport = document.getElementById('up-sport').value;
+  const galId = document.getElementById('up-gallery').value;
+  const hp = document.getElementById('up-hp').checked;
+  const pw = document.getElementById('prog-wrap'), pb = document.getElementById('prog-bar'), st = document.getElementById('up-status');
+  pw.style.display = 'block'; let done = 0;
+  for (const file of files) {
+    const ext = file.name.split('.').pop();
+    const path = `public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    st.textContent = `Uploading ${file.name}...`;
+    const { error } = await sb.storage.from('photos').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) { st.textContent = `Error: ${error.message}`; continue; }
+    const { data: u } = sb.storage.from('photos').getPublicUrl(path);
+    await sb.from('portfolio_photos').insert({ file_name: file.name, storage_path: path, url: u.publicUrl, sport: sport || null, gallery_id: galId || null, show_on_homepage: hp });
+    done++; pb.style.width = `${(done / files.length) * 100}%`;
   }
-  st.textContent=`${done} photo${done!==1?'s':''} uploaded!`;
-  setTimeout(()=>{pw.style.display='none';pb.style.width='0';st.textContent='';},3000);
-  fi.value='';await loadPhotos();toast(`${done} photo${done!==1?'s':''} uploaded!`);
+  st.textContent = `${done} photo${done !== 1 ? 's' : ''} uploaded!`;
+  setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0'; st.textContent = ''; }, 3000);
+  fi.value = ''; await loadPhotos(); toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
 }
 
-// GALLERIES
-async function loadGalleries(){
-  const{data}=await sb.from('client_galleries').select('*').order('created_at',{ascending:false});
-  allGalleries=data||[];renderGalleries();populateGalDrop();
+// ── GALLERIES ──
+async function loadGalleries() {
+  const { data } = await sb.from('client_galleries').select('*').order('created_at', { ascending: false });
+  allGalleries = data || []; renderGalleries(); populateGalDrop();
 }
-function populateGalDrop(){
-  const s=document.getElementById('up-gallery'),cur=s.value;
-  s.innerHTML='<option value="">Portfolio only</option>';
-  allGalleries.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;if(g.id===cur)o.selected=true;s.appendChild(o);});
+function populateGalDrop() {
+  const s = document.getElementById('up-gallery'), cur = s.value;
+  s.innerHTML = '<option value="">Portfolio only</option>';
+  allGalleries.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.name; if (g.id === cur) o.selected = true; s.appendChild(o); });
 }
-function renderGalleries(){
-  const l=document.getElementById('gal-list');
-  if(!allGalleries.length){l.innerHTML='<p class="no-data">No galleries yet.</p>';return;}
-  l.innerHTML=allGalleries.map(g=>{
-    const url=`${window.location.origin}/gallery.html?id=${g.slug}`;
-    const cnt=allPhotos.filter(p=>p.gallery_id===g.id).length;
-    return `<div class="gal-row"><div class="gal-info"><h3>${g.name}</h3><p>${cnt} photo${cnt!==1?'s':''}</p></div>
+function renderGalleries() {
+  const l = document.getElementById('gal-list');
+  if (!allGalleries.length) { l.innerHTML = '<p class="no-data">No galleries yet.</p>'; return; }
+  l.innerHTML = allGalleries.map(g => {
+    const url = `${window.location.origin}/gallery.html?id=${g.slug}`;
+    const cnt = allPhotos.filter(p => p.gallery_id === g.id).length;
+    return `<div class="gal-row"><div class="gal-info"><h3>${g.name}</h3><p>${cnt} photo${cnt !== 1 ? 's' : ''}</p></div>
       <div class="gal-actions">
         <button class="copy-btn" onclick="copyLink('${url}',this)">Copy link</button>
         <a class="open-btn" href="${url}" target="_blank">Open</a>
@@ -252,55 +372,228 @@ function renderGalleries(){
       </div></div>`;
   }).join('');
 }
-async function createGallery(){
-  const name=document.getElementById('new-gal-name').value.trim();
-  if(!name){toast('Enter a client name first.');return;}
-  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString(36);
-  await sb.from('client_galleries').insert({name,slug});
-  document.getElementById('new-gal-name').value='';
-  await loadGalleries();toast('Gallery created!');
+async function createGallery() {
+  const name = document.getElementById('new-gal-name').value.trim();
+  if (!name) { toast('Enter a client name first.'); return; }
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
+  await sb.from('client_galleries').insert({ name, slug });
+  document.getElementById('new-gal-name').value = '';
+  await loadGalleries(); toast('Gallery created!');
 }
-async function delGallery(id){
-  if(!confirm('Delete this gallery? Photos stay in your portfolio.'))return;
-  await sb.from('client_galleries').delete().eq('id',id);
-  await loadGalleries();toast('Gallery deleted.');
+async function delGallery(id) {
+  if (!confirm('Delete this gallery? Photos stay in your portfolio.')) return;
+  await sb.from('client_galleries').delete().eq('id', id);
+  await loadGalleries(); toast('Gallery deleted.');
 }
-function copyLink(url,btn){
+function copyLink(url, btn) {
   navigator.clipboard.writeText(url);
-  btn.textContent='Copied!';btn.classList.add('copied');
-  setTimeout(()=>{btn.textContent='Copy link';btn.classList.remove('copied');},2000);
+  btn.textContent = 'Copied!'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
 }
 
-// BOOKINGS
-async function loadBookings(){
-  const{data}=await sb.from('bookings').select('*').order('created_at',{ascending:false});
-  allBookings=data||[];
-  renderBookings('all-bookings',allBookings);
-  renderBookings('ov-bookings',allBookings.slice(0,4));
+// ── BOOKINGS ──
+async function loadBookings() {
+  const { data } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
+  allBookings = data || [];
+  renderBookings('all-bookings', allBookings);
+  renderBookings('ov-bookings', allBookings.slice(0, 4));
 }
-function renderBookings(id,list){
-  const el=document.getElementById(id);
-  if(!list.length){el.innerHTML='<p class="no-data">No bookings yet.</p>';return;}
-  el.innerHTML=list.map(b=>`
+function renderBookings(id, list) {
+  const el = document.getElementById(id);
+  if (!list.length) { el.innerHTML = '<p class="no-data">No bookings yet.</p>'; return; }
+  el.innerHTML = list.map(b => `
     <div class="booking-card">
-      <div class="booking-head"><span class="booking-name">${b.first_name||''} ${b.last_name||''}</span><span class="booking-pkg">${b.package_selected||'—'}</span></div>
+      <div class="booking-head"><span class="booking-name">${b.first_name || ''} ${b.last_name || ''}</span><span class="booking-pkg">${b.package_selected || '—'}</span></div>
       <div class="booking-details">
-        <div class="booking-detail"><strong>Email</strong>${b.email||'—'}</div>
-        <div class="booking-detail"><strong>Phone</strong>${b.phone||'—'}</div>
-        <div class="booking-detail"><strong>Date</strong>${b.event_date||'—'} ${b.event_time||''}</div>
-        <div class="booking-detail"><strong>Sport</strong>${b.sport_type||'—'}</div>
-        <div class="booking-detail"><strong>Venue</strong>${b.event_location||'—'}</div>
-        <div class="booking-detail"><strong>Total / Deposit</strong>${b.total||'—'} / ${b.deposit||'—'}</div>
+        <div class="booking-detail"><strong>Email</strong>${b.email || '—'}</div>
+        <div class="booking-detail"><strong>Phone</strong>${b.phone || '—'}</div>
+        <div class="booking-detail"><strong>Date</strong>${b.event_date || '—'} ${b.event_time || ''}</div>
+        <div class="booking-detail"><strong>Sport</strong>${b.sport_type || '—'}</div>
+        <div class="booking-detail"><strong>Venue</strong>${b.event_location || '—'}</div>
+        <div class="booking-detail"><strong>Total / Deposit</strong>${b.total || '—'} / ${b.deposit || '—'}</div>
       </div>
     </div>`).join('');
 }
 
-function updateStats(){
-  document.getElementById('st-photos').textContent=allPhotos.length;
-  document.getElementById('st-galleries').textContent=allGalleries.length;
-  document.getElementById('st-bookings').textContent=allBookings.length;
-  document.getElementById('st-hp').textContent=allPhotos.filter(p=>p.show_on_homepage).length;
+function updateStats() {
+  document.getElementById('st-photos').textContent = allPhotos.length;
+  document.getElementById('st-galleries').textContent = allGalleries.length;
+  document.getElementById('st-bookings').textContent = allBookings.length;
+  document.getElementById('st-hp').textContent = allPhotos.filter(p => p.show_on_homepage).length;
 }
+
+// ── CALENDAR / AVAILABILITY ──
+let calYear, calMonth, selectedDate = null, selectedBlockType = null;
+
+async function loadBlocks() {
+  const { data } = await sb.from('availability').select('*').order('date').order('start_time');
+  allBlocks = data || [];
+}
+
+function getBlocksForDate(dateStr) {
+  return allBlocks.filter(b => b.date === dateStr);
+}
+
+function getDateStatus(dateStr) {
+  const blocks = getBlocksForDate(dateStr);
+  if (!blocks.length) return null;
+  if (blocks.some(b => b.status === 'unavailable' && !b.start_time)) return 'unavailable';
+  if (blocks.some(b => b.status === 'partial')) return 'partial';
+  if (blocks.some(b => b.status === 'available')) return 'available';
+  return null;
+}
+
+function renderCalendar() {
+  const now = new Date();
+  if (!calYear) { calYear = now.getFullYear(); calMonth = now.getMonth(); }
+
+  const label = new Date(calYear, calMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-month-label').textContent = label;
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = now.toISOString().slice(0, 10);
+
+  // empty cells
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const status = getDateStatus(dateStr);
+    const isPast = dateStr < today;
+    const isToday = dateStr === today;
+    const isSelected = dateStr === selectedDate;
+
+    const el = document.createElement('div');
+    let cls = 'cal-day';
+    if (isPast) cls += ' past';
+    if (isToday) cls += ' today';
+    if (isSelected) cls += ' selected';
+    if (status) cls += ' ' + status;
+    el.className = cls;
+    el.innerHTML = `<span>${d}</span>`;
+    if (status) {
+      const dot = document.createElement('div');
+      dot.className = 'cal-dot ' + (status === 'unavailable' ? 'red' : status === 'partial' ? 'yellow' : 'green');
+      el.appendChild(dot);
+    }
+    if (!isPast) el.addEventListener('click', () => openEditor(dateStr));
+    grid.appendChild(el);
+  }
+
+  renderBlocksList();
+}
+
+function shiftMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  closeEditor();
+  renderCalendar();
+}
+
+// ── DAY EDITOR ──
+function openEditor(dateStr) {
+  selectedDate = dateStr;
+  selectedBlockType = null;
+  const d = new Date(dateStr + 'T00:00:00');
+  const label = d.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' });
+  document.getElementById('editor-title').textContent = label;
+  document.getElementById('block-note').value = '';
+  document.getElementById('block-start').value = '09:00';
+  document.getElementById('block-end').value = '17:00';
+  document.querySelectorAll('.block-type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('time-row').classList.add('hidden');
+  document.getElementById('day-editor').classList.add('open');
+  renderCalendar();
+}
+
+function closeEditor() {
+  selectedDate = null;
+  selectedBlockType = null;
+  document.getElementById('day-editor').classList.remove('open');
+  renderCalendar();
+}
+
+function setBlockType(type) {
+  selectedBlockType = type;
+  document.querySelectorAll('.block-type-btn').forEach(b => b.classList.remove('active'));
+  const map = { unavailable: 'btn-unavail', partial: 'btn-partial', available: 'btn-avail', clear: 'btn-clear' };
+  document.getElementById(map[type]).classList.add('active');
+  document.getElementById('time-row').classList.toggle('hidden', type !== 'partial');
+}
+
+async function saveBlock() {
+  if (!selectedDate || !selectedBlockType) { toast('Pick a block type first.'); return; }
+
+  if (selectedBlockType === 'clear') {
+    await sb.from('availability').delete().eq('date', selectedDate);
+    toast('Cleared.');
+  } else {
+    const startTime = selectedBlockType === 'partial' ? document.getElementById('block-start').value : null;
+    const endTime = selectedBlockType === 'partial' ? document.getElementById('block-end').value : null;
+    const note = document.getElementById('block-note').value.trim() || null;
+
+    // For full day blocks, delete existing first
+    if (selectedBlockType !== 'partial') {
+      await sb.from('availability').delete().eq('date', selectedDate).is('start_time', null);
+    }
+
+    await sb.from('availability').insert({
+      date: selectedDate,
+      status: selectedBlockType,
+      start_time: startTime,
+      end_time: endTime,
+      note: note
+    });
+    toast('Saved!');
+  }
+
+  await loadBlocks();
+  closeEditor();
+}
+
+function renderBlocksList() {
+  const list = document.getElementById('blocks-list');
+  const monthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  const monthBlocks = allBlocks.filter(b => b.date.startsWith(monthStr));
+
+  if (!monthBlocks.length) { list.innerHTML = '<p class="no-data">No blocks set for this month.</p>'; return; }
+
+  list.innerHTML = monthBlocks.map(b => {
+    const d = new Date(b.date + 'T00:00:00');
+    const dateLabel = d.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' });
+    const timeLabel = b.start_time ? `${b.start_time} – ${b.end_time}` : 'Full day';
+    return `<div class="block-row">
+      <div class="block-row-info">
+        <strong>${dateLabel}</strong>${timeLabel}${b.note ? ' · ' + b.note : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="block-status ${b.status}">${b.status}</span>
+        <button class="del-block-btn" onclick="deleteBlock('${b.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteBlock(id) {
+  await sb.from('availability').delete().eq('id', id);
+  await loadBlocks();
+  renderCalendar();
+  toast('Block removed.');
+}
+
+// Init calendar month
+const _now = new Date();
+calYear = _now.getFullYear();
+calMonth = _now.getMonth();
 </script>
 </body>
 </html>

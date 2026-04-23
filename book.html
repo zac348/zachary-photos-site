@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Book — Zachary Routsong Photography</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -106,8 +108,35 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .tr-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);padding:2px 0}
 .tr-row.big{font-size:13px;font-weight:500;color:var(--t1);border-top:1px solid var(--b1);margin-top:6px;padding-top:8px}
 .tr-row.free{color:var(--accent);justify-content:center;font-size:11px;margin-top:6px}
+.travel-calculating{font-size:11px;color:var(--t3);margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:.06em;display:none}
 
-/* FORM */
+/* AVAILABILITY CALENDAR */
+.avail-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden}
+.avail-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b1);flex-wrap:wrap;gap:8px}
+.avail-hint{font-size:11px;color:var(--t3)}
+.avail-nav{display:flex;align-items:center;gap:10px}
+.avail-month{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--t2);min-width:110px;text-align:center}
+.avail-nav-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t3);border-radius:4px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.avail-nav-btn:hover{color:var(--t1);border-color:var(--b3)}
+.avail-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.avail-dow{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);text-align:center;padding:8px 0;border-bottom:1px solid var(--b1)}
+.avail-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--t3);position:relative;transition:background .1s;flex-direction:column;gap:1px}
+.avail-day.clickable{cursor:pointer}
+.avail-day.clickable:hover{background:var(--s2);color:var(--t1)}
+.avail-day.empty{pointer-events:none}
+.avail-day.past{color:var(--b3);pointer-events:none}
+.avail-day.today{color:var(--accent)}
+.avail-day.picked{background:var(--accent-bg);color:var(--accent);outline:1px solid var(--accent-border)}
+.avail-day.unavailable{color:#ff4d4d;background:rgba(255,77,77,.06)}
+.avail-day.partial{color:#f59e0b;background:rgba(245,158,11,.06);cursor:pointer}
+.avail-day.available{color:#22c55e;background:rgba(34,197,94,.06);cursor:pointer}
+.avail-day.unavailable.clickable{cursor:not-allowed}
+.avail-dot-sm{width:3px;height:3px;border-radius:50%;flex-shrink:0}
+.avail-legend{display:flex;gap:14px;padding:10px 16px;border-top:1px solid var(--b1);flex-wrap:wrap}
+.avail-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
+.avail-dot{width:6px;height:6px;border-radius:50%}
+
+
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:480px){.form-grid{grid-template-columns:1fr}}
 .field{display:flex;flex-direction:column;gap:5px}
@@ -133,8 +162,9 @@ input[type="date"],input[type="time"]{cursor:pointer}
 .cost-line.balance{font-size:11px;color:var(--t3)}
 
 .submit-wrap{grid-column:1/-1;margin-top:6px}
-.submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
-.submit-btn:hover{background:var(--accent-d)}
+.submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;position:relative}
+.submit-btn:hover:not(:disabled){background:var(--accent-d)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed}
 
 .success{display:none;text-align:center;padding:60px 20px}
 .success h3{font-size:16px;font-weight:500;margin-bottom:6px}
@@ -253,7 +283,7 @@ footer span{font-size:11px;color:var(--t3)}
         <span class="travel-title">Fuel cost calculator</span>
         <span class="gas-pill">Valdosta avg: $3.69/gal</span>
       </div>
-      <p class="travel-hint">Type an address or venue and pick from the results. Driving distance calculated from Valdosta at 22.5 MPG, rounded down to nearest $0.10. Under 15 miles = no charge.</p>
+      <p class="travel-hint">Type an address or venue and pick from the results. Driving distance from Valdosta at 22.5 MPG, rounded down to nearest $0.10. Under 15 miles = no charge.</p>
       <div class="addr-wrap">
         <div class="field" style="margin:0">
           <label for="addr-input">Shoot location</label>
@@ -262,6 +292,7 @@ footer span{font-size:11px;color:var(--t3)}
         <div class="addr-drop" id="addr-drop"></div>
       </div>
       <p class="travel-err" id="travel-err">No results found — try adding a city or state.</p>
+      <p class="travel-calculating" id="travel-calc-status">Calculating driving distance...</p>
       <div class="travel-result" id="travel-result">
         <div class="tr-row"><span>One way distance</span><span id="tr-mi">—</span></div>
         <div class="tr-row"><span>Gas price</span><span id="tr-gas">$3.69/gal</span></div>
@@ -272,34 +303,66 @@ footer span{font-size:11px;color:var(--t3)}
     </div>
   </div>
 
+  <!-- AVAILABILITY -->
+  <div class="block">
+    <div class="sec-label">availability</div>
+    <div class="avail-card">
+      <div class="avail-header">
+        <span class="avail-hint">Click an available date to pre-fill your event date below.</span>
+        <div class="avail-nav">
+          <button class="avail-nav-btn" onclick="shiftCalMonth(-1)"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <span class="avail-month" id="avail-month"></span>
+          <button class="avail-nav-btn" onclick="shiftCalMonth(1)"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg></button>
+        </div>
+      </div>
+      <div class="avail-grid" id="avail-dow">
+        <div class="avail-dow">Sun</div><div class="avail-dow">Mon</div><div class="avail-dow">Tue</div>
+        <div class="avail-dow">Wed</div><div class="avail-dow">Thu</div><div class="avail-dow">Fri</div><div class="avail-dow">Sat</div>
+      </div>
+      <div class="avail-grid" id="avail-grid"></div>
+      <div class="avail-legend">
+        <div class="avail-legend-item"><div class="avail-dot" style="background:#ff4d4d"></div>Unavailable</div>
+        <div class="avail-legend-item"><div class="avail-dot" style="background:#f59e0b"></div>Partially available</div>
+        <div class="avail-legend-item"><div class="avail-dot" style="background:#22c55e"></div>Available</div>
+        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--b3)"></div>Not set</div>
+      </div>
+    </div>
+  </div>
+
   <!-- FORM -->
   <div class="block">
     <div class="sec-label">your details</div>
     <div id="form-wrap">
-      <form onsubmit="handleSubmit(event)">
-        <input type="hidden" id="h-pkg"/>
-        <input type="hidden" id="h-addons"/>
-        <input type="hidden" id="h-total"/>
-        <input type="hidden" id="h-deposit"/>
-        <input type="hidden" id="h-travel"/>
+      <!-- Formspree endpoint — all hidden fields get submitted too -->
+      <form id="booking-form" action="https://formspree.io/f/xzdyygdl" method="POST">
+        <!-- Hidden fields populated by JS -->
+        <input type="hidden" name="Package"      id="h-pkg"/>
+        <input type="hidden" name="Add-Ons"      id="h-addons"/>
+        <input type="hidden" name="Total"        id="h-total"/>
+        <input type="hidden" name="Deposit Due"  id="h-deposit"/>
+        <input type="hidden" name="Travel Fee"   id="h-travel"/>
+        <!-- Formspree redirect back to same page with ?success=1 -->
+        <input type="hidden" name="_next" value="book.html?success=1"/>
+        <input type="hidden" name="_subject" value="New booking request — ZRP"/>
+
         <div class="form-grid">
-          <div class="field"><label>First name</label><input type="text" id="fname" placeholder="Jordan" required/></div>
-          <div class="field"><label>Last name</label><input type="text" id="lname" placeholder="Smith" required/></div>
-          <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@email.com" required/></div>
-          <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(229) 555-0100"/></div>
+          <div class="field"><label>First name</label><input type="text" name="First Name" id="fname" placeholder="Jordan" required/></div>
+          <div class="field"><label>Last name</label><input type="text" name="Last Name" id="lname" placeholder="Smith" required/></div>
+          <div class="field"><label>Email</label><input type="email" name="Email" id="email" placeholder="you@email.com" required/></div>
+          <div class="field"><label>Phone</label><input type="tel" name="Phone" id="phone" placeholder="(229) 555-0100"/></div>
           <hr class="divider"/>
-          <div class="field"><label>Event date</label><input type="date" id="edate" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
-          <div class="field"><label>Start time</label><input type="time" id="etime" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
+          <div class="field"><label>Event date</label><input type="date" name="Event Date" id="edate" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
+          <div class="field"><label>Start time</label><input type="time" name="Start Time" id="etime" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
           <div class="field">
             <label>Sport / event type</label>
-            <select id="sport" required>
+            <select name="Sport" id="sport" required>
               <option value="" disabled selected>Select...</option>
               <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
               <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
               <option>Wrestling</option><option>Swimming</option><option>Other</option>
             </select>
           </div>
-          <div class="field"><label>Venue / location</label><input type="text" id="venue" placeholder="Valdosta High School Stadium" required/></div>
+          <div class="field"><label>Venue / location</label><input type="text" name="Venue" id="venue" placeholder="Valdosta High School Stadium" required/></div>
           <hr class="divider"/>
           <div class="field full"><label>Selected package</label><input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default;color:var(--t3)"/></div>
           <hr class="divider"/>
@@ -322,7 +385,7 @@ footer span{font-size:11px;color:var(--t3)}
           <hr class="divider"/>
           <div class="field full">
             <label>How'd you find me?</label>
-            <select id="referral" required>
+            <select name="Referral" id="referral" required>
               <option value="" disabled selected>Select...</option>
               <option>Instagram (@zacharyroutsongphotos)</option>
               <option>Word of mouth / friend</option>
@@ -332,12 +395,16 @@ footer span{font-size:11px;color:var(--t3)}
               <option>Other</option>
             </select>
           </div>
-          <div class="field full"><label>Anything else? (optional)</label><textarea id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
-          <div class="submit-wrap"><button type="submit" class="submit-btn">Send booking request</button></div>
+          <div class="field full"><label>Anything else? (optional)</label><textarea name="Notes" id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
+          <div class="submit-wrap">
+            <button type="submit" class="submit-btn" id="submit-btn">Send booking request</button>
+          </div>
         </div>
       </form>
     </div>
-    <div class="success" id="success">
+
+    <!-- shown when ?success=1 is in the URL after Formspree redirect -->
+    <div class="success" id="success-msg">
       <p style="font-size:28px;margin-bottom:12px">📸</p>
       <h3>Request sent!</h3>
       <p>Zachary will get back to you within 24–48 hours to confirm your booking.</p>
@@ -355,36 +422,84 @@ footer span{font-size:11px;color:var(--t3)}
 
 <script>
 // ── CONFIG ──
-// Origin stored as coordinates only — no address in source
-var ORIGIN = { lat: 30.8876, lng: -83.3089 };
-var GAS    = 3.69;
-var MPG    = 22.5;
-var FREE_MI = 15;
+// Origin: coordinates only, no address stored in source
+var ORIGIN   = { lat: 30.8876, lng: -83.3089 };
+var GAS      = 3.69;
+var MPG      = 22.5;
+var FREE_MI  = 15;
 
 // ── STATE ──
-var selPkg = null, qPhotos = 0, qPrints = 0, addons = [], travelCost = 0;
+var selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
+var travelCost = 0, travelReady = true; // travelReady = false while OSRM is calculating
 var acTimer = null, acResults = [], acIdx = -1;
+
+// ── SHOW SUCCESS IF REDIRECTED BACK ──
+if (window.location.search.includes('success=1')) {
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('success-msg').style.display = 'block';
+}
+
+// ── FORM SUBMIT — validate then let Formspree handle it ──
+document.getElementById('booking-form').addEventListener('submit', function(e) {
+  if (!selPkg) {
+    e.preventDefault();
+    alert('Please select a package first.');
+    document.querySelector('.pkg-grid').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  if (!travelReady) {
+    e.preventDefault();
+    alert('Travel fee is still calculating — please wait a moment and try again.');
+    return;
+  }
+  // Sync all hidden fields before submit
+  syncHiddenFields();
+  // Let the form POST naturally to Formspree
+});
+
+function syncHiddenFields() {
+  var pc = qPhotos * 15, pr = qPrints * 3;
+  var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
+  var total   = (selPkg ? selPkg.price : 0) + pc + pr + travelCost + at;
+  var deposit = Math.round(total * 50) / 100;
+  var balance = total - deposit;
+  var an = [];
+  if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
+  if (qPrints > 0) an.push('Prints x' + qPrints);
+  if (travelCost > 0) an.push('Travel $' + travelCost.toFixed(2));
+  addons.forEach(function(a) { an.push(a.n); });
+
+  document.getElementById('h-pkg').value     = selPkg ? selPkg.name + ' — $' + selPkg.price : '';
+  document.getElementById('h-addons').value  = an.join(', ') || 'None';
+  document.getElementById('h-total').value   = '$' + total.toFixed(2);
+  document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
+  document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
+}
 
 // ── ADDRESS SEARCH ──
 function onAddrInput(v) {
   clearTimeout(acTimer);
   document.getElementById('travel-err').style.display = 'none';
   document.getElementById('travel-result').classList.remove('show');
-  travelCost = 0; updateCost();
+  document.getElementById('travel-calc-status').style.display = 'none';
+  travelCost = 0; travelReady = true;
+  updateCost();
   if (v.length < 3) { closeDD(); return; }
   acTimer = setTimeout(function() { fetchAddr(v); }, 400);
 }
 
 async function fetchAddr(q) {
   try {
-    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q);
-    var r = await fetch(url, { headers: { 'Accept-Language': 'en-US', 'User-Agent': 'ZRPBooking/1.0' } });
+    var r = await fetch(
+      'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q),
+      { headers: { 'Accept-Language': 'en-US', 'User-Agent': 'ZRPBooking/1.0' } }
+    );
     var d = await r.json();
     acResults = d; acIdx = -1;
     if (!d.length) { document.getElementById('travel-err').style.display = 'block'; closeDD(); return; }
     var dd = document.getElementById('addr-drop');
-    dd.innerHTML = d.map(function(r, i) {
-      var p = r.display_name.split(', ');
+    dd.innerHTML = d.map(function(item, i) {
+      var p = item.display_name.split(', ');
       return '<div class="addr-item" onmousedown="pickAddr(' + i + ')">'
         + '<div class="addr-main">' + p.slice(0, 2).join(', ') + '</div>'
         + '<div class="addr-sub">' + p.slice(2, 5).join(', ') + '</div>'
@@ -398,7 +513,6 @@ function pickAddr(i) {
   var r = acResults[i]; if (!r) return;
   var label = r.display_name.split(', ').slice(0, 3).join(', ');
   document.getElementById('addr-input').value = label;
-  // autofill venue field if empty
   var vf = document.getElementById('venue');
   if (vf && !vf.value) vf.value = label;
   closeDD();
@@ -412,37 +526,132 @@ function onAddrKey(e) {
   else if (e.key === 'Enter') { e.preventDefault(); if (acIdx >= 0 && items[acIdx]) items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
   else if (e.key === 'Escape') closeDD();
 }
-
 function closeDD() { var dd = document.getElementById('addr-drop'); dd.classList.remove('open'); dd.innerHTML = ''; }
 document.addEventListener('click', function(e) { if (!e.target.closest('.addr-wrap')) closeDD(); });
 
-// ── TRAVEL CALC ──
+// ── PUBLIC AVAILABILITY CALENDAR ──
+let calYear, calMonth, calBlocks = [], pickedDate = null;
+
+async function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  const { data } = await fetch_blocks();
+  calBlocks = data || [];
+  renderPublicCal();
+}
+
+async function fetch_blocks() {
+  // fetch 2 months worth to cover navigation
+  const from = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-01`;
+  const nextM = calMonth === 11 ? 1 : calMonth + 2;
+  const nextY = calMonth === 11 ? calYear + 1 : calYear;
+  const to = `${nextY}-${String(nextM).padStart(2,'0')}-01`;
+  return await sb.from('availability').select('*').gte('date', from).lt('date', to);
+}
+
+async function shiftCalMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  const { data } = await fetch_blocks();
+  calBlocks = data || [];
+  renderPublicCal();
+}
+
+function getPublicStatus(dateStr) {
+  const blocks = calBlocks.filter(b => b.date === dateStr);
+  if (!blocks.length) return null;
+  if (blocks.some(b => b.status === 'unavailable' && !b.start_time)) return 'unavailable';
+  if (blocks.some(b => b.status === 'partial')) return 'partial';
+  if (blocks.some(b => b.status === 'available')) return 'available';
+  return null;
+}
+
+function renderPublicCal() {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const label = new Date(calYear, calMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  document.getElementById('avail-month').textContent = label;
+
+  const grid = document.getElementById('avail-grid');
+  grid.innerHTML = '';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'avail-day empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const status = getPublicStatus(dateStr);
+    const isPast = dateStr < today;
+    const isToday = dateStr === today;
+    const isPicked = dateStr === pickedDate;
+
+    const el = document.createElement('div');
+    let cls = 'avail-day';
+    if (isPast) cls += ' past';
+    else cls += ' clickable';
+    if (isToday) cls += ' today';
+    if (isPicked) cls += ' picked';
+    if (status) cls += ' ' + status;
+    el.className = cls;
+    el.innerHTML = `<span>${d}</span>`;
+
+    if (status) {
+      const dot = document.createElement('div');
+      dot.className = 'avail-dot-sm';
+      dot.style.background = status === 'unavailable' ? '#ff4d4d' : status === 'partial' ? '#f59e0b' : '#22c55e';
+      el.appendChild(dot);
+    }
+
+    if (!isPast && status !== 'unavailable') {
+      el.addEventListener('click', () => {
+        pickedDate = dateStr;
+        const edateInput = document.getElementById('edate');
+        if (edateInput) edateInput.value = dateStr;
+        renderPublicCal();
+        document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
+    grid.appendChild(el);
+  }
+}
+
+// Load Supabase for public calendar
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+initCalendar();
+
 async function calcTravel(lat, lng) {
+  travelReady = false;
+  travelCost  = 0;
+  var statusEl = document.getElementById('travel-calc-status');
   var resultEl = document.getElementById('travel-result');
-  document.getElementById('tr-mi').textContent = 'Calculating...';
-  document.getElementById('tr-gal').textContent = '—';
+
+  statusEl.style.display = 'block';
+  resultEl.classList.remove('show');
   document.getElementById('tr-fee-row').style.display = 'none';
   document.getElementById('tr-free').style.display = 'none';
-  resultEl.classList.add('show');
 
   var onewayMi = null;
-
   try {
-    // OSRM — real driving distance, free, no API key
     var url = 'https://router.project-osrm.org/route/v1/driving/'
-      + ORIGIN.lng + ',' + ORIGIN.lat + ';' + lng + ',' + lat
-      + '?overview=false';
+      + ORIGIN.lng + ',' + ORIGIN.lat + ';'
+      + lng + ',' + lat + '?overview=false';
     var resp = await fetch(url);
     var data = await resp.json();
     if (data.code === 'Ok' && data.routes && data.routes.length) {
-      // OSRM returns meters — convert to miles (one way)
       onewayMi = data.routes[0].distance * 0.000621371;
     }
   } catch(e) {
     console.warn('OSRM unavailable, using haversine fallback');
   }
 
-  // Fallback: straight-line × 1.3 road factor
   if (!onewayMi) {
     onewayMi = haversine(ORIGIN.lat, ORIGIN.lng, lat, lng) * 1.3;
   }
@@ -452,19 +661,21 @@ async function calcTravel(lat, lng) {
 
   document.getElementById('tr-mi').textContent  = onewayMi.toFixed(1) + ' mi (driving)';
   document.getElementById('tr-gal').textContent = gallons.toFixed(2) + ' gal';
+  statusEl.style.display = 'none';
 
   if (onewayMi <= FREE_MI) {
     travelCost = 0;
     document.getElementById('tr-fee-row').style.display = 'none';
     document.getElementById('tr-free').style.display = 'flex';
   } else {
-    // Round DOWN to nearest $0.10
     travelCost = Math.floor(gallons * GAS * 10) / 10;
     document.getElementById('tr-fee-row').style.display = 'flex';
     document.getElementById('tr-free').style.display = 'none';
     document.getElementById('tr-fee').textContent = '$' + travelCost.toFixed(2);
   }
 
+  resultEl.classList.add('show');
+  travelReady = true;
   updateCost();
 }
 
@@ -532,14 +743,10 @@ function updateCost() {
   showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
   showLine('cl-travel', travelCost > 0, 'cl-travel-v', '+$' + travelCost.toFixed(2));
 
-  var at = 0, an = [];
-  if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
-  if (qPrints > 0) an.push('Prints x' + qPrints);
-  if (travelCost > 0) an.push('Travel $' + travelCost.toFixed(2));
-
+  var at = 0;
   ['cl-a0','cl-a1','cl-a2'].forEach(function(id, i) {
     var row = document.getElementById(id), a = addons[i];
-    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.n; row.children[1].textContent = '+$' + a.p.toFixed(2); at += a.p; an.push(a.n); }
+    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.n; row.children[1].textContent = '+$' + a.p.toFixed(2); at += a.p; }
     else row.classList.add('hide');
   });
 
@@ -550,20 +757,6 @@ function updateCost() {
   document.getElementById('cl-total').textContent   = '$' + total.toFixed(2);
   document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
   document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
-  document.getElementById('h-pkg').value     = selPkg.name + ' $' + selPkg.price;
-  document.getElementById('h-addons').value  = an.join(', ') || 'None';
-  document.getElementById('h-total').value   = '$' + total.toFixed(2);
-  document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
-  document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
-}
-
-// ── SUBMIT ──
-function handleSubmit(e) {
-  e.preventDefault();
-  if (!selPkg) { alert('Please select a package first.'); return; }
-  document.getElementById('form-wrap').style.display = 'none';
-  document.getElementById('success').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 </body>
