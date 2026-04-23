@@ -3,490 +3,303 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Admin Dashboard — ZRP</title>
+<title>Admin — ZRP</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0e0e0e; --surface: #161616; --surface2: #1e1e1e; --border: #2a2a2a; --border2: #333; --text: #e8e8e8; --muted: #666; --muted2: #888; --accent: #c8ff00; --accent-d: #a8d900; --red: #ff4d4d; --radius: 8px; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-
-  /* SIDEBAR */
-  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
-  @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
-  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 28px 0; display: flex; flex-direction: column; }
-  .sidebar-logo { font-size: 12px; font-weight: 500; color: var(--muted); padding: 0 24px; margin-bottom: 32px; letter-spacing: 0.04em; }
-  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-  .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 24px; font-size: 13px; color: var(--muted2); cursor: pointer; transition: background 0.15s, color 0.15s; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
-  .sidebar-link:hover { background: var(--surface2); color: var(--text); }
-  .sidebar-link.active { background: var(--surface2); color: var(--text); }
-  .sidebar-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; flex-shrink: 0; }
-  .sidebar-bottom { padding: 16px 24px; border-top: 1px solid var(--border); margin-top: auto; }
-  .logout-btn { font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; transition: color 0.15s; font-family: 'DM Sans', sans-serif; }
-  .logout-btn:hover { color: var(--red); }
-
-  /* MAIN */
-  .main { padding: 40px; overflow-y: auto; }
-  @media (max-width: 700px) { .main { padding: 24px 20px; } }
-  .main-header { margin-bottom: 36px; }
-  .main-title { font-size: 20px; font-weight: 400; letter-spacing: -0.02em; }
-  .main-sub { font-size: 13px; color: var(--muted2); margin-top: 4px; }
-
-  /* TABS */
-  .tab { display: none; }
-  .tab.active { display: block; }
-
-  /* STATS ROW */
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 36px; }
-  .stat-card { background: var(--surface); padding: 20px; }
-  .stat-num { font-size: 26px; font-weight: 300; color: var(--accent); letter-spacing: -0.02em; }
-  .stat-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
-
-  /* SECTION LABEL */
-  .block-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-  .block-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  /* UPLOAD AREA */
-  .upload-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; align-items: flex-end; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-  input[type="text"], select { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; outline: none; transition: border-color 0.15s; appearance: none; }
-  input[type="text"]:focus, select:focus { border-color: var(--border2); }
-  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; min-width: 160px; }
-  select option { background: var(--surface2); }
-
-  .drop-zone { border: 1px dashed var(--border2); border-radius: var(--radius); padding: 48px 24px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
-  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(200,255,0,0.03); }
-  .drop-zone input { display: none; }
-  .drop-icon { font-size: 28px; margin-bottom: 12px; }
-  .drop-text { font-size: 13px; color: var(--muted2); margin-bottom: 4px; }
-  .drop-sub { font-size: 11px; color: var(--muted); }
-  .upload-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 6px; padding: 10px 24px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; align-self: flex-end; }
-  .upload-btn:hover { background: var(--accent-d); }
-  .upload-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* PROGRESS */
-  .progress-bar-wrap { display: none; height: 3px; background: var(--border); border-radius: 2px; margin: 12px 0; }
-  .progress-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
-  .upload-status { font-size: 12px; color: var(--muted2); margin-top: 8px; min-height: 18px; }
-
-  /* PHOTOS GRID */
-  .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-top: 24px; }
-  .photo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; position: relative; }
-  .photo-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
-  .photo-card-info { padding: 8px 10px; }
-  .photo-card-sport { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-  .photo-card-name { font-size: 11px; color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-  .photo-card-actions { display: flex; gap: 6px; padding: 0 10px 10px; }
-  .toggle-hp { font-size: 10px; font-family: 'DM Mono', monospace; border: 1px solid var(--border); background: none; color: var(--muted); border-radius: 4px; padding: 3px 8px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.06em; text-transform: uppercase; }
-  .toggle-hp.on { border-color: var(--accent); color: var(--accent); }
-  .delete-btn { font-size: 10px; font-family: 'DM Mono', monospace; border: 1px solid var(--border); background: none; color: var(--muted); border-radius: 4px; padding: 3px 8px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.06em; text-transform: uppercase; }
-  .delete-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* CLIENT GALLERIES */
-  .gallery-form { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; align-items: flex-end; }
-  .gallery-form input[type="text"] { flex: 1; min-width: 180px; }
-  .create-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 6px; padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
-  .create-btn:hover { background: var(--accent-d); }
-  .galleries-list { display: flex; flex-direction: column; gap: 8px; }
-  .gallery-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .gallery-row-info h3 { font-size: 14px; font-weight: 500; }
-  .gallery-row-info p { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
-  .gallery-row-actions { display: flex; gap: 8px; }
-  .copy-btn { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted2); border-radius: 4px; padding: 6px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.15s; }
-  .copy-btn:hover { color: var(--text); }
-  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
-  .open-btn { font-size: 11px; background: none; border: 1px solid var(--border); color: var(--muted2); border-radius: 4px; padding: 6px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; transition: color 0.15s; }
-  .open-btn:hover { color: var(--text); }
-  .del-gallery-btn { font-size: 11px; background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 6px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-  .del-gallery-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* BOOKINGS */
-  .bookings-list { display: flex; flex-direction: column; gap: 8px; }
-  .booking-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .booking-card-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .booking-name { font-size: 15px; font-weight: 500; }
-  .booking-pkg { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); background: rgba(200,255,0,0.08); padding: 3px 10px; border-radius: 4px; }
-  .booking-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
-  .booking-detail { font-size: 12px; color: var(--muted2); }
-  .booking-detail strong { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; font-weight: 400; }
-  .booking-deposit { font-size: 13px; color: var(--accent); font-weight: 500; }
-  .no-data { font-size: 13px; color: var(--muted); font-style: italic; padding: 24px 0; }
-
-  /* TOAST */
-  .toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 12px 20px; font-size: 13px; color: var(--text); transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 999; }
-  .toast.show { transform: translateY(0); opacity: 1; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--s1:#111;--s2:#181818;--b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;--t1:#efefef;--t2:#aaa;--t3:#666;--accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);--red:#ff4d4d;--radius:8px;}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.6}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);padding:20px 0;display:flex;flex-direction:column}
+.sidebar-logo{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:0 18px;margin-bottom:24px}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:1px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:12px;color:var(--t3);cursor:pointer;transition:background .15s,color .15s;border:none;background:none;width:100%;text-align:left;text-decoration:none}
+.sb-link:hover,.sb-link.active{background:var(--s2);color:var(--t1)}
+.sb-link svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;flex-shrink:0}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--b1)}
+.logout-btn{font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s}
+.logout-btn:hover{color:var(--red)}
+.main{padding:32px;overflow-y:auto}
+@media(max-width:700px){.main{padding:20px 16px}}
+.tab{display:none}.tab.active{display:block}
+.main-title{font-size:18px;font-weight:400;letter-spacing:-.02em;margin-bottom:4px}
+.main-sub{font-size:12px;color:var(--t3);margin-bottom:28px}
+.sec-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--b2)}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
+.stat{background:var(--s1);padding:16px}
+.stat-n{font-size:22px;font-weight:300;color:var(--accent);letter-spacing:-.02em}
+.stat-l{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:3px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+input[type="text"],input[type="email"],select,textarea{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%;appearance:none;color-scheme:dark}
+input:focus,select:focus,textarea:focus{border-color:var(--b2);background:var(--s2)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select option{background:var(--s2)}
+.drop-zone{border:1px dashed var(--b3);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:12px}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:var(--accent-bg)}
+.drop-zone input{display:none}
+.drop-text{font-size:13px;color:var(--t2);margin-bottom:4px}
+.drop-sub{font-size:11px;color:var(--t3)}
+.prog-wrap{height:2px;background:var(--b2);border-radius:2px;margin-bottom:8px;display:none}
+.prog-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0}
+.upload-status{font-size:11px;color:var(--t2);min-height:16px;margin-bottom:16px}
+.acc-btn{background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.acc-btn:hover{background:var(--accent-d)}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:20px}
+.photo-card{background:var(--s1);border:1px solid var(--b1);border-radius:6px;overflow:hidden}
+.photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.photo-card-info{padding:7px 9px}
+.photo-sport{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.photo-name{font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.photo-actions{display:flex;gap:5px;padding:0 9px 9px}
+.tog-hp{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.tog-hp.on{border-color:var(--accent);color:var(--accent)}
+.del-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.del-btn:hover{border-color:var(--red);color:var(--red)}
+.gal-form{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.gal-form input{flex:1;min-width:160px}
+.gal-list{display:flex;flex-direction:column;gap:8px}
+.gal-row{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.gal-info h3{font-size:13px;font-weight:500}
+.gal-info p{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px}
+.gal-actions{display:flex;gap:7px}
+.copy-btn,.open-btn,.del-gal-btn{font-size:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:4px;padding:5px 11px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;transition:all .15s;display:inline-block}
+.copy-btn:hover,.open-btn:hover{color:var(--t1)}
+.copy-btn.copied{border-color:var(--accent);color:var(--accent)}
+.del-gal-btn:hover{border-color:var(--red);color:var(--red)}
+.booking-list{display:flex;flex-direction:column;gap:8px}
+.booking-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:16px}
+.booking-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.booking-name{font-size:14px;font-weight:500}
+.booking-pkg{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);padding:2px 8px;border-radius:3px}
+.booking-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.booking-detail{font-size:11px;color:var(--t2)}
+.booking-detail strong{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:400;margin-bottom:1px}
+.no-data{font-size:12px;color:var(--t3);font-style:italic;padding:16px 0}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--b3);border-radius:6px;padding:10px 18px;font-size:12px;color:var(--t1);transform:translateY(60px);opacity:0;transition:all .3s;z-index:999}
+.toast.show{transform:translateY(0);opacity:1}
+input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.check-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.check-row label{font-size:12px;text-transform:none;letter-spacing:0;color:var(--t2);cursor:pointer}
 </style>
 </head>
 <body>
-
 <div class="layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">ZRP Admin</div>
-    <nav class="sidebar-nav">
-      <button class="sidebar-link active" onclick="switchTab('overview', this)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Overview
-      </button>
-      <button class="sidebar-link" onclick="switchTab('upload', this)">
-        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-        Upload photos
-      </button>
-      <button class="sidebar-link" onclick="switchTab('galleries', this)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        Client galleries
-      </button>
-      <button class="sidebar-link" onclick="switchTab('bookings', this)">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Bookings
-      </button>
-      <a class="sidebar-link" href="index.html" target="_blank">
-        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        View site
-      </a>
-    </nav>
-    <div class="sidebar-bottom">
-      <button class="logout-btn" onclick="logout()">Sign out</button>
+<aside class="sidebar">
+  <div class="sidebar-logo">ZRP Admin</div>
+  <nav class="sidebar-nav">
+    <button class="sb-link active" onclick="switchTab('overview',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</button>
+    <button class="sb-link" onclick="switchTab('upload',this)"><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Upload</button>
+    <button class="sb-link" onclick="switchTab('galleries',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries</button>
+    <button class="sb-link" onclick="switchTab('bookings',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bookings</button>
+    <a class="sb-link" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View site</a>
+  </nav>
+  <div class="sidebar-footer"><button class="logout-btn" onclick="logout()">Sign out</button></div>
+</aside>
+<main class="main">
+
+  <div class="tab active" id="tab-overview">
+    <h1 class="main-title">Dashboard</h1><p class="main-sub">Welcome back, Zachary.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n" id="st-photos">—</div><div class="stat-l">Photos</div></div>
+      <div class="stat"><div class="stat-n" id="st-galleries">—</div><div class="stat-l">Galleries</div></div>
+      <div class="stat"><div class="stat-n" id="st-bookings">—</div><div class="stat-l">Bookings</div></div>
+      <div class="stat"><div class="stat-n" id="st-hp">—</div><div class="stat-l">On homepage</div></div>
     </div>
-  </aside>
+    <div class="sec-label">recent bookings</div>
+    <div class="booking-list" id="ov-bookings"><p class="no-data">No bookings yet.</p></div>
+  </div>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- OVERVIEW -->
-    <div class="tab active" id="tab-overview">
-      <div class="main-header">
-        <h1 class="main-title">Dashboard</h1>
-        <p class="main-sub">Welcome back, Zachary.</p>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-num" id="stat-photos">—</div><div class="stat-label">Total photos</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-galleries">—</div><div class="stat-label">Client galleries</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-bookings">—</div><div class="stat-label">Bookings</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-hp">—</div><div class="stat-label">On homepage</div></div>
-      </div>
-      <div class="block-label">Recent bookings</div>
-      <div class="bookings-list" id="overview-bookings"><p class="no-data">No bookings yet.</p></div>
+  <div class="tab" id="tab-upload">
+    <h1 class="main-title">Upload photos</h1><p class="main-sub">Add photos to your portfolio or a client gallery.</p>
+    <div class="field"><label>Sport / event</label>
+      <select id="up-sport"><option value="">Select sport...</option><option>Football</option><option>Basketball</option><option>Baseball</option><option>Softball</option><option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option><option>Wrestling</option><option>Swimming</option><option>Other</option></select>
     </div>
-
-    <!-- UPLOAD -->
-    <div class="tab" id="tab-upload">
-      <div class="main-header">
-        <h1 class="main-title">Upload photos</h1>
-        <p class="main-sub">Add photos to your portfolio or a client gallery.</p>
-      </div>
-
-      <div class="upload-controls">
-        <div class="field">
-          <label>Sport / event</label>
-          <select id="upload-sport">
-            <option value="">Select sport...</option>
-            <option>Football</option><option>Basketball</option><option>Baseball</option>
-            <option>Softball</option><option>Soccer</option><option>Track &amp; Field</option>
-            <option>Volleyball</option><option>Wrestling</option><option>Swimming</option><option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Client gallery (optional)</label>
-          <select id="upload-gallery">
-            <option value="">Portfolio only</option>
-          </select>
-        </div>
-        <div class="field" style="flex-direction:row;align-items:center;gap:8px;padding-top:22px;">
-          <input type="checkbox" id="show-homepage" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;"/>
-          <label for="show-homepage" style="font-size:12px;text-transform:none;letter-spacing:0;color:var(--muted2);cursor:pointer;">Show on homepage</label>
-        </div>
-      </div>
-
-      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-        <input type="file" id="file-input" accept="image/*" multiple/>
-        <div class="drop-icon">📁</div>
-        <p class="drop-text">Click to select photos, or drag and drop here</p>
-        <p class="drop-sub">JPG, PNG, WEBP — multiple files OK</p>
-      </div>
-
-      <div class="progress-bar-wrap" id="progress-wrap">
-        <div class="progress-bar" id="progress-bar"></div>
-      </div>
-      <p class="upload-status" id="upload-status"></p>
-
-      <div style="margin-top:36px;">
-        <div class="block-label">All photos</div>
-        <div class="photos-grid" id="photos-grid"><p class="no-data">No photos uploaded yet.</p></div>
-      </div>
+    <div class="field"><label>Client gallery (optional)</label><select id="up-gallery"><option value="">Portfolio only</option></select></div>
+    <div class="check-row"><input type="checkbox" id="up-hp"/><label for="up-hp">Show on homepage</label></div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <input type="file" id="file-input" accept="image/*" multiple/>
+      <p class="drop-text">Click to select photos, or drag and drop</p>
+      <p class="drop-sub">JPG, PNG, WEBP — multiple files OK</p>
     </div>
+    <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+    <p class="upload-status" id="up-status"></p>
+    <div class="sec-label">all photos</div>
+    <div class="photos-grid" id="photos-grid"><p class="no-data">No photos yet.</p></div>
+  </div>
 
-    <!-- GALLERIES -->
-    <div class="tab" id="tab-galleries">
-      <div class="main-header">
-        <h1 class="main-title">Client galleries</h1>
-        <p class="main-sub">Create a private gallery link for each client.</p>
-      </div>
-
-      <div class="gallery-form">
-        <div class="field" style="flex:1;">
-          <label>Client name</label>
-          <input type="text" id="new-gallery-name" placeholder="e.g. Smith Family — Football 2025"/>
-        </div>
-        <button class="create-btn" onclick="createGallery()">Create gallery</button>
-      </div>
-
-      <div class="block-label">All galleries</div>
-      <div class="galleries-list" id="galleries-list"><p class="no-data">No galleries yet.</p></div>
+  <div class="tab" id="tab-galleries">
+    <h1 class="main-title">Client galleries</h1><p class="main-sub">Create a private gallery link for each client.</p>
+    <div class="gal-form">
+      <div class="field" style="flex:1;margin:0"><label>Client name</label><input type="text" id="new-gal-name" placeholder="e.g. Smith Family — Football 2025"/></div>
+      <button class="acc-btn" onclick="createGallery()" style="align-self:flex-end">Create gallery</button>
     </div>
+    <div class="sec-label">all galleries</div>
+    <div class="gal-list" id="gal-list"><p class="no-data">No galleries yet.</p></div>
+  </div>
 
-    <!-- BOOKINGS -->
-    <div class="tab" id="tab-bookings">
-      <div class="main-header">
-        <h1 class="main-title">Bookings</h1>
-        <p class="main-sub">Requests submitted through the booking form.</p>
-      </div>
-      <div class="block-label">All bookings</div>
-      <div class="bookings-list" id="bookings-list"><p class="no-data">No bookings yet.</p></div>
-    </div>
+  <div class="tab" id="tab-bookings">
+    <h1 class="main-title">Bookings</h1><p class="main-sub">Requests submitted through your booking form.</p>
+    <div class="sec-label">all bookings</div>
+    <div class="booking-list" id="all-bookings"><p class="no-data">No bookings yet.</p></div>
+  </div>
 
-  </main>
+</main>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// AUTH GUARD
-sb.auth.getSession().then(({ data }) => {
-  if (!data.session) window.location.href = 'login.html';
-  else { loadAll(); }
-});
-
-async function logout() {
-  await sb.auth.signOut();
-  window.location.href = 'login.html';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+sb.auth.getSession().then(({data})=>{if(!data.session)window.location.href='login.html';else loadAll();});
+async function logout(){await sb.auth.signOut();window.location.href='login.html';}
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
 }
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 
-// TAB SWITCHER
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-}
+let allPhotos=[],allGalleries=[],allBookings=[];
 
-// TOAST
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ── LOAD ALL ──
-async function loadAll() {
-  await Promise.all([loadPhotos(), loadGalleries(), loadBookings()]);
+async function loadAll(){
+  await Promise.all([loadPhotos(),loadGalleries(),loadBookings()]);
   updateStats();
 }
-
-// ── PHOTOS ──
-let allPhotos = [];
-async function loadPhotos() {
-  const { data } = await sb.from('portfolio_photos').select('*').order('created_at', { ascending: false });
-  allPhotos = data || [];
-  renderPhotos();
-  populateGalleryDropdown();
+async function loadPhotos(){
+  const{data}=await sb.from('portfolio_photos').select('*').order('created_at',{ascending:false});
+  allPhotos=data||[];renderPhotos();populateGalDrop();
 }
-
-function renderPhotos() {
-  const grid = document.getElementById('photos-grid');
-  if (!allPhotos.length) { grid.innerHTML = '<p class="no-data">No photos uploaded yet.</p>'; return; }
-  grid.innerHTML = allPhotos.map(p => `
+function renderPhotos(){
+  const g=document.getElementById('photos-grid');
+  if(!allPhotos.length){g.innerHTML='<p class="no-data">No photos yet.</p>';return;}
+  g.innerHTML=allPhotos.map(p=>`
     <div class="photo-card">
-      <img src="${p.url}" alt="${p.sport || ''}"/>
+      <img src="${p.url}" alt="${p.sport||''}"/>
       <div class="photo-card-info">
-        <div class="photo-card-sport">${p.sport || 'No sport'}</div>
-        <div class="photo-card-name">${p.file_name}</div>
+        <div class="photo-sport">${p.sport||'No sport'}</div>
+        <div class="photo-name">${p.file_name}</div>
       </div>
-      <div class="photo-card-actions">
-        <button class="toggle-hp ${p.show_on_homepage ? 'on' : ''}" onclick="toggleHomepage('${p.id}', ${p.show_on_homepage})">${p.show_on_homepage ? 'On HP' : 'Add to HP'}</button>
-        <button class="delete-btn" onclick="deletePhoto('${p.id}', '${p.storage_path}')">Delete</button>
+      <div class="photo-actions">
+        <button class="tog-hp ${p.show_on_homepage?'on':''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage?'On HP':'Add HP'}</button>
+        <button class="del-btn" onclick="delPhoto('${p.id}','${p.storage_path}')">Delete</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-async function toggleHomepage(id, current) {
-  await sb.from('portfolio_photos').update({ show_on_homepage: !current }).eq('id', id);
-  await loadPhotos();
-}
-
-async function deletePhoto(id, storagePath) {
-  if (!confirm('Delete this photo?')) return;
-  await sb.storage.from('photos').remove([storagePath]);
-  await sb.from('portfolio_photos').delete().eq('id', id);
-  await loadPhotos();
-  toast('Photo deleted.');
+async function togHP(id,cur){await sb.from('portfolio_photos').update({show_on_homepage:!cur}).eq('id',id);await loadPhotos();}
+async function delPhoto(id,path){
+  if(!confirm('Delete this photo?'))return;
+  await sb.storage.from('photos').remove([path]);
+  await sb.from('portfolio_photos').delete().eq('id',id);
+  await loadPhotos();toast('Photo deleted.');
 }
 
 // UPLOAD
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', () => handleFiles(fileInput.files));
-
-async function handleFiles(files) {
-  if (!files.length) return;
-  const sport = document.getElementById('upload-sport').value;
-  const galleryId = document.getElementById('upload-gallery').value;
-  const showHP = document.getElementById('show-homepage').checked;
-  const statusEl = document.getElementById('upload-status');
-  const progressWrap = document.getElementById('progress-wrap');
-  const progressBar = document.getElementById('progress-bar');
-
-  progressWrap.style.display = 'block';
-  let done = 0;
-
-  for (const file of files) {
-    const ext = file.name.split('.').pop();
-    const path = `public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    statusEl.textContent = `Uploading ${file.name}...`;
-
-    const { error: upErr } = await sb.storage.from('photos').upload(path, file, { cacheControl: '3600', upsert: false });
-    if (upErr) { statusEl.textContent = `Error: ${upErr.message}`; continue; }
-
-    const { data: urlData } = sb.storage.from('photos').getPublicUrl(path);
-
-    await sb.from('portfolio_photos').insert({
-      file_name: file.name,
-      storage_path: path,
-      url: urlData.publicUrl,
-      sport: sport || null,
-      gallery_id: galleryId || null,
-      show_on_homepage: showHP
-    });
-
-    done++;
-    progressBar.style.width = `${(done / files.length) * 100}%`;
+const dz=document.getElementById('drop-zone');
+const fi=document.getElementById('file-input');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');handleFiles(e.dataTransfer.files);});
+fi.addEventListener('change',()=>handleFiles(fi.files));
+async function handleFiles(files){
+  if(!files.length)return;
+  const sport=document.getElementById('up-sport').value;
+  const galId=document.getElementById('up-gallery').value;
+  const hp=document.getElementById('up-hp').checked;
+  const pw=document.getElementById('prog-wrap'),pb=document.getElementById('prog-bar'),st=document.getElementById('up-status');
+  pw.style.display='block';let done=0;
+  for(const file of files){
+    const ext=file.name.split('.').pop();
+    const path=`public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    st.textContent=`Uploading ${file.name}...`;
+    const{error}=await sb.storage.from('photos').upload(path,file,{cacheControl:'3600',upsert:false});
+    if(error){st.textContent=`Error: ${error.message}`;continue;}
+    const{data:u}=sb.storage.from('photos').getPublicUrl(path);
+    await sb.from('portfolio_photos').insert({file_name:file.name,storage_path:path,url:u.publicUrl,sport:sport||null,gallery_id:galId||null,show_on_homepage:hp});
+    done++;pb.style.width=`${(done/files.length)*100}%`;
   }
-
-  statusEl.textContent = `${done} photo${done !== 1 ? 's' : ''} uploaded!`;
-  setTimeout(() => { progressWrap.style.display = 'none'; progressBar.style.width = '0%'; statusEl.textContent = ''; }, 3000);
-  fileInput.value = '';
-  await loadPhotos();
-  toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
+  st.textContent=`${done} photo${done!==1?'s':''} uploaded!`;
+  setTimeout(()=>{pw.style.display='none';pb.style.width='0';st.textContent='';},3000);
+  fi.value='';await loadPhotos();toast(`${done} photo${done!==1?'s':''} uploaded!`);
 }
 
-// ── GALLERIES ──
-let allGalleries = [];
-async function loadGalleries() {
-  const { data } = await sb.from('client_galleries').select('*').order('created_at', { ascending: false });
-  allGalleries = data || [];
-  renderGalleries();
-  populateGalleryDropdown();
+// GALLERIES
+async function loadGalleries(){
+  const{data}=await sb.from('client_galleries').select('*').order('created_at',{ascending:false});
+  allGalleries=data||[];renderGalleries();populateGalDrop();
 }
-
-function populateGalleryDropdown() {
-  const sel = document.getElementById('upload-gallery');
-  const current = sel.value;
-  sel.innerHTML = '<option value="">Portfolio only</option>';
-  allGalleries.forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g.id;
-    opt.textContent = g.name;
-    if (g.id === current) opt.selected = true;
-    sel.appendChild(opt);
-  });
+function populateGalDrop(){
+  const s=document.getElementById('up-gallery'),cur=s.value;
+  s.innerHTML='<option value="">Portfolio only</option>';
+  allGalleries.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;if(g.id===cur)o.selected=true;s.appendChild(o);});
 }
-
-function renderGalleries() {
-  const list = document.getElementById('galleries-list');
-  if (!allGalleries.length) { list.innerHTML = '<p class="no-data">No galleries yet.</p>'; return; }
-  list.innerHTML = allGalleries.map(g => {
-    const url = `${window.location.origin}/gallery.html?id=${g.slug}`;
-    const count = allPhotos.filter(p => p.gallery_id === g.id).length;
-    return `
-      <div class="gallery-row">
-        <div class="gallery-row-info">
-          <h3>${g.name}</h3>
-          <p>${count} photo${count !== 1 ? 's' : ''} · ${url}</p>
-        </div>
-        <div class="gallery-row-actions">
-          <button class="copy-btn" onclick="copyLink('${url}', this)">Copy link</button>
-          <a class="open-btn" href="${url}" target="_blank">Open</a>
-          <button class="del-gallery-btn" onclick="deleteGallery('${g.id}')">Delete</button>
-        </div>
-      </div>
-    `;
+function renderGalleries(){
+  const l=document.getElementById('gal-list');
+  if(!allGalleries.length){l.innerHTML='<p class="no-data">No galleries yet.</p>';return;}
+  l.innerHTML=allGalleries.map(g=>{
+    const url=`${window.location.origin}/gallery.html?id=${g.slug}`;
+    const cnt=allPhotos.filter(p=>p.gallery_id===g.id).length;
+    return `<div class="gal-row"><div class="gal-info"><h3>${g.name}</h3><p>${cnt} photo${cnt!==1?'s':''}</p></div>
+      <div class="gal-actions">
+        <button class="copy-btn" onclick="copyLink('${url}',this)">Copy link</button>
+        <a class="open-btn" href="${url}" target="_blank">Open</a>
+        <button class="del-gal-btn" onclick="delGallery('${g.id}')">Delete</button>
+      </div></div>`;
   }).join('');
 }
-
-async function createGallery() {
-  const name = document.getElementById('new-gallery-name').value.trim();
-  if (!name) { toast('Enter a client name first.'); return; }
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
-  const { error } = await sb.from('client_galleries').insert({ name, slug });
-  if (error) { toast('Error creating gallery.'); return; }
-  document.getElementById('new-gallery-name').value = '';
-  await loadGalleries();
-  toast('Gallery created!');
+async function createGallery(){
+  const name=document.getElementById('new-gal-name').value.trim();
+  if(!name){toast('Enter a client name first.');return;}
+  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+Date.now().toString(36);
+  await sb.from('client_galleries').insert({name,slug});
+  document.getElementById('new-gal-name').value='';
+  await loadGalleries();toast('Gallery created!');
 }
-
-async function deleteGallery(id) {
-  if (!confirm('Delete this gallery? Photos stay in your portfolio.')) return;
-  await sb.from('client_galleries').delete().eq('id', id);
-  await loadGalleries();
-  toast('Gallery deleted.');
+async function delGallery(id){
+  if(!confirm('Delete this gallery? Photos stay in your portfolio.'))return;
+  await sb.from('client_galleries').delete().eq('id',id);
+  await loadGalleries();toast('Gallery deleted.');
 }
-
-function copyLink(url, btn) {
+function copyLink(url,btn){
   navigator.clipboard.writeText(url);
-  btn.textContent = 'Copied!';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+  btn.textContent='Copied!';btn.classList.add('copied');
+  setTimeout(()=>{btn.textContent='Copy link';btn.classList.remove('copied');},2000);
 }
 
-// ── BOOKINGS ──
-let allBookings = [];
-async function loadBookings() {
-  const { data } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
-  allBookings = data || [];
-  renderBookings('bookings-list', allBookings);
-  renderBookings('overview-bookings', allBookings.slice(0, 4));
+// BOOKINGS
+async function loadBookings(){
+  const{data}=await sb.from('bookings').select('*').order('created_at',{ascending:false});
+  allBookings=data||[];
+  renderBookings('all-bookings',allBookings);
+  renderBookings('ov-bookings',allBookings.slice(0,4));
 }
-
-function renderBookings(containerId, bookings) {
-  const el = document.getElementById(containerId);
-  if (!bookings.length) { el.innerHTML = '<p class="no-data">No bookings yet.</p>'; return; }
-  el.innerHTML = bookings.map(b => `
+function renderBookings(id,list){
+  const el=document.getElementById(id);
+  if(!list.length){el.innerHTML='<p class="no-data">No bookings yet.</p>';return;}
+  el.innerHTML=list.map(b=>`
     <div class="booking-card">
-      <div class="booking-card-header">
-        <span class="booking-name">${b.first_name} ${b.last_name}</span>
-        <span class="booking-pkg">${b.package_selected || '—'}</span>
-      </div>
+      <div class="booking-head"><span class="booking-name">${b.first_name||''} ${b.last_name||''}</span><span class="booking-pkg">${b.package_selected||'—'}</span></div>
       <div class="booking-details">
-        <div class="booking-detail"><strong>Email</strong>${b.email}</div>
-        <div class="booking-detail"><strong>Phone</strong>${b.phone || '—'}</div>
-        <div class="booking-detail"><strong>Date</strong>${b.event_date || '—'} ${b.event_time || ''}</div>
-        <div class="booking-detail"><strong>Sport</strong>${b.sport_type || '—'}</div>
-        <div class="booking-detail"><strong>Venue</strong>${b.event_location || '—'}</div>
-        <div class="booking-detail"><strong>Add-ons</strong>${b.addons || 'None'}</div>
-        <div class="booking-detail"><strong>Found via</strong>${b.referral || '—'}</div>
-        <div class="booking-detail"><strong>Total / Deposit</strong><span class="booking-deposit">${b.total || '—'} / ${b.deposit || '—'}</span></div>
+        <div class="booking-detail"><strong>Email</strong>${b.email||'—'}</div>
+        <div class="booking-detail"><strong>Phone</strong>${b.phone||'—'}</div>
+        <div class="booking-detail"><strong>Date</strong>${b.event_date||'—'} ${b.event_time||''}</div>
+        <div class="booking-detail"><strong>Sport</strong>${b.sport_type||'—'}</div>
+        <div class="booking-detail"><strong>Venue</strong>${b.event_location||'—'}</div>
+        <div class="booking-detail"><strong>Total / Deposit</strong>${b.total||'—'} / ${b.deposit||'—'}</div>
       </div>
-      ${b.notes ? `<div style="margin-top:12px;font-size:12px;color:var(--muted2);border-top:1px solid var(--border);padding-top:12px;">${b.notes}</div>` : ''}
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-// STATS
-function updateStats() {
-  document.getElementById('stat-photos').textContent = allPhotos.length;
-  document.getElementById('stat-galleries').textContent = allGalleries.length;
-  document.getElementById('stat-bookings').textContent = allBookings.length;
-  document.getElementById('stat-hp').textContent = allPhotos.filter(p => p.show_on_homepage).length;
+function updateStats(){
+  document.getElementById('st-photos').textContent=allPhotos.length;
+  document.getElementById('st-galleries').textContent=allGalleries.length;
+  document.getElementById('st-bookings').textContent=allBookings.length;
+  document.getElementById('st-hp').textContent=allPhotos.filter(p=>p.show_on_homepage).length;
 }
 </script>
 </body>
