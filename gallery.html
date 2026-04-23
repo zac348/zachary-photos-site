@@ -14,88 +14,77 @@
   --accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
   --radius:8px;
 }
-html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6;min-height:100vh}
-
 nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1)}
 .nav-logo{font-size:13px;font-weight:500;color:var(--t1);text-decoration:none}
 .nav-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);background:var(--s1);border:1px solid var(--b2);border-radius:4px;padding:3px 8px}
-
 .page{max-width:960px;margin:0 auto;padding:40px 20px 80px}
 @media(max-width:600px){.page{padding:28px 16px 60px}}
-
 .gallery-header{margin-bottom:36px}
 .gallery-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
 .gallery-title{font-size:22px;font-weight:400;letter-spacing:-.02em;margin-bottom:6px}
 .gallery-meta{font-size:12px;color:var(--t3)}
 .gallery-meta span{color:var(--accent)}
-
-.dl-all{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:9px 18px;border-radius:6px;text-decoration:none;cursor:pointer;border:none;transition:background .15s;font-family:'DM Sans',sans-serif}
+.watermark-notice{display:none;margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:6px;font-size:12px;color:#f59e0b}
+.dl-all{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:9px 18px;border-radius:6px;cursor:pointer;border:none;transition:background .15s;font-family:'DM Sans',sans-serif}
 .dl-all:hover{background:var(--accent-d)}
 .dl-all svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
-
+.dl-all:disabled{opacity:.4;cursor:not-allowed}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:3px}
 @media(max-width:480px){.photo-grid{grid-template-columns:repeat(2,1fr)}}
 .photo-item{aspect-ratio:4/3;background:var(--s1);overflow:hidden;position:relative;cursor:pointer}
-.photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
-.photo-item:hover img{transform:scale(1.04)}
+.photo-item canvas{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.photo-item:hover canvas{transform:scale(1.04)}
 .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .25s;display:flex;align-items:center;justify-content:center;gap:10px}
 .photo-item:hover .photo-overlay{opacity:1}
 .ov-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:6px 10px;cursor:pointer;text-decoration:none;border:1px solid rgba(255,255,255,.2);color:var(--t1);background:rgba(255,255,255,.08);transition:background .15s}
 .ov-btn:hover{background:rgba(255,255,255,.16)}
 .ov-btn.dl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
 .ov-btn.dl:hover{background:rgba(0,183,227,.18)}
-
 .empty{text-align:center;padding:80px 20px}
 .empty h2{font-size:16px;font-weight:400;margin-bottom:6px}
 .empty p{font-size:12px;color:var(--t2)}
-
 .loading{text-align:center;padding:80px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--t3)}
-
 .not-found{text-align:center;padding:100px 20px}
 .not-found h2{font-size:18px;font-weight:400;margin-bottom:8px}
 .not-found p{font-size:12px;color:var(--t2);margin-bottom:20px}
 .not-found a{color:var(--accent);text-decoration:none;font-size:12px}
-
-/* LIGHTBOX */
 .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 .lb.open{display:flex}
-.lb img{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:4px}
+.lb canvas{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:4px}
 .lb-actions{display:flex;gap:10px}
 .lb-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:8px 14px;cursor:pointer;text-decoration:none;border:1px solid rgba(255,255,255,.2);color:var(--t2);background:rgba(255,255,255,.06);transition:all .15s}
 .lb-btn:hover{color:var(--t1);border-color:rgba(255,255,255,.35)}
 .lb-btn.dl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
 .lb-btn.dl:hover{background:rgba(0,183,227,.18)}
-.lb-close{position:absolute;top:18px;right:22px;font-size:22px;color:var(--t3);cursor:pointer;background:none;border:none;transition:color .15s}
-.lb-close:hover{color:var(--t1)}
-.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;color:var(--t2)}
+.lb-close{position:absolute;top:18px;right:22px;font-size:22px;color:var(--t3);cursor:pointer;background:none;border:none}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2)}
 .lb-nav:hover{background:rgba(255,255,255,.12);color:var(--t1)}
 .lb-nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 #lb-prev{left:16px}#lb-next{right:16px}
 @media(max-width:600px){.lb-nav{display:none}}
-
 footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 footer span{font-size:11px;color:var(--t3)}
 .foot-links{display:flex;gap:16px}
-.foot-links a{font-size:11px;color:var(--t3);text-decoration:none;transition:color .15s}
+.foot-links a{font-size:11px;color:var(--t3);text-decoration:none}
 .foot-links a:hover{color:var(--t1)}
 </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="nav-logo">ZRP</a>
   <span class="nav-badge">Private gallery</span>
 </nav>
-
 <div class="page">
   <div id="loading" class="loading">Loading your gallery...</div>
-
   <div id="gallery-content" style="display:none">
     <div class="gallery-header">
       <p class="gallery-tag">Private client gallery</p>
       <h1 class="gallery-title" id="g-title">Your Photos</h1>
       <p class="gallery-meta" id="g-meta"></p>
+      <div class="watermark-notice" id="wm-notice">
+        ⚠️ These are preview photos with a watermark. Full resolution unwatermarked photos will be available once payment is confirmed.
+      </div>
       <button class="dl-all" id="dl-all-btn" onclick="downloadAll()" style="display:none">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download all
@@ -103,31 +92,26 @@ footer span{font-size:11px;color:var(--t3)}
     </div>
     <div class="photo-grid" id="photo-grid"></div>
   </div>
-
   <div id="empty-state" class="empty" style="display:none">
     <h2>Photos coming soon</h2>
     <p>Check back shortly — Zachary is still editing your photos.</p>
   </div>
-
   <div id="not-found" class="not-found" style="display:none">
     <h2>Gallery not found</h2>
     <p>This link may be invalid or the gallery has been removed.</p>
     <a href="index.html">← Back to site</a>
   </div>
 </div>
-
-<!-- LIGHTBOX -->
 <div class="lb" id="lb">
   <button class="lb-close" onclick="closeLB()">×</button>
   <button class="lb-nav" id="lb-prev" onclick="navLB(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
   <button class="lb-nav" id="lb-next" onclick="navLB(1)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
-  <img id="lb-img" src="" alt=""/>
+  <canvas id="lb-canvas"></canvas>
   <div class="lb-actions">
     <button class="lb-btn" onclick="closeLB()">Close</button>
-    <a class="lb-btn dl" id="lb-dl" href="" download target="_blank">Download</a>
+    <button class="lb-btn dl" id="lb-dl-btn" onclick="downloadCurrent()">Download</button>
   </div>
 </div>
-
 <footer>
   <span>© 2025 Zachary Routsong Photography</span>
   <div class="foot-links">
@@ -135,66 +119,175 @@ footer span{font-size:11px;color:var(--t3)}
     <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">@zacharyroutsongphotos</a>
   </div>
 </footer>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let photos=[],lbIdx=0;
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let photos = [], lbIdx = 0, useWatermark = true, galleryName = '';
 
-async function load(){
-  const params=new URLSearchParams(window.location.search);
-  const slug=params.get('id');
-  if(!slug){showNotFound();return;}
-  const{data:gallery,error}=await sb.from('client_galleries').select('*').eq('slug',slug).single();
-  if(error||!gallery){showNotFound();return;}
-  const{data:imgs}=await sb.from('portfolio_photos').select('*').eq('gallery_id',gallery.id).order('created_at',{ascending:true});
-  photos=imgs||[];
-  document.getElementById('loading').style.display='none';
-  document.getElementById('g-title').textContent=gallery.name;
-  document.getElementById('g-meta').innerHTML=`<span>${photos.length}</span> photo${photos.length!==1?'s':''} — click any to view full size or download`;
-  if(photos.length){
-    document.getElementById('dl-all-btn').style.display='inline-flex';
-    document.getElementById('gallery-content').style.display='block';
-    const grid=document.getElementById('photo-grid');
-    photos.forEach((p,i)=>{
-      const el=document.createElement('div');el.className='photo-item';
-      el.innerHTML=`<img src="${p.url}" alt="${p.sport||'Photo'}" loading="lazy"/>
-        <div class="photo-overlay">
-          <button class="ov-btn" onclick="openLB(${i})">View</button>
-          <a class="ov-btn dl" href="${p.url}" download target="_blank">Download</a>
-        </div>`;
+// ── WATERMARK ──
+function applyWatermark(img, canvas, small = false) {
+  canvas.width  = img.naturalWidth  || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  if (!useWatermark) return;
+
+  const text = '© ZRP — zachary routsong photography';
+  const fontSize = Math.max(14, Math.floor(canvas.width * 0.022));
+  ctx.font = `${fontSize}px DM Sans, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Diagonal repeating watermark
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = '#ffffff';
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-Math.PI / 6);
+  const step = Math.max(120, canvas.width * 0.28);
+  for (let y = -canvas.height; y < canvas.height; y += step) {
+    for (let x = -canvas.width; x < canvas.width; x += step) {
+      ctx.fillText(text, x, y);
+    }
+  }
+  ctx.restore();
+
+  // Bottom corner tag
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  const tagFont = Math.max(10, Math.floor(canvas.width * 0.016));
+  ctx.font = `500 ${tagFont}px DM Sans, sans-serif`;
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  const tagPad = tagFont * 0.6;
+  const tagText = '© Zachary Routsong Photography';
+  const tw = ctx.measureText(tagText).width;
+  ctx.fillRect(canvas.width - tw - tagPad * 2 - 8, canvas.height - tagFont * 2.4, tw + tagPad * 2, tagFont * 1.8);
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(tagText, canvas.width - tw - tagPad - 8, canvas.height - tagFont * 1.5);
+  ctx.restore();
+}
+
+function loadImageToCanvas(url, canvas, small = false) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { applyWatermark(img, canvas, small); resolve(); };
+    img.onerror = () => {
+      // fallback: draw placeholder
+      canvas.width = 400; canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#111'; ctx.fillRect(0, 0, 400, 300);
+      resolve();
+    };
+    img.src = url;
+  });
+}
+
+// ── LOAD ──
+async function load() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('id');
+  if (!slug) { showNotFound(); return; }
+
+  const { data: gallery, error } = await sb.from('client_galleries').select('*').eq('slug', slug).single();
+  if (error || !gallery) { showNotFound(); return; }
+
+  useWatermark = gallery.watermark !== false; // default true unless explicitly false
+  galleryName  = gallery.name;
+
+  const { data: imgs } = await sb.from('portfolio_photos').select('*').eq('gallery_id', gallery.id).order('created_at', { ascending: true });
+  photos = imgs || [];
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('g-title').textContent = gallery.name;
+
+  if (useWatermark) {
+    document.getElementById('wm-notice').style.display = 'block';
+    document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — preview watermarks shown`;
+  } else {
+    document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — click any to view or download`;
+  }
+
+  if (photos.length) {
+    document.getElementById('dl-all-btn').style.display = 'inline-flex';
+    document.getElementById('gallery-content').style.display = 'block';
+    const grid = document.getElementById('photo-grid');
+
+    for (let i = 0; i < photos.length; i++) {
+      const p = photos[i];
+      const el = document.createElement('div');
+      el.className = 'photo-item';
+
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'photo-overlay';
+      overlay.innerHTML = `
+        <button class="ov-btn" onclick="openLB(${i})">View</button>
+        <button class="ov-btn dl" onclick="downloadPhoto(${i})">Download</button>`;
+
+      el.appendChild(canvas);
+      el.appendChild(overlay);
       grid.appendChild(el);
-    });
-  }else{
-    document.getElementById('gallery-content').style.display='block';
-    document.getElementById('empty-state').style.display='block';
+
+      // Load async so UI doesn't block
+      loadImageToCanvas(p.url, canvas, true);
+    }
+  } else {
+    document.getElementById('gallery-content').style.display = 'block';
+    document.getElementById('empty-state').style.display = 'block';
   }
 }
 
-function showNotFound(){document.getElementById('loading').style.display='none';document.getElementById('not-found').style.display='block';}
+function showNotFound() { document.getElementById('loading').style.display = 'none'; document.getElementById('not-found').style.display = 'block'; }
 
-function openLB(i){
-  lbIdx=i;
-  const p=photos[i];
-  document.getElementById('lb-img').src=p.url;
-  document.getElementById('lb-dl').href=p.url;
+// ── LIGHTBOX ──
+async function openLB(i) {
+  lbIdx = i;
+  const canvas = document.getElementById('lb-canvas');
+  canvas.style.cssText = 'max-width:90vw;max-height:78vh;border-radius:4px';
+  await loadImageToCanvas(photos[i].url, canvas);
   document.getElementById('lb').classList.add('open');
 }
-function closeLB(){document.getElementById('lb').classList.remove('open');document.getElementById('lb-img').src='';}
-function navLB(d){openLB((lbIdx+d+photos.length)%photos.length);}
-document.getElementById('lb').addEventListener('click',function(e){if(e.target===this)closeLB();});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeLB();
-  if(e.key==='ArrowRight')navLB(1);
-  if(e.key==='ArrowLeft')navLB(-1);
+function closeLB() { document.getElementById('lb').classList.remove('open'); }
+function navLB(d) { openLB((lbIdx + d + photos.length) % photos.length); }
+document.getElementById('lb').addEventListener('click', e => { if (e.target === e.currentTarget) closeLB(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLB();
+  if (e.key === 'ArrowRight') navLB(1);
+  if (e.key === 'ArrowLeft') navLB(-1);
 });
 
-async function downloadAll(){
-  for(const p of photos){
-    const a=document.createElement('a');a.href=p.url;a.download=p.file_name||'photo';a.target='_blank';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    await new Promise(r=>setTimeout(r,300));
+// ── DOWNLOAD — canvas blob so watermark is baked in ──
+function downloadPhoto(i) {
+  const tmpCanvas = document.createElement('canvas');
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    applyWatermark(img, tmpCanvas);
+    tmpCanvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = photos[i].file_name || `photo-${i + 1}.jpg`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/jpeg', 0.92);
+  };
+  img.src = photos[i].url;
+}
+
+function downloadCurrent() { downloadPhoto(lbIdx); }
+
+async function downloadAll() {
+  for (let i = 0; i < photos.length; i++) {
+    downloadPhoto(i);
+    await new Promise(r => setTimeout(r, 400));
   }
 }
 

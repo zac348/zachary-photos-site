@@ -85,7 +85,18 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 .check-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .check-row label{font-size:12px;text-transform:none;letter-spacing:0;color:var(--t2);cursor:pointer}
 
-/* ── CALENDAR ── */
+/* INVOICE + PAYMENT */
+.paid-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid}
+.paid-badge.paid{color:#22c55e;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.paid-badge.unpaid{color:var(--yellow);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+.pay-toggle{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.pay-toggle:hover{border-color:var(--green);color:var(--green)}
+.pay-toggle.paid:hover{border-color:var(--red);color:var(--red)}
+.invoice-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.invoice-btn:hover{border-color:var(--accent);color:var(--accent)}
+.wm-toggle{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.wm-toggle.wm-on{border-color:var(--yellow);color:var(--yellow)}
+.wm-toggle.wm-off{border-color:var(--green);color:var(--green)}
 .cal-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
 .cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b1)}
 .cal-month{font-size:14px;font-weight:500;color:var(--t1)}
@@ -364,15 +375,164 @@ function renderGalleries() {
   l.innerHTML = allGalleries.map(g => {
     const url = `${window.location.origin}/gallery.html?id=${g.slug}`;
     const cnt = allPhotos.filter(p => p.gallery_id === g.id).length;
-    return `<div class="gal-row"><div class="gal-info"><h3>${g.name}</h3><p>${cnt} photo${cnt !== 1 ? 's' : ''}</p></div>
-      <div class="gal-actions">
+    const isPaid = g.paid === true;
+    const hasWm = g.watermark !== false;
+    return `<div class="gal-row">
+      <div class="gal-info">
+        <h3 style="display:flex;align-items:center;gap:8px">
+          ${g.name}
+          <span class="paid-badge ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? 'Paid' : 'Unpaid'}</span>
+        </h3>
+        <p>${cnt} photo${cnt !== 1 ? 's' : ''} · Watermark: ${hasWm ? 'on' : 'off'}</p>
+      </div>
+      <div class="gal-actions" style="flex-wrap:wrap">
+        <button class="pay-toggle ${isPaid ? 'paid' : ''}" onclick="togglePaid('${g.id}',${isPaid})">${isPaid ? 'Mark unpaid' : 'Mark paid'}</button>
+        <button class="wm-toggle ${hasWm ? 'wm-on' : 'wm-off'}" onclick="toggleWatermark('${g.id}',${hasWm})">${hasWm ? 'WM: on' : 'WM: off'}</button>
+        <button class="invoice-btn" onclick="generateInvoice('${g.id}')">Invoice PDF</button>
         <button class="copy-btn" onclick="copyLink('${url}',this)">Copy link</button>
         <a class="open-btn" href="${url}" target="_blank">Open</a>
         <button class="del-gal-btn" onclick="delGallery('${g.id}')">Delete</button>
-      </div></div>`;
+      </div>
+    </div>`;
   }).join('');
 }
-async function createGallery() {
+async function togglePaid(id, cur) {
+  await sb.from('client_galleries').update({ paid: !cur }).eq('id', id);
+  await loadGalleries();
+  toast(cur ? 'Marked unpaid.' : '✓ Marked as paid!');
+}
+
+async function toggleWatermark(id, cur) {
+  await sb.from('client_galleries').update({ watermark: !cur }).eq('id', id);
+  await loadGalleries();
+  toast(cur ? 'Watermark removed — clients can now download clean photos.' : 'Watermark re-enabled.');
+}
+
+async function generateInvoice(galId) {
+  const gallery = allGalleries.find(g => g.id === galId);
+  if (!gallery) return;
+
+  // Find matching booking by name (best match)
+  const booking = allBookings.find(b =>
+    gallery.name.toLowerCase().includes((b.first_name || '').toLowerCase()) ||
+    gallery.name.toLowerCase().includes((b.last_name || '').toLowerCase())
+  );
+
+  const now = new Date();
+  const invoiceNum = 'ZRP-' + now.getFullYear() + '-' + String(allGalleries.indexOf(gallery) + 1).padStart(3, '0');
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Invoice ${invoiceNum}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111;padding:48px;max-width:680px;margin:0 auto;font-size:13px}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px}
+  .brand{font-size:18px;font-weight:600;letter-spacing:-.02em}
+  .brand-sub{font-size:11px;color:#888;margin-top:3px;letter-spacing:.04em}
+  .invoice-meta{text-align:right}
+  .invoice-meta h1{font-size:22px;font-weight:300;letter-spacing:-.02em;color:#111}
+  .invoice-meta p{font-size:11px;color:#888;margin-top:4px}
+  .divider{border:none;border-top:1px solid #e5e5e5;margin:24px 0}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:36px}
+  .col-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:6px}
+  .col-val{font-size:13px;color:#111;line-height:1.6}
+  table{width:100%;border-collapse:collapse;margin-bottom:24px}
+  thead th{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding:8px 0;text-align:left;border-bottom:1px solid #e5e5e5}
+  tbody td{padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#111;vertical-align:top}
+  .amount{text-align:right}
+  .totals{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:8px}
+  .total-row{display:flex;gap:48px;font-size:12px}
+  .total-row .label{color:#888}
+  .total-row .val{min-width:80px;text-align:right}
+  .total-row.big .label,.total-row.big .val{font-size:14px;font-weight:600;color:#111}
+  .deposit-row{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+  .deposit-row .label{font-size:12px;color:#16a34a;font-weight:500}
+  .deposit-row .val{font-size:14px;font-weight:600;color:#16a34a}
+  .footer-note{margin-top:48px;padding-top:20px;border-top:1px solid #e5e5e5;font-size:11px;color:#aaa;line-height:1.7}
+  @media print{body{padding:0}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Zachary Routsong Photography</div>
+    <div class="brand-sub">Sports Photography · Valdosta, GA</div>
+    <div style="margin-top:12px;font-size:11px;color:#888;line-height:1.7">
+      229-300-1006<br/>
+      @zacharyroutsongphotos<br/>
+      zrphotos.net
+    </div>
+  </div>
+  <div class="invoice-meta">
+    <h1>Invoice</h1>
+    <p>${invoiceNum}</p>
+    <p>${dateStr}</p>
+  </div>
+</div>
+<hr class="divider"/>
+<div class="two-col">
+  <div>
+    <div class="col-label">Bill to</div>
+    <div class="col-val">${gallery.name}</div>
+  </div>
+  <div>
+    <div class="col-label">Event details</div>
+    <div class="col-val">
+      ${booking ? `${booking['Sport'] || booking.sport_type || '—'}<br/>${booking['Event Date'] || booking.event_date || ''} ${booking['Start Time'] || booking.event_time || ''}<br/>${booking['Venue'] || booking.event_location || ''}` : 'See booking form'}
+    </div>
+  </div>
+</div>
+<table>
+  <thead>
+    <tr><th>Description</th><th class="amount">Amount</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>${booking ? (booking['Package'] || booking.package_selected || 'Photography package') : 'Photography package'}</td>
+      <td class="amount">${booking ? (booking['Total'] || booking.total || '—') : '—'}</td>
+    </tr>
+    ${booking && (booking['Add-Ons'] || booking.addons) && (booking['Add-Ons'] || booking.addons) !== 'None' ? `
+    <tr>
+      <td style="color:#888;font-size:12px">Add-ons: ${booking['Add-Ons'] || booking.addons}</td>
+      <td class="amount">—</td>
+    </tr>` : ''}
+    ${booking && (booking['Travel Fee'] || booking.travel) && (booking['Travel Fee'] || booking.travel) !== 'None' ? `
+    <tr>
+      <td>Travel fee</td>
+      <td class="amount">${booking['Travel Fee'] || booking.travel}</td>
+    </tr>` : ''}
+  </tbody>
+</table>
+<div class="totals">
+  <div class="total-row big">
+    <span class="label">Total due</span>
+    <span class="val">${booking ? (booking['Total'] || booking.total || '—') : '—'}</span>
+  </div>
+</div>
+${booking && (booking['Deposit Due'] || booking.deposit) ? `
+<div class="deposit-row">
+  <span class="label">✓ Deposit paid</span>
+  <span class="val">${booking['Deposit Due'] || booking.deposit}</span>
+</div>` : ''}
+<div class="footer-note">
+  Thank you for booking with Zachary Routsong Photography!<br/>
+  Photos delivered via private gallery link · 5–7 day turnaround · Personal use license included<br/>
+  Questions? Call or text 229-300-1006 or DM @zacharyroutsongphotos
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 600);
+}
+
+
   const name = document.getElementById('new-gal-name').value.trim();
   if (!name) { toast('Enter a client name first.'); return; }
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
