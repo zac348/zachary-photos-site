@@ -8,147 +8,147 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg:       #0e0e0e;
-    --surface:  #161616;
-    --surface2: #1e1e1e;
-    --border:   #2a2a2a;
-    --border2:  #333;
-    --text:     #e8e8e8;
-    --muted:    #666;
-    --muted2:   #888;
-    --accent:   #c8ff00;
-    --accent-d: #a8d900;
-    --radius:   8px;
+    --bg:#0e0e0e; --surface:#161616; --surface2:#1e1e1e;
+    --border:#2a2a2a; --border2:#333;
+    --text:#e8e8e8; --muted:#666; --muted2:#888;
+    --accent:#c8ff00; --accent-d:#a8d900; --radius:8px;
   }
   html { scroll-behavior: smooth; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 14px; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; font-size:14px; }
 
-  /* TOPBAR */
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 32px;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 10;
-    background: var(--bg);
-  }
-  .topbar-name { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; color: var(--text); }
-  .topbar-links { display: flex; gap: 24px; }
-  .topbar-links a { font-size: 12px; color: var(--muted); text-decoration: none; letter-spacing: 0.04em; transition: color 0.15s; }
-  .topbar-links a:hover { color: var(--text); }
-  .topbar-book { font-size: 12px; font-weight: 500; color: var(--bg); background: var(--accent); padding: 7px 16px; border-radius: 4px; text-decoration: none; transition: background 0.15s; }
-  .topbar-book:hover { background: var(--accent-d); }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; background:var(--bg); gap:12px; }
+  .topbar-name { font-size:13px; font-weight:500; color:var(--text); white-space:nowrap; }
+  .topbar-links { display:flex; gap:20px; }
+  .topbar-links a { font-size:12px; color:var(--muted); text-decoration:none; transition:color .15s; }
+  .topbar-links a:hover { color:var(--text); }
+  @media(max-width:560px){ .topbar-links { display:none; } }
+  .topbar-book { font-size:12px; font-weight:500; color:var(--bg); background:var(--accent); padding:7px 14px; border-radius:4px; text-decoration:none; white-space:nowrap; transition:background .15s; flex-shrink:0; }
+  .topbar-book:hover { background:var(--accent-d); }
 
-  /* LAYOUT */
-  .page { max-width: 820px; margin: 0 auto; padding: 56px 32px 80px; }
-  @media (max-width: 600px) { .page { padding: 36px 20px 60px; } .topbar { padding: 16px 20px; } }
+  .page { max-width:780px; margin:0 auto; padding:48px 24px 80px; }
+  @media(max-width:600px){ .page { padding:32px 16px 60px; } }
 
-  /* PAGE HEADER (small) */
-  .page-header { margin-bottom: 52px; }
-  .page-header h1 { font-size: 22px; font-weight: 500; color: var(--text); letter-spacing: -0.02em; margin-bottom: 4px; }
-  .page-header p { font-size: 13px; color: var(--muted2); }
+  .page-header { margin-bottom:44px; }
+  .page-header h1 { font-size:22px; font-weight:500; letter-spacing:-.02em; margin-bottom:4px; }
+  .page-header p { font-size:13px; color:var(--muted2); }
 
-  /* SECTION */
-  .block { margin-bottom: 48px; }
-  .block-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-  .block-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .block { margin-bottom:44px; }
+  .block-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  .block-label::after { content:''; flex:1; height:1px; background:var(--border); }
 
   /* PACKAGES */
-  .pkg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-  .pkg-card { background: var(--surface); padding: 24px 20px 24px; cursor: pointer; transition: background 0.15s; position: relative; padding-top: 44px; }
-  .pkg-card:hover { background: var(--surface2); }
-  .pkg-card.selected { background: var(--surface2); }
-  .pkg-card.selected::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
-  .pkg-badge { position: absolute; top: 16px; left: 20px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bg); background: var(--accent); padding: 2px 8px; border-radius: 3px; }
-  .pkg-name { font-size: 11px; font-weight: 500; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
-  .pkg-price { font-size: 32px; font-weight: 300; color: var(--text); line-height: 1; margin-bottom: 16px; letter-spacing: -0.02em; }
-  .pkg-price span { font-size: 14px; color: var(--muted); font-weight: 400; }
-  .pkg-features { list-style: none; border-top: 1px solid var(--border); padding-top: 14px; }
-  .pkg-features li { font-size: 12px; color: var(--muted2); padding: 3px 0; display: flex; gap: 8px; }
-  .pkg-features li::before { content: '—'; color: var(--border2); flex-shrink: 0; }
-  .pkg-check { display: none; position: absolute; top: 14px; right: 14px; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; align-items: center; justify-content: center; }
-  .pkg-check svg { width: 9px; height: 9px; stroke: var(--bg); stroke-width: 2.5; fill: none; }
-  .pkg-card.selected .pkg-check { display: flex; }
+  .pkg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  @media(max-width:580px){ .pkg-grid { grid-template-columns:1fr; } }
+  .pkg-card { background:var(--surface); padding:44px 18px 20px; cursor:pointer; transition:background .15s; position:relative; }
+  .pkg-card:hover { background:var(--surface2); }
+  .pkg-card.selected { background:var(--surface2); }
+  .pkg-card.selected::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); }
+  .pkg-badge { position:absolute; top:16px; left:18px; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--bg); background:var(--accent); padding:2px 8px; border-radius:3px; }
+  .pkg-name { font-size:10px; font-weight:500; color:var(--muted2); letter-spacing:.08em; text-transform:uppercase; margin-bottom:4px; }
+  .pkg-price { font-size:28px; font-weight:300; color:var(--text); line-height:1; margin-bottom:14px; letter-spacing:-.02em; }
+  .pkg-price span { font-size:12px; color:var(--muted); font-weight:400; }
+  .pkg-features { list-style:none; border-top:1px solid var(--border); padding-top:12px; }
+  .pkg-features li { font-size:11px; color:var(--muted2); padding:3px 0; display:flex; gap:6px; line-height:1.4; }
+  .pkg-features li::before { content:'—'; color:var(--border2); flex-shrink:0; }
+  .pkg-check { display:none; position:absolute; top:14px; right:14px; width:17px; height:17px; background:var(--accent); border-radius:50%; align-items:center; justify-content:center; }
+  .pkg-check svg { width:8px; height:8px; stroke:var(--bg); stroke-width:2.5; fill:none; }
+  .pkg-card.selected .pkg-check { display:flex; }
 
   /* ADD-ONS */
-  .addons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; }
-  .addon-pill {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 11px 14px;
-    cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none;
-  }
-  .addon-pill:hover { border-color: var(--border2); }
-  .addon-pill.active { border-color: var(--accent); background: rgba(200,255,0,0.05); }
-  .addon-pill-left { display: flex; align-items: center; gap: 10px; }
-  .addon-box { width: 15px; height: 15px; border-radius: 3px; border: 1px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
-  .addon-pill.active .addon-box { background: var(--accent); border-color: var(--accent); }
-  .addon-box svg { width: 8px; height: 8px; stroke: var(--bg); stroke-width: 2.5; fill: none; display: none; }
-  .addon-pill.active .addon-box svg { display: block; }
-  .addon-pill-name { font-size: 12px; color: var(--muted2); }
-  .addon-pill.active .addon-pill-name { color: var(--text); }
-  .addon-price-tag { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .addon-pill.active .addon-price-tag { color: var(--accent); }
-  .addon-footnote { font-size: 11px; color: var(--muted); margin-top: 10px; }
+  .addons-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; }
+  @media(max-width:480px){ .addons-grid { grid-template-columns:1fr; } }
+  .addon-pill { display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 14px; cursor:pointer; transition:border-color .15s,background .15s; user-select:none; gap:8px; }
+  .addon-pill:hover { border-color:var(--border2); }
+  .addon-pill.active { border-color:var(--accent); background:rgba(200,255,0,.05); }
+  .addon-pill-left { display:flex; align-items:center; gap:10px; flex:1; }
+  .addon-box { width:15px; height:15px; border-radius:3px; border:1px solid var(--border2); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:background .15s,border-color .15s; }
+  .addon-pill.active .addon-box { background:var(--accent); border-color:var(--accent); }
+  .addon-box svg { width:8px; height:8px; stroke:var(--bg); stroke-width:2.5; fill:none; display:none; }
+  .addon-pill.active .addon-box svg { display:block; }
+  .addon-pill-name { font-size:12px; color:var(--muted2); }
+  .addon-pill.active .addon-pill-name { color:var(--text); }
+  .addon-price-tag { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); white-space:nowrap; flex-shrink:0; }
+  .addon-pill.active .addon-price-tag { color:var(--accent); }
 
-  /* FORM FIELDS */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field.full { grid-column: 1 / -1; }
-  label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-  input, select, textarea {
-    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
-    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
-    padding: 10px 13px; outline: none; transition: border-color 0.15s; width: 100%; appearance: none;
-    color-scheme: dark;
-  }
-  input::placeholder { color: var(--muted); }
-  input:focus, select:focus, textarea:focus { border-color: var(--border2); background: var(--surface2); }
-  textarea { resize: vertical; min-height: 80px; }
-  select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
-  }
-  select option { background: var(--surface2); color: var(--text); }
-  input[type="date"], input[type="time"] { cursor: pointer; }
-  #selected-package, #selected-addons-hidden { display: none; }
+  /* QTY */
+  .addon-qty-pill { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:11px 14px; }
+  .addon-qty-pill.active { border-color:var(--accent); background:rgba(200,255,0,.05); }
+  .addon-qty-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; }
+  .addon-qty-name { font-size:12px; color:var(--muted2); }
+  .addon-qty-pill.active .addon-qty-name { color:var(--text); }
+  .addon-qty-rate { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
+  .addon-qty-pill.active .addon-qty-rate { color:var(--accent); }
+  .qty-controls { display:flex; align-items:center; border:1px solid var(--border); border-radius:6px; overflow:hidden; width:fit-content; }
+  .qty-btn { background:var(--surface2); border:none; color:var(--muted2); width:32px; height:32px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; transition:background .15s,color .15s; }
+  .qty-btn:hover { background:var(--border2); color:var(--text); }
+  .qty-display { font-family:'DM Mono',monospace; font-size:13px; color:var(--text); width:40px; text-align:center; background:var(--surface); border:none; border-left:1px solid var(--border); border-right:1px solid var(--border); height:32px; line-height:32px; }
+  .qty-subtotal { font-size:11px; color:var(--muted); margin-top:6px; font-family:'DM Mono',monospace; }
+  .addon-qty-pill.active .qty-subtotal { color:var(--muted2); }
 
-  .divider { grid-column: 1/-1; border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+  /* TRAVEL */
+  .travel-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+  .travel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
+  .travel-title { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .gas-badge { font-family:'DM Mono',monospace; font-size:10px; color:var(--accent); background:rgba(200,255,0,.08); border:1px solid rgba(200,255,0,.2); border-radius:4px; padding:3px 8px; }
+  .travel-note { font-size:12px; color:var(--muted); margin-bottom:14px; line-height:1.5; }
+  .venue-search-wrap { position:relative; margin-bottom:4px; }
+  .venue-dropdown { position:absolute; top:100%; left:0; right:0; background:var(--surface2); border:1px solid var(--border2); border-top:none; border-radius:0 0 6px 6px; z-index:50; max-height:220px; overflow-y:auto; display:none; }
+  .venue-dropdown.open { display:block; }
+  .venue-item { padding:10px 14px; font-size:13px; cursor:pointer; border-bottom:1px solid var(--border); transition:background .1s; }
+  .venue-item:last-child { border-bottom:none; }
+  .venue-item:hover, .venue-item.focused { background:var(--border2); }
+  .venue-item-name { color:var(--text); font-size:13px; }
+  .venue-item-sub { color:var(--muted); font-size:11px; margin-top:2px; }
+  .travel-err { font-size:12px; color:#ff6b6b; margin-top:6px; }
+  .travel-result { border-top:1px solid var(--border); padding-top:14px; margin-top:14px; display:none; }
+  .travel-result.show { display:block; }
+  .travel-result-row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted2); padding:3px 0; }
+  .travel-result-row.big { font-size:13px; font-weight:500; color:var(--text); border-top:1px solid var(--border); margin-top:8px; padding-top:10px; }
+  .travel-result-row.free { color:var(--accent); justify-content:center; font-size:12px; margin-top:8px; }
+
+  /* FORM */
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:500px){ .form-grid { grid-template-columns:1fr; } }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field.full { grid-column:1/-1; }
+  label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  input,select,textarea { font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:11px 13px; outline:none; transition:border-color .15s; width:100%; appearance:none; -webkit-appearance:none; color-scheme:dark; }
+  input::placeholder { color:var(--muted); }
+  input:focus,select:focus,textarea:focus { border-color:var(--border2); background:var(--surface2); }
+  textarea { resize:vertical; min-height:80px; }
+  select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:36px; }
+  select option { background:var(--surface2); color:var(--text); }
+  input[type="date"],input[type="time"] { cursor:pointer; }
+  .divider { grid-column:1/-1; border:none; border-top:1px solid var(--border); margin:4px 0; }
 
   /* COST BOX */
-  .cost-box { grid-column: 1/-1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; }
-  .cost-box-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
-  .cost-line { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted2); padding: 4px 0; }
-  .cost-line.addon-line { display: none; }
-  .cost-line.addon-line.visible { display: flex; }
-  .cost-line.total { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 12px; font-size: 14px; font-weight: 500; color: var(--text); }
-  .cost-line.deposit { font-size: 13px; font-weight: 500; color: var(--accent); }
-  .cost-line.balance { font-size: 12px; color: var(--muted); }
-  .cost-empty { font-size: 12px; color: var(--muted); font-style: italic; }
+  .cost-box { grid-column:1/-1; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+  .cost-box-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+  .cost-line { display:flex; justify-content:space-between; font-size:13px; color:var(--muted2); padding:3px 0; }
+  .cost-line.hide { display:none; }
+  .cost-line.total { border-top:1px solid var(--border); margin-top:10px; padding-top:11px; font-size:14px; font-weight:500; color:var(--text); }
+  .cost-line.deposit { font-size:13px; font-weight:500; color:var(--accent); }
+  .cost-line.balance { font-size:12px; color:var(--muted); }
+  .cost-empty { font-size:12px; color:var(--muted); font-style:italic; }
 
-  /* SUBMIT */
-  .submit-row { grid-column: 1/-1; display: flex; justify-content: flex-end; margin-top: 8px; }
-  .submit-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; padding: 12px 32px; cursor: pointer; transition: background 0.15s, transform 0.1s; letter-spacing: 0.01em; }
-  .submit-btn:hover { background: var(--accent-d); }
-  .submit-btn:active { transform: scale(0.98); }
+  .submit-row { grid-column:1/-1; margin-top:8px; }
+  .submit-btn { font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; background:var(--accent); color:var(--bg); border:none; border-radius:6px; padding:13px 32px; cursor:pointer; transition:background .15s; width:100%; }
+  .submit-btn:hover { background:var(--accent-d); }
 
-  /* SUCCESS */
-  .success-msg { display: none; text-align: center; padding: 60px 24px; }
-  .success-msg .icon { font-size: 32px; margin-bottom: 16px; }
-  .success-msg h3 { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
-  .success-msg p { font-size: 13px; color: var(--muted2); }
+  .success-msg { display:none; text-align:center; padding:60px 24px; }
+  .success-msg .icon { font-size:32px; margin-bottom:16px; }
+  .success-msg h3 { font-size:18px; font-weight:500; margin-bottom:8px; }
+  .success-msg p { font-size:13px; color:var(--muted2); }
 
-  /* FOOTER */
-  footer { border-top: 1px solid var(--border); padding: 28px 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-  .footer-name { font-size: 12px; color: var(--muted); }
-  .footer-links { display: flex; gap: 20px; }
-  .footer-links a { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
-  .footer-links a:hover { color: var(--text); }
+  footer { border-top:1px solid var(--border); padding:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  .footer-name { font-size:12px; color:var(--muted); }
+  .footer-links { display:flex; gap:16px; flex-wrap:wrap; }
+  .footer-links a { font-size:12px; color:var(--muted); text-decoration:none; transition:color .15s; }
+  .footer-links a:hover { color:var(--text); }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <span class="topbar-name">Zachary Routsong Photography</span>
   <div class="topbar-links">
@@ -160,17 +160,15 @@
 
 <div class="page">
 
-  <!-- PAGE HEADER -->
   <div class="page-header">
     <h1>Book a session</h1>
     <p>Sports photography for local games &amp; events. Select a package and fill out the form below.</p>
   </div>
 
-  <!-- PACKAGES -->
+  <!-- 01 PACKAGES -->
   <div class="block">
     <div class="block-label">01 — Packages</div>
     <div class="pkg-grid">
-
       <div class="pkg-card" data-package="Basic" data-price="40" onclick="selectPackage(this)">
         <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
         <p class="pkg-name">Basic</p>
@@ -182,7 +180,6 @@
           <li>Personal use license</li>
         </ul>
       </div>
-
       <div class="pkg-card" data-package="Standard" data-price="75" onclick="selectPackage(this)">
         <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
         <span class="pkg-badge">Most popular</span>
@@ -196,7 +193,6 @@
           <li>Personal use license</li>
         </ul>
       </div>
-
       <div class="pkg-card" data-package="Premium" data-price="120" onclick="selectPackage(this)">
         <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
         <p class="pkg-name">Premium</p>
@@ -210,29 +206,40 @@
           <li>Personal use license</li>
         </ul>
       </div>
-
     </div>
   </div>
 
-  <!-- ADD-ONS -->
+  <!-- 02 ADD-ONS -->
   <div class="block">
     <div class="block-label">02 — Add-ons</div>
     <div class="addons-grid">
-      <div class="addon-pill" data-addon="Extra edited photos (+25)" data-price="15" onclick="toggleAddon(this)">
-        <div class="addon-pill-left"><div class="addon-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="addon-pill-name">Extra edited photos (+25)</span></div>
-        <span class="addon-price-tag">+$15</span>
+      <div class="addon-qty-pill" id="qty-pill-photos">
+        <div class="addon-qty-top">
+          <span class="addon-qty-name">Extra edited photos (+25 each)</span>
+          <span class="addon-qty-rate">$15/set</span>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty('photos',-1)">−</button>
+          <div class="qty-display" id="qty-photos">0</div>
+          <button class="qty-btn" onclick="changeQty('photos',1)">+</button>
+        </div>
+        <div class="qty-subtotal" id="qty-sub-photos">0 sets · $0.00</div>
       </div>
-      <div class="addon-pill" data-addon="Printed 4×6 (each)" data-price="3" onclick="toggleAddon(this)">
-        <div class="addon-pill-left"><div class="addon-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="addon-pill-name">Printed 4×6 (each)</span></div>
-        <span class="addon-price-tag">$3</span>
+      <div class="addon-qty-pill" id="qty-pill-prints">
+        <div class="addon-qty-top">
+          <span class="addon-qty-name">Printed 4×6 photos</span>
+          <span class="addon-qty-rate">$3 each</span>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty('prints',-1)">−</button>
+          <div class="qty-display" id="qty-prints">0</div>
+          <button class="qty-btn" onclick="changeQty('prints',1)">+</button>
+        </div>
+        <div class="qty-subtotal" id="qty-sub-prints">0 prints · $0.00</div>
       </div>
       <div class="addon-pill" data-addon="Rush delivery (24 hrs)" data-price="40" onclick="toggleAddon(this)">
         <div class="addon-pill-left"><div class="addon-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="addon-pill-name">Rush delivery (24 hrs)</span></div>
         <span class="addon-price-tag">+$40</span>
-      </div>
-      <div class="addon-pill" data-addon="Travel fee (15+ mi)" data-price="0" onclick="toggleAddon(this)">
-        <div class="addon-pill-left"><div class="addon-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="addon-pill-name">Travel fee (15+ mi)</span></div>
-        <span class="addon-price-tag">$0.67/mi</span>
       </div>
       <div class="addon-pill" data-addon="Team roster photo session" data-price="30" onclick="toggleAddon(this)">
         <div class="addon-pill-left"><div class="addon-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="addon-pill-name">Team roster photo session</span></div>
@@ -243,101 +250,89 @@
         <span class="addon-price-tag">+$10</span>
       </div>
     </div>
-    <p class="addon-footnote">* Travel fee is per mile over 15 miles from Valdosta. Exact amount confirmed before booking is finalized.</p>
   </div>
 
-  <!-- BOOKING FORM -->
-  <div class="block" id="book">
-    <div class="block-label">03 — Your details</div>
+  <!-- 03 TRAVEL -->
+  <div class="block">
+    <div class="block-label">03 — Travel estimate</div>
+    <div class="travel-box">
+      <div class="travel-header">
+        <span class="travel-title">Fuel cost calculator</span>
+        <span class="gas-badge">Valdosta avg: $3.69/gal</span>
+      </div>
+      <p class="travel-note">Type an address, school, or venue below and pick from the results. We'll estimate round-trip fuel from Valdosta at 22.5 MPG. Under 15 miles = no charge.</p>
+      <div class="venue-search-wrap">
+        <div class="field" style="margin:0 0 8px;">
+          <label for="venue-input">Shoot location</label>
+          <input type="text" id="venue-input" placeholder="e.g. Lowndes High School, 1 Viking Dr, Valdosta..." autocomplete="off" oninput="onVenueInput(this.value)" onkeydown="onVenueKey(event)"/>
+        </div>
+        <div class="venue-dropdown" id="venue-dropdown"></div>
+      </div>
+      <p class="travel-err" id="travel-err" style="display:none;">No results found — try adding a city or state.</p>
+      <div class="travel-result" id="travel-result">
+        <div class="travel-result-row"><span>Round trip distance</span><span id="tr-miles">—</span></div>
+        <div class="travel-result-row"><span>Gas price (Valdosta avg)</span><span id="tr-gas">$3.69/gal</span></div>
+        <div class="travel-result-row"><span>Estimated fuel used</span><span id="tr-gallons">—</span></div>
+        <div class="travel-result-row big" id="tr-fee-row"><span>Travel fee</span><span id="tr-fee">—</span></div>
+        <div class="travel-result-row free" id="tr-free-row" style="display:none;">No travel fee — within 15 miles!</div>
+      </div>
+    </div>
+  </div>
 
+  <!-- 04 BOOKING FORM -->
+  <div class="block" id="book">
+    <div class="block-label">04 — Your details</div>
     <div id="form-wrap">
-      <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" onsubmit="handleSubmit(event)">
-        <input type="hidden" name="Package Selected" id="selected-package" value="Not selected"/>
-        <input type="hidden" name="Add-Ons Selected" id="selected-addons-hidden" value="None"/>
-        <input type="hidden" name="Estimated Total" id="hidden-total" value=""/>
-        <input type="hidden" name="Deposit Due" id="hidden-deposit" value=""/>
+      <form onsubmit="handleSubmit(event)">
+        <input type="hidden" id="hidden-pkg"/>
+        <input type="hidden" id="hidden-addons"/>
+        <input type="hidden" id="hidden-total"/>
+        <input type="hidden" id="hidden-deposit"/>
+        <input type="hidden" id="hidden-travel"/>
 
         <div class="form-grid">
-
-          <div class="field">
-            <label for="fname">First name</label>
-            <input type="text" id="fname" name="First Name" placeholder="Jordan" required/>
-          </div>
-          <div class="field">
-            <label for="lname">Last name</label>
-            <input type="text" id="lname" name="Last Name" placeholder="Smith" required/>
-          </div>
-          <div class="field">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="Email" placeholder="you@email.com" required/>
-          </div>
-          <div class="field">
-            <label for="phone">Phone</label>
-            <input type="tel" id="phone" name="Phone" placeholder="(229) 555-0100"/>
-          </div>
-
+          <div class="field"><label>First name</label><input type="text" id="fname" placeholder="Jordan" required/></div>
+          <div class="field"><label>Last name</label><input type="text" id="lname" placeholder="Smith" required/></div>
+          <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@email.com" required/></div>
+          <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(229) 555-0100"/></div>
           <hr class="divider"/>
-
+          <div class="field"><label>Event date</label><input type="date" id="event-date" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
+          <div class="field"><label>Start time</label><input type="time" id="event-time" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
           <div class="field">
-            <label for="event-date">Event date</label>
-            <input type="date" id="event-date" name="Event Date" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer;"/>
-          </div>
-          <div class="field">
-            <label for="event-time">Start time</label>
-            <input type="time" id="event-time" name="Event Start Time" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer;"/>
-          </div>
-          <div class="field">
-            <label for="sport">Sport / event type</label>
-            <select id="sport" name="Sport Type" required>
+            <label>Sport / event type</label>
+            <select id="sport" required>
               <option value="" disabled selected>Select...</option>
-              <option>Football</option>
-              <option>Basketball</option>
-              <option>Baseball / Softball</option>
-              <option>Soccer</option>
-              <option>Track &amp; Field</option>
-              <option>Volleyball</option>
-              <option>Wrestling</option>
-              <option>Swimming</option>
-              <option>Other</option>
+              <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
+              <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
+              <option>Wrestling</option><option>Swimming</option><option>Other</option>
             </select>
           </div>
-          <div class="field">
-            <label for="location">Venue / location</label>
-            <input type="text" id="location" name="Event Location" placeholder="Valdosta High School Stadium" required/>
-          </div>
-
+          <div class="field"><label>Venue / location</label><input type="text" id="location" placeholder="Valdosta High School Stadium" required/></div>
+          <hr class="divider"/>
+          <div class="field full"><label>Selected package</label><input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default;color:var(--muted)"/></div>
           <hr class="divider"/>
 
-          <div class="field full">
-            <label>Selected package</label>
-            <input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default; color: var(--muted);"/>
-          </div>
-
-          <hr class="divider"/>
-
-          <!-- COST BOX -->
           <div class="cost-box">
             <div class="cost-box-label">Estimate</div>
             <div id="cost-empty" class="cost-empty">Select a package to see your total.</div>
-            <div id="cost-lines" style="display:none;">
-              <div class="cost-line" id="line-pkg"><span id="line-pkg-name"></span><span id="line-pkg-price"></span></div>
-              <div class="cost-line addon-line" id="line-addon-0"><span></span><span></span></div>
-              <div class="cost-line addon-line" id="line-addon-1"><span></span><span></span></div>
-              <div class="cost-line addon-line" id="line-addon-2"><span></span><span></span></div>
-              <div class="cost-line addon-line" id="line-addon-3"><span></span><span></span></div>
-              <div class="cost-line addon-line" id="line-addon-4"><span></span><span></span></div>
-              <div class="cost-line addon-line" id="line-addon-5"><span></span><span></span></div>
-              <div class="cost-line total"><span>Total</span><span id="line-total"></span></div>
-              <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="line-deposit"></span></div>
-              <div class="cost-line balance"><span>Balance due day of event</span><span id="line-balance"></span></div>
+            <div id="cost-lines" style="display:none">
+              <div class="cost-line" id="cl-pkg"><span id="cl-pkg-name"></span><span id="cl-pkg-price"></span></div>
+              <div class="cost-line hide" id="cl-photos"><span>Extra edited photos</span><span id="cl-photos-val"></span></div>
+              <div class="cost-line hide" id="cl-prints"><span>Printed 4×6 photos</span><span id="cl-prints-val"></span></div>
+              <div class="cost-line hide" id="cl-travel"><span>Travel fee (fuel)</span><span id="cl-travel-val"></span></div>
+              <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
+              <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
+              <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
+              <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
+              <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
+              <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
             </div>
           </div>
 
           <hr class="divider"/>
-
           <div class="field full">
-            <label for="referral">How'd you find me?</label>
-            <select id="referral" name="How They Found You" required>
+            <label>How'd you find me?</label>
+            <select id="referral" required>
               <option value="" disabled selected>Select...</option>
               <option>Instagram (@zacharyroutsongphotos)</option>
               <option>Word of mouth / friend</option>
@@ -347,30 +342,19 @@
               <option>Other</option>
             </select>
           </div>
-
-          <div class="field full">
-            <label for="notes">Anything else? (optional)</label>
-            <textarea id="notes" name="Additional Notes" placeholder="Players to focus on, questions, etc."></textarea>
-          </div>
-
-          <div class="submit-row">
-            <button type="submit" class="submit-btn">Send booking request</button>
-          </div>
-
+          <div class="field full"><label>Anything else? (optional)</label><textarea id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
+          <div class="submit-row"><button type="submit" class="submit-btn">Send booking request</button></div>
         </div>
       </form>
     </div>
-
     <div class="success-msg" id="success">
       <div class="icon">📸</div>
-      <h3>Request sent</h3>
+      <h3>Request sent!</h3>
       <p>Zachary will get back to you within 24–48 hours to confirm your booking.</p>
     </div>
-
   </div>
 </div>
 
-<!-- FOOTER -->
 <footer>
   <span class="footer-name">© 2025 Zachary Routsong Photography</span>
   <div class="footer-links">
@@ -380,89 +364,197 @@
 </footer>
 
 <script>
-  var selectedPkg = null;
-  var activeAddons = [];
+// ── STATE ──
+var selectedPkg = null;
+var qtyPhotos = 0;
+var qtyPrints = 0;
+var activeAddons = [];
+var travelCost = 0;
+var focusedIdx = -1;
 
-  function selectPackage(card) {
-    document.querySelectorAll('.pkg-card').forEach(function(c){ c.classList.remove('selected'); });
-    card.classList.add('selected');
-    var name = card.getAttribute('data-package');
-    var price = parseFloat(card.getAttribute('data-price'));
-    selectedPkg = { name: name, price: price };
-    document.getElementById('selected-package').value = name + ' — $' + price;
-    var display = document.getElementById('pkg-display');
-    display.value = name + ' — $' + price;
-    display.style.color = 'var(--text)';
-    updateCost();
+var ORIGIN = { lat:30.8327, lng:-83.2785 };
+var GAS = 3.69;
+var MPG = 22.5;
+var FREE_MI = 15;
+
+var ORIGIN = { lat:30.8327, lng:-83.2785 };
+var GAS = 3.69;
+var MPG = 22.5;
+var FREE_MI = 15;
+var acTimer = null;
+var acResults = [];
+var acIdx = -1;
+
+function onVenueInput(val) {
+  clearTimeout(acTimer);
+  document.getElementById('travel-err').style.display = 'none';
+  document.getElementById('travel-result').classList.remove('show');
+  travelCost = 0; updateCost();
+  if (val.length < 3) { closeDD(); return; }
+  acTimer = setTimeout(function(){ fetchPlaces(val); }, 400);
+}
+
+async function fetchPlaces(q) {
+  try {
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q);
+    var r = await fetch(url, { headers: { 'Accept-Language':'en-US','User-Agent':'ZacharyPhotography/1.0' } });
+    var data = await r.json();
+    acResults = data;
+    acIdx = -1;
+    if (!data.length) { document.getElementById('travel-err').style.display='block'; closeDD(); return; }
+    var dd = document.getElementById('venue-dropdown');
+    dd.innerHTML = data.map(function(r,i){
+      var parts = r.display_name.split(', ');
+      var main = parts.slice(0,2).join(', ');
+      var sub  = parts.slice(2,5).join(', ');
+      return '<div class="venue-item" data-i="'+i+'" onmousedown="pickPlace('+i+')">'
+        +'<div class="venue-item-name">'+main+'</div>'
+        +'<div class="venue-item-sub">'+sub+'</div>'
+        +'</div>';
+    }).join('');
+    dd.classList.add('open');
+  } catch(e) { closeDD(); }
+}
+
+function pickPlace(i) {
+  var r = acResults[i]; if (!r) return;
+  document.getElementById('venue-input').value = r.display_name.split(', ').slice(0,3).join(', ');
+  closeDD();
+  calcTravelCoords(parseFloat(r.lat), parseFloat(r.lon));
+}
+
+function onVenueKey(e) {
+  var items = document.querySelectorAll('.venue-item');
+  if (e.key==='ArrowDown'){ e.preventDefault(); acIdx=Math.min(acIdx+1,items.length-1); items.forEach(function(el,i){el.classList.toggle('focused',i===acIdx);}); }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); acIdx=Math.max(acIdx-1,0); items.forEach(function(el,i){el.classList.toggle('focused',i===acIdx);}); }
+  else if (e.key==='Enter'){ e.preventDefault(); if(acIdx>=0&&items[acIdx]) items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
+  else if (e.key==='Escape') closeDD();
+}
+
+function closeDD() { var dd=document.getElementById('venue-dropdown'); dd.classList.remove('open'); dd.innerHTML=''; }
+document.addEventListener('click', function(e){ if(!e.target.closest('.venue-search-wrap')) closeDD(); });
+
+function calcTravelCoords(lat, lng) {
+  var oneway = haversine(ORIGIN.lat, ORIGIN.lng, lat, lng);
+  var roundTrip = oneway * 2;
+  var gallons = roundTrip / MPG;
+  document.getElementById('tr-miles').textContent = roundTrip.toFixed(1)+' mi';
+  document.getElementById('tr-gallons').textContent = gallons.toFixed(2)+' gal';
+  if (oneway <= FREE_MI) {
+    travelCost = 0;
+    document.getElementById('tr-fee-row').style.display = 'none';
+    document.getElementById('tr-free-row').style.display = 'flex';
+  } else {
+    travelCost = Math.floor(gallons * GAS * 10) / 10;
+    document.getElementById('tr-fee-row').style.display = 'flex';
+    document.getElementById('tr-free-row').style.display = 'none';
+    document.getElementById('tr-fee').textContent = '$'+travelCost.toFixed(2);
   }
+  document.getElementById('travel-result').classList.add('show');
+  updateCost();
+}
 
-  function toggleAddon(pill) {
-    pill.classList.toggle('active');
-    var name = pill.getAttribute('data-addon');
-    var price = parseFloat(pill.getAttribute('data-price'));
-    if (pill.classList.contains('active')) {
-      activeAddons.push({ name: name, price: price });
-    } else {
-      activeAddons = activeAddons.filter(function(a){ return a.name !== name; });
-    }
-    updateCost();
+function haversine(lat1,lng1,lat2,lng2) {
+  var R=3958.8,dL=(lat2-lat1)*Math.PI/180,dN=(lng2-lng1)*Math.PI/180;
+  var a=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ── PACKAGES ──
+function selectPackage(card) {
+  document.querySelectorAll('.pkg-card').forEach(function(c){ c.classList.remove('selected'); });
+  card.classList.add('selected');
+  selectedPkg = { name: card.dataset.package, price: parseFloat(card.dataset.price) };
+  var d = document.getElementById('pkg-display');
+  d.value = selectedPkg.name + ' — $' + selectedPkg.price;
+  d.style.color = 'var(--text)';
+  updateCost();
+}
+
+// ── QTY ──
+function changeQty(type, delta) {
+  if (type === 'photos') {
+    qtyPhotos = Math.max(0, qtyPhotos + delta);
+    document.getElementById('qty-photos').textContent = qtyPhotos;
+    document.getElementById('qty-sub-photos').textContent = qtyPhotos+' set'+(qtyPhotos!==1?'s':'')+' · $'+(qtyPhotos*15).toFixed(2);
+    document.getElementById('qty-pill-photos').classList.toggle('active', qtyPhotos>0);
+  } else {
+    qtyPrints = Math.max(0, qtyPrints + delta);
+    document.getElementById('qty-prints').textContent = qtyPrints;
+    document.getElementById('qty-sub-prints').textContent = qtyPrints+' print'+(qtyPrints!==1?'s':'')+' · $'+(qtyPrints*3).toFixed(2);
+    document.getElementById('qty-pill-prints').classList.toggle('active', qtyPrints>0);
   }
+  updateCost();
+}
 
-  function updateCost() {
-    var empty = document.getElementById('cost-empty');
-    var lines = document.getElementById('cost-lines');
-    if (!selectedPkg) { empty.style.display = 'block'; lines.style.display = 'none'; return; }
-    empty.style.display = 'none';
-    lines.style.display = 'block';
+// ── ADDONS ──
+function toggleAddon(pill) {
+  pill.classList.toggle('active');
+  var name=pill.dataset.addon, price=parseFloat(pill.dataset.price);
+  if (pill.classList.contains('active')) activeAddons.push({name:name,price:price});
+  else activeAddons = activeAddons.filter(function(a){ return a.name!==name; });
+  updateCost();
+}
 
-    document.getElementById('line-pkg-name').textContent = selectedPkg.name + ' package';
-    document.getElementById('line-pkg-price').textContent = '$' + selectedPkg.price.toFixed(2);
-
-    for (var i = 0; i < 6; i++) {
-      var row = document.getElementById('line-addon-' + i);
-      row.classList.remove('visible');
-      row.children[0].textContent = '';
-      row.children[1].textContent = '';
-    }
-
-    var addonTotal = 0;
-    var addonNames = [];
-    for (var j = 0; j < activeAddons.length; j++) {
-      var a = activeAddons[j];
-      var r = document.getElementById('line-addon-' + j);
-      if (r) {
-        r.classList.add('visible');
-        r.children[0].textContent = a.name;
-        if (a.price === 0) { r.children[1].textContent = '$0.67/mi'; }
-        else { r.children[1].textContent = '+$' + a.price.toFixed(2); addonTotal += a.price; }
-      }
-      addonNames.push(a.name);
-    }
-
-    var total = selectedPkg.price + addonTotal;
-    var deposit = total * 0.5;
-    var balance = total - deposit;
-
-    document.getElementById('line-total').textContent = '$' + total.toFixed(2);
-    document.getElementById('line-deposit').textContent = '$' + deposit.toFixed(2);
-    document.getElementById('line-balance').textContent = '$' + balance.toFixed(2);
-    document.getElementById('hidden-total').value = '$' + total.toFixed(2);
-    document.getElementById('hidden-deposit').value = '$' + deposit.toFixed(2);
-    document.getElementById('selected-addons-hidden').value = addonNames.length ? addonNames.join(', ') : 'None';
+// ── COST ──
+function updateCost() {
+  if (!selectedPkg) {
+    document.getElementById('cost-empty').style.display='block';
+    document.getElementById('cost-lines').style.display='none';
+    return;
   }
+  document.getElementById('cost-empty').style.display='none';
+  document.getElementById('cost-lines').style.display='block';
 
-  function handleSubmit(e) {
-    if (!selectedPkg) {
-      e.preventDefault();
-      alert('Please select a package first.');
-      document.querySelector('.pkg-grid').scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
-    e.preventDefault();
-    document.getElementById('form-wrap').style.display = 'none';
-    document.getElementById('success').style.display = 'block';
-  }
+  var photoCost=qtyPhotos*15, printCost=qtyPrints*3;
+  document.getElementById('cl-pkg-name').textContent=selectedPkg.name+' package';
+  document.getElementById('cl-pkg-price').textContent='$'+selectedPkg.price.toFixed(2);
+
+  setLine('cl-photos',qtyPhotos>0,'cl-photos-val',qtyPhotos+' set'+(qtyPhotos!==1?'s':'')+' · +$'+photoCost.toFixed(2));
+  setLine('cl-prints',qtyPrints>0,'cl-prints-val',qtyPrints+' print'+(qtyPrints!==1?'s':'')+' · +$'+printCost.toFixed(2));
+  setLine('cl-travel',travelCost>0,'cl-travel-val','+$'+travelCost.toFixed(2));
+
+  var addonTotal=0, addonNames=[];
+  if (qtyPhotos>0) addonNames.push('Extra photos x'+qtyPhotos);
+  if (qtyPrints>0) addonNames.push('Prints x'+qtyPrints);
+  if (travelCost>0) addonNames.push('Travel $'+travelCost.toFixed(2));
+
+  ['cl-a0','cl-a1','cl-a2'].forEach(function(id,i) {
+    var row=document.getElementById(id), a=activeAddons[i];
+    if (a) { row.classList.remove('hide'); row.children[0].textContent=a.name; row.children[1].textContent='+$'+a.price.toFixed(2); addonTotal+=a.price; addonNames.push(a.name); }
+    else { row.classList.add('hide'); }
+  });
+
+  var total=selectedPkg.price+photoCost+printCost+travelCost+addonTotal;
+  var deposit=Math.round(total*50)/100;
+  var balance=total-deposit;
+
+  document.getElementById('cl-total').textContent='$'+total.toFixed(2);
+  document.getElementById('cl-deposit').textContent='$'+deposit.toFixed(2);
+  document.getElementById('cl-balance').textContent='$'+balance.toFixed(2);
+  document.getElementById('hidden-total').value='$'+total.toFixed(2);
+  document.getElementById('hidden-deposit').value='$'+deposit.toFixed(2);
+  document.getElementById('hidden-pkg').value=selectedPkg.name+' $'+selectedPkg.price;
+  document.getElementById('hidden-addons').value=addonNames.join(', ')||'None';
+  document.getElementById('hidden-travel').value=travelCost>0?'$'+travelCost.toFixed(2):'None';
+}
+
+function setLine(rowId,show,valId,val) {
+  var row=document.getElementById(rowId);
+  if (show) { row.classList.remove('hide'); document.getElementById(valId).textContent=val; }
+  else row.classList.add('hide');
+}
+
+// ── SUBMIT ──
+function handleSubmit(e) {
+  e.preventDefault();
+  if (!selectedPkg) { alert('Please select a package first.'); return; }
+  document.getElementById('form-wrap').style.display='none';
+  document.getElementById('success').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+
 </script>
-
 </body>
 </html>
