@@ -56,8 +56,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .pkg-features li::before{content:'–';color:var(--b3);flex-shrink:0}
 
 /* QTY PILLS */
-.addons-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
-@media(max-width:480px){.addons-grid{grid-template-columns:1fr}}
+.addons-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.addons-grid .qty-pill{grid-column:auto}
+.addons-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:0}
+@media(max-width:600px){.addons-toggles{grid-template-columns:1fr 1fr}}
+@media(max-width:380px){.addons-grid{grid-template-columns:1fr}.addons-toggles{grid-template-columns:1fr}}
 .qty-pill{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 14px;transition:border-color .15s,background .15s}
 .qty-pill.active{border-color:var(--accent);background:var(--accent-bg)}
 .qty-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
@@ -231,13 +234,15 @@ footer span{font-size:11px;color:var(--t3)}
         </div>
         <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
       </div>
+    </div>
+    <div class="addons-toggles" style="margin-top:8px">
       <div class="toggle-pill" data-addon="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
         <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery (24 hrs)</span></div>
         <span class="toggle-price">+$40</span>
       </div>
-      <div class="toggle-pill" data-addon="Team roster session" data-price="30" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Team roster session</span></div>
-        <span class="toggle-price">+$30</span>
+      <div class="toggle-pill" data-addon="Video highlight reel" data-price="50" onclick="togAddon(this)">
+        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Video highlight reel</span></div>
+        <span class="toggle-price">+$50</span>
       </div>
       <div class="toggle-pill" data-addon="Social media crop pack" data-price="10" onclick="togAddon(this)">
         <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Social media crop pack</span></div>
