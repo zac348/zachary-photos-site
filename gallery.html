@@ -3,78 +3,113 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Your Gallery — Zachary Routsong Photography</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<title>Your Gallery — ZRP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0e0e0e; --surface: #161616; --border: #2a2a2a; --text: #e8e8e8; --muted: #666; --muted2: #888; --accent: #c8ff00; --accent-d: #a8d900; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--s1:#111;--s2:#181818;
+  --b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;
+  --t1:#efefef;--t2:#aaa;--t3:#666;
+  --accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
+  --radius:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6;min-height:100vh}
 
-  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid var(--border); }
-  .nav-logo { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
-  .nav-right { font-size: 12px; color: var(--muted); }
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1)}
+.nav-logo{font-size:13px;font-weight:500;color:var(--t1);text-decoration:none}
+.nav-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);background:var(--s1);border:1px solid var(--b2);border-radius:4px;padding:3px 8px}
 
-  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
-  @media (max-width: 600px) { .page { padding: 36px 20px 60px; } nav { padding: 16px 20px; } }
+.page{max-width:960px;margin:0 auto;padding:40px 20px 80px}
+@media(max-width:600px){.page{padding:28px 16px 60px}}
 
-  .gallery-header { margin-bottom: 48px; }
-  .gallery-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  .gallery-title { font-size: 26px; font-weight: 300; letter-spacing: -0.02em; margin-bottom: 8px; }
-  .gallery-sub { font-size: 13px; color: var(--muted2); }
+.gallery-header{margin-bottom:36px}
+.gallery-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.gallery-title{font-size:22px;font-weight:400;letter-spacing:-.02em;margin-bottom:6px}
+.gallery-meta{font-size:12px;color:var(--t3)}
+.gallery-meta span{color:var(--accent)}
 
-  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px; }
-  .gallery-item { aspect-ratio: 4/3; background: var(--surface); overflow: hidden; position: relative; cursor: pointer; }
-  .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
-  .gallery-item:hover img { transform: scale(1.04); }
-  .gallery-item-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); opacity: 0; transition: opacity 0.25s; display: flex; align-items: center; justify-content: center; gap: 12px; }
-  .gallery-item:hover .gallery-item-overlay { opacity: 1; }
-  .overlay-btn { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 6px 12px; cursor: pointer; text-decoration: none; transition: background 0.15s; }
-  .overlay-btn:hover { background: rgba(255,255,255,0.22); }
-  .overlay-btn.dl { background: rgba(200,255,0,0.15); border-color: rgba(200,255,0,0.3); color: var(--accent); }
-  .overlay-btn.dl:hover { background: rgba(200,255,0,0.25); }
+.dl-all{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:9px 18px;border-radius:6px;text-decoration:none;cursor:pointer;border:none;transition:background .15s;font-family:'DM Sans',sans-serif}
+.dl-all:hover{background:var(--accent-d)}
+.dl-all svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
 
-  .empty-state { text-align: center; padding: 80px 24px; }
-  .empty-state h2 { font-size: 18px; font-weight: 400; margin-bottom: 8px; }
-  .empty-state p { font-size: 13px; color: var(--muted2); }
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:3px}
+@media(max-width:480px){.photo-grid{grid-template-columns:repeat(2,1fr)}}
+.photo-item{aspect-ratio:4/3;background:var(--s1);overflow:hidden;position:relative;cursor:pointer}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.photo-item:hover img{transform:scale(1.04)}
+.photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .25s;display:flex;align-items:center;justify-content:center;gap:10px}
+.photo-item:hover .photo-overlay{opacity:1}
+.ov-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:6px 10px;cursor:pointer;text-decoration:none;border:1px solid rgba(255,255,255,.2);color:var(--t1);background:rgba(255,255,255,.08);transition:background .15s}
+.ov-btn:hover{background:rgba(255,255,255,.16)}
+.ov-btn.dl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.ov-btn.dl:hover{background:rgba(0,183,227,.18)}
 
-  .not-found { text-align: center; padding: 100px 24px; }
-  .not-found h2 { font-size: 20px; font-weight: 400; margin-bottom: 8px; }
-  .not-found p { font-size: 13px; color: var(--muted2); margin-bottom: 24px; }
-  .not-found a { color: var(--accent); text-decoration: none; font-size: 13px; }
+.empty{text-align:center;padding:80px 20px}
+.empty h2{font-size:16px;font-weight:400;margin-bottom:6px}
+.empty p{font-size:12px;color:var(--t2)}
 
-  /* LIGHTBOX */
-  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-  .lightbox.open { display: flex; }
-  .lightbox img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 4px; }
-  .lightbox-actions { display: flex; gap: 12px; }
-  .lightbox-close { position: absolute; top: 20px; right: 28px; font-size: 28px; color: var(--muted); cursor: pointer; background: none; border: none; line-height: 1; }
-  .lightbox-close:hover { color: var(--text); }
-  .lb-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 4px; padding: 8px 16px; cursor: pointer; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); color: var(--text); background: rgba(255,255,255,0.08); transition: background 0.15s; }
-  .lb-btn:hover { background: rgba(255,255,255,0.16); }
-  .lb-btn.dl { background: rgba(200,255,0,0.12); border-color: rgba(200,255,0,0.3); color: var(--accent); }
-  .lb-btn.dl:hover { background: rgba(200,255,0,0.22); }
+.loading{text-align:center;padding:80px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--t3)}
 
-  .loading { text-align: center; padding: 80px; font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; }
+.not-found{text-align:center;padding:100px 20px}
+.not-found h2{font-size:18px;font-weight:400;margin-bottom:8px}
+.not-found p{font-size:12px;color:var(--t2);margin-bottom:20px}
+.not-found a{color:var(--accent);text-decoration:none;font-size:12px}
+
+/* LIGHTBOX */
+.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.lb.open{display:flex}
+.lb img{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:4px}
+.lb-actions{display:flex;gap:10px}
+.lb-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:8px 14px;cursor:pointer;text-decoration:none;border:1px solid rgba(255,255,255,.2);color:var(--t2);background:rgba(255,255,255,.06);transition:all .15s}
+.lb-btn:hover{color:var(--t1);border-color:rgba(255,255,255,.35)}
+.lb-btn.dl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.lb-btn.dl:hover{background:rgba(0,183,227,.18)}
+.lb-close{position:absolute;top:18px;right:22px;font-size:22px;color:var(--t3);cursor:pointer;background:none;border:none;transition:color .15s}
+.lb-close:hover{color:var(--t1)}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;color:var(--t2)}
+.lb-nav:hover{background:rgba(255,255,255,.12);color:var(--t1)}
+.lb-nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+#lb-prev{left:16px}#lb-next{right:16px}
+@media(max-width:600px){.lb-nav{display:none}}
+
+footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+footer span{font-size:11px;color:var(--t3)}
+.foot-links{display:flex;gap:16px}
+.foot-links a{font-size:11px;color:var(--t3);text-decoration:none;transition:color .15s}
+.foot-links a:hover{color:var(--t1)}
 </style>
 </head>
 <body>
 
 <nav>
-  <span class="nav-logo">Zachary Routsong Photography</span>
-  <span class="nav-right">Private gallery</span>
+  <a href="index.html" class="nav-logo">ZRP</a>
+  <span class="nav-badge">Private gallery</span>
 </nav>
 
 <div class="page">
   <div id="loading" class="loading">Loading your gallery...</div>
-  <div id="gallery-content" style="display:none;">
+
+  <div id="gallery-content" style="display:none">
     <div class="gallery-header">
       <p class="gallery-tag">Private client gallery</p>
-      <h1 class="gallery-title" id="gallery-title">Your Photos</h1>
-      <p class="gallery-sub" id="gallery-sub"></p>
+      <h1 class="gallery-title" id="g-title">Your Photos</h1>
+      <p class="gallery-meta" id="g-meta"></p>
+      <button class="dl-all" id="dl-all-btn" onclick="downloadAll()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download all
+      </button>
     </div>
-    <div class="gallery-grid" id="gallery-grid"></div>
+    <div class="photo-grid" id="photo-grid"></div>
   </div>
-  <div id="not-found" class="not-found" style="display:none;">
+
+  <div id="empty-state" class="empty" style="display:none">
+    <h2>Photos coming soon</h2>
+    <p>Check back shortly — Zachary is still editing your photos.</p>
+  </div>
+
+  <div id="not-found" class="not-found" style="display:none">
     <h2>Gallery not found</h2>
     <p>This link may be invalid or the gallery has been removed.</p>
     <a href="index.html">← Back to site</a>
@@ -82,76 +117,88 @@
 </div>
 
 <!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" onclick="closeLightbox()">×</button>
-  <img id="lightbox-img" src="" alt=""/>
-  <div class="lightbox-actions">
-    <button class="lb-btn" onclick="closeLightbox()">Close</button>
-    <a class="lb-btn dl" id="lightbox-dl" href="" download target="_blank">Download</a>
+<div class="lb" id="lb">
+  <button class="lb-close" onclick="closeLB()">×</button>
+  <button class="lb-nav" id="lb-prev" onclick="navLB(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <button class="lb-nav" id="lb-next" onclick="navLB(1)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+  <img id="lb-img" src="" alt=""/>
+  <div class="lb-actions">
+    <button class="lb-btn" onclick="closeLB()">Close</button>
+    <a class="lb-btn dl" id="lb-dl" href="" download target="_blank">Download</a>
   </div>
 </div>
+
+<footer>
+  <span>© 2025 Zachary Routsong Photography</span>
+  <div class="foot-links">
+    <a href="tel:2293001006">229-300-1006</a>
+    <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">@zacharyroutsongphotos</a>
+  </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let photos=[],lbIdx=0;
 
-async function loadGallery() {
-  const params = new URLSearchParams(window.location.search);
-  const slug = params.get('id');
-
-  document.getElementById('loading').style.display = 'block';
-
-  if (!slug) { showNotFound(); return; }
-
-  const { data: gallery, error } = await sb.from('client_galleries').select('*').eq('slug', slug).single();
-  if (error || !gallery) { showNotFound(); return; }
-
-  const { data: photos } = await sb.from('portfolio_photos').select('*').eq('gallery_id', gallery.id).order('created_at', { ascending: true });
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('gallery-content').style.display = 'block';
-  document.getElementById('gallery-title').textContent = gallery.name;
-  document.getElementById('gallery-sub').textContent = `${(photos || []).length} photo${(photos || []).length !== 1 ? 's' : ''} — click any photo to view full size or download.`;
-
-  const grid = document.getElementById('gallery-grid');
-  if (!photos || !photos.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h2>Photos coming soon</h2><p>Check back shortly — Zachary is still editing your photos.</p></div>';
-    return;
+async function load(){
+  const params=new URLSearchParams(window.location.search);
+  const slug=params.get('id');
+  if(!slug){showNotFound();return;}
+  const{data:gallery,error}=await sb.from('client_galleries').select('*').eq('slug',slug).single();
+  if(error||!gallery){showNotFound();return;}
+  const{data:imgs}=await sb.from('portfolio_photos').select('*').eq('gallery_id',gallery.id).order('created_at',{ascending:true});
+  photos=imgs||[];
+  document.getElementById('loading').style.display='none';
+  document.getElementById('g-title').textContent=gallery.name;
+  document.getElementById('g-meta').innerHTML=`<span>${photos.length}</span> photo${photos.length!==1?'s':''} — click any to view full size or download`;
+  if(photos.length){
+    document.getElementById('dl-all-btn').style.display='inline-flex';
+    document.getElementById('gallery-content').style.display='block';
+    const grid=document.getElementById('photo-grid');
+    photos.forEach((p,i)=>{
+      const el=document.createElement('div');el.className='photo-item';
+      el.innerHTML=`<img src="${p.url}" alt="${p.sport||'Photo'}" loading="lazy"/>
+        <div class="photo-overlay">
+          <button class="ov-btn" onclick="openLB(${i})">View</button>
+          <a class="ov-btn dl" href="${p.url}" download target="_blank">Download</a>
+        </div>`;
+      grid.appendChild(el);
+    });
+  }else{
+    document.getElementById('gallery-content').style.display='block';
+    document.getElementById('empty-state').style.display='block';
   }
-
-  photos.forEach(p => {
-    const item = document.createElement('div');
-    item.className = 'gallery-item';
-    item.innerHTML = `
-      <img src="${p.url}" alt="${p.sport || 'Photo'}" loading="lazy"/>
-      <div class="gallery-item-overlay">
-        <button class="overlay-btn" onclick="openLightbox('${p.url}')">View</button>
-        <a class="overlay-btn dl" href="${p.url}" download target="_blank">Download</a>
-      </div>
-    `;
-    grid.appendChild(item);
-  });
 }
 
-function showNotFound() {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('not-found').style.display = 'block';
+function showNotFound(){document.getElementById('loading').style.display='none';document.getElementById('not-found').style.display='block';}
+
+function openLB(i){
+  lbIdx=i;
+  const p=photos[i];
+  document.getElementById('lb-img').src=p.url;
+  document.getElementById('lb-dl').href=p.url;
+  document.getElementById('lb').classList.add('open');
+}
+function closeLB(){document.getElementById('lb').classList.remove('open');document.getElementById('lb-img').src='';}
+function navLB(d){openLB((lbIdx+d+photos.length)%photos.length);}
+document.getElementById('lb').addEventListener('click',function(e){if(e.target===this)closeLB();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeLB();
+  if(e.key==='ArrowRight')navLB(1);
+  if(e.key==='ArrowLeft')navLB(-1);
+});
+
+async function downloadAll(){
+  for(const p of photos){
+    const a=document.createElement('a');a.href=p.url;a.download=p.file_name||'photo';a.target='_blank';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    await new Promise(r=>setTimeout(r,300));
+  }
 }
 
-function openLightbox(url) {
-  document.getElementById('lightbox-img').src = url;
-  document.getElementById('lightbox-dl').href = url;
-  document.getElementById('lightbox').classList.add('open');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.getElementById('lightbox-img').src = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-document.getElementById('lightbox').addEventListener('click', e => { if (e.target === e.currentTarget) closeLightbox(); });
-
-loadGallery();
+load();
 </script>
 </body>
 </html>
