@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Your Gallery — Zachary Routsong Photography</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0e0e0e; --surface: #161616; --border: #2a2a2a; --text: #e8e8e8; --muted: #666; --muted2: #888; --accent: #c8ff00; --accent-d: #a8d900; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid var(--border); }
+  .nav-logo { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+  .nav-right { font-size: 12px; color: var(--muted); }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+  @media (max-width: 600px) { .page { padding: 36px 20px 60px; } nav { padding: 16px 20px; } }
+
+  .gallery-header { margin-bottom: 48px; }
+  .gallery-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .gallery-title { font-size: 26px; font-weight: 300; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .gallery-sub { font-size: 13px; color: var(--muted2); }
+
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px; }
+  .gallery-item { aspect-ratio: 4/3; background: var(--surface); overflow: hidden; position: relative; cursor: pointer; }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
+  .gallery-item:hover img { transform: scale(1.04); }
+  .gallery-item-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); opacity: 0; transition: opacity 0.25s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .gallery-item:hover .gallery-item-overlay { opacity: 1; }
+  .overlay-btn { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 6px 12px; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+  .overlay-btn:hover { background: rgba(255,255,255,0.22); }
+  .overlay-btn.dl { background: rgba(200,255,0,0.15); border-color: rgba(200,255,0,0.3); color: var(--accent); }
+  .overlay-btn.dl:hover { background: rgba(200,255,0,0.25); }
+
+  .empty-state { text-align: center; padding: 80px 24px; }
+  .empty-state h2 { font-size: 18px; font-weight: 400; margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; color: var(--muted2); }
+
+  .not-found { text-align: center; padding: 100px 24px; }
+  .not-found h2 { font-size: 20px; font-weight: 400; margin-bottom: 8px; }
+  .not-found p { font-size: 13px; color: var(--muted2); margin-bottom: 24px; }
+  .not-found a { color: var(--accent); text-decoration: none; font-size: 13px; }
+
+  /* LIGHTBOX */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 4px; }
+  .lightbox-actions { display: flex; gap: 12px; }
+  .lightbox-close { position: absolute; top: 20px; right: 28px; font-size: 28px; color: var(--muted); cursor: pointer; background: none; border: none; line-height: 1; }
+  .lightbox-close:hover { color: var(--text); }
+  .lb-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 4px; padding: 8px 16px; cursor: pointer; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); color: var(--text); background: rgba(255,255,255,0.08); transition: background 0.15s; }
+  .lb-btn:hover { background: rgba(255,255,255,0.16); }
+  .lb-btn.dl { background: rgba(200,255,0,0.12); border-color: rgba(200,255,0,0.3); color: var(--accent); }
+  .lb-btn.dl:hover { background: rgba(200,255,0,0.22); }
+
+  .loading { text-align: center; padding: 80px; font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Zachary Routsong Photography</span>
+  <span class="nav-right">Private gallery</span>
+</nav>
+
+<div class="page">
+  <div id="loading" class="loading">Loading your gallery...</div>
+  <div id="gallery-content" style="display:none;">
+    <div class="gallery-header">
+      <p class="gallery-tag">Private client gallery</p>
+      <h1 class="gallery-title" id="gallery-title">Your Photos</h1>
+      <p class="gallery-sub" id="gallery-sub"></p>
+    </div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+  <div id="not-found" class="not-found" style="display:none;">
+    <h2>Gallery not found</h2>
+    <p>This link may be invalid or the gallery has been removed.</p>
+    <a href="index.html">← Back to site</a>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt=""/>
+  <div class="lightbox-actions">
+    <button class="lb-btn" onclick="closeLightbox()">Close</button>
+    <a class="lb-btn dl" id="lightbox-dl" href="" download target="_blank">Download</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function loadGallery() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('id');
+
+  document.getElementById('loading').style.display = 'block';
+
+  if (!slug) { showNotFound(); return; }
+
+  const { data: gallery, error } = await sb.from('client_galleries').select('*').eq('slug', slug).single();
+  if (error || !gallery) { showNotFound(); return; }
+
+  const { data: photos } = await sb.from('portfolio_photos').select('*').eq('gallery_id', gallery.id).order('created_at', { ascending: true });
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('gallery-content').style.display = 'block';
+  document.getElementById('gallery-title').textContent = gallery.name;
+  document.getElementById('gallery-sub').textContent = `${(photos || []).length} photo${(photos || []).length !== 1 ? 's' : ''} — click any photo to view full size or download.`;
+
+  const grid = document.getElementById('gallery-grid');
+  if (!photos || !photos.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h2>Photos coming soon</h2><p>Check back shortly — Zachary is still editing your photos.</p></div>';
+    return;
+  }
+
+  photos.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.innerHTML = `
+      <img src="${p.url}" alt="${p.sport || 'Photo'}" loading="lazy"/>
+      <div class="gallery-item-overlay">
+        <button class="overlay-btn" onclick="openLightbox('${p.url}')">View</button>
+        <a class="overlay-btn dl" href="${p.url}" download target="_blank">Download</a>
+      </div>
+    `;
+    grid.appendChild(item);
+  });
+}
+
+function showNotFound() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('not-found').style.display = 'block';
+}
+
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox-dl').href = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.getElementById('lightbox').addEventListener('click', e => { if (e.target === e.currentTarget) closeLightbox(); });
+
+loadGallery();
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zachary Routsong Photography</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0e0e; --surface: #161616; --surface2: #1e1e1e;
+    --border: #2a2a2a; --border2: #333;
+    --text: #e8e8e8; --muted: #666; --muted2: #888;
+    --accent: #c8ff00; --accent-d: #a8d900; --radius: 8px;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  .nav-logo { font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-book { background: var(--accent); color: var(--bg); padding: 7px 18px; border-radius: 4px; font-weight: 500; font-size: 12px; text-decoration: none; transition: background 0.15s; }
+  .nav-book:hover { background: var(--accent-d); color: var(--bg); }
+
+  /* HERO */
+  .hero { max-width: 900px; margin: 0 auto; padding: 100px 40px 80px; }
+  .hero-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .hero h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); margin-bottom: 24px; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { font-size: 15px; color: var(--muted2); max-width: 420px; margin-bottom: 40px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary { background: var(--accent); color: var(--bg); padding: 12px 28px; border-radius: 6px; font-weight: 500; font-size: 13px; text-decoration: none; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--accent-d); }
+  .btn-secondary { border: 1px solid var(--border2); color: var(--text); padding: 12px 28px; border-radius: 6px; font-size: 13px; text-decoration: none; transition: border-color 0.15s; }
+  .btn-secondary:hover { border-color: var(--muted); }
+
+  /* PORTFOLIO GRID */
+  .portfolio-section { max-width: 900px; margin: 0 auto; padding: 0 40px 80px; }
+  .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+  @media (max-width: 600px) { .portfolio-grid { grid-template-columns: repeat(2, 1fr); } nav { padding: 16px 20px; } .hero, .portfolio-section { padding-left: 20px; padding-right: 20px; } }
+  .portfolio-item { aspect-ratio: 4/3; background: var(--surface); overflow: hidden; position: relative; cursor: pointer; }
+  .portfolio-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; }
+  .portfolio-item:hover img { transform: scale(1.04); }
+  .portfolio-item-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center; }
+  .portfolio-item:hover .portfolio-item-overlay { opacity: 1; }
+  .portfolio-item-overlay span { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+
+  /* placeholder tiles when no photos uploaded */
+  .portfolio-placeholder { aspect-ratio: 4/3; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+  .portfolio-placeholder span { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* SPORTS COVERED */
+  .sports-section { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 48px 0; margin-bottom: 0; }
+  .sports-inner { max-width: 900px; margin: 0 auto; padding: 0 40px; }
+  .sports-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .sport-tag { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: var(--muted2); border: 1px solid var(--border); border-radius: 4px; padding: 6px 14px; }
+
+  /* ABOUT */
+  .about-section { max-width: 900px; margin: 0 auto; padding: 72px 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  @media (max-width: 640px) { .about-section { grid-template-columns: 1fr; gap: 32px; } }
+  .about-text h2 { font-size: 24px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 16px; }
+  .about-text p { font-size: 13px; color: var(--muted2); line-height: 1.8; margin-bottom: 12px; }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .stat { background: var(--surface); padding: 24px 20px; }
+  .stat-num { font-size: 28px; font-weight: 300; color: var(--accent); letter-spacing: -0.02em; }
+  .stat-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; margin-top: 4px; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 28px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .footer-copy { font-size: 12px; color: var(--muted); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* LIGHTBOX */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; align-items: center; justify-content: center; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 4px; }
+  .lightbox-close { position: absolute; top: 20px; right: 28px; font-size: 28px; color: var(--muted); cursor: pointer; background: none; border: none; line-height: 1; }
+  .lightbox-close:hover { color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Zachary Routsong Photography</span>
+  <div class="nav-links">
+    <a href="#portfolio">Work</a>
+    <a href="#about">About</a>
+    <a href="tel:2293001006">229-300-1006</a>
+    <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">Instagram</a>
+    <a href="book.html" class="nav-book">Book a session</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <p class="hero-tag">Sports Photography · Valdosta, GA</p>
+  <h1>Game-day moments<br/>worth <em>keeping.</em></h1>
+  <p>Sports photography for local teams, schools, and events. Fast turnaround, real shots.</p>
+  <div class="hero-actions">
+    <a href="book.html" class="btn-primary">Book a session</a>
+    <a href="#portfolio" class="btn-secondary">View work</a>
+  </div>
+</div>
+
+<div class="portfolio-section" id="portfolio">
+  <div class="section-label">Portfolio</div>
+  <div class="portfolio-grid" id="portfolio-grid">
+    <!-- Populated by JS from Supabase, placeholders shown if empty -->
+    <div class="portfolio-placeholder"><span>Photos coming soon</span></div>
+    <div class="portfolio-placeholder"><span>Photos coming soon</span></div>
+    <div class="portfolio-placeholder"><span>Photos coming soon</span></div>
+  </div>
+</div>
+
+<div class="sports-section">
+  <div class="sports-inner">
+    <div class="section-label">Sports covered</div>
+    <div class="sports-grid">
+      <span class="sport-tag">Football</span>
+      <span class="sport-tag">Basketball</span>
+      <span class="sport-tag">Baseball</span>
+      <span class="sport-tag">Softball</span>
+      <span class="sport-tag">Soccer</span>
+      <span class="sport-tag">Track &amp; Field</span>
+      <span class="sport-tag">Volleyball</span>
+      <span class="sport-tag">Wrestling</span>
+      <span class="sport-tag">Swimming</span>
+      <span class="sport-tag">And more</span>
+    </div>
+  </div>
+</div>
+
+<div class="about-section" id="about">
+  <div class="about-text">
+    <div class="section-label">About</div>
+    <h2>Local photographer,<br/>real results.</h2>
+    <p>Based in Valdosta, Georgia. I shoot local high school and community sports events — action shots, team photos, and everything in between.</p>
+    <p>Fast turnaround, affordable pricing, and photos delivered via private gallery link.</p>
+    <div style="margin-top: 24px;">
+      <a href="book.html" class="btn-primary">Book your event</a>
+    </div>
+  </div>
+  <div class="about-stats">
+    <div class="stat"><div class="stat-num">$40</div><div class="stat-label">Starting price</div></div>
+    <div class="stat"><div class="stat-num">5–7</div><div class="stat-label">Day turnaround</div></div>
+    <div class="stat"><div class="stat-num">25+</div><div class="stat-label">Edited photos</div></div>
+    <div class="stat"><div class="stat-num">All</div><div class="stat-label">Sports covered</div></div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-copy">© 2025 Zachary Routsong Photography</span>
+  <div class="footer-links">
+    <a href="tel:2293001006">229-300-1006</a>
+    <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">@zacharyroutsongphotos</a>
+    <a href="book.html">Book now</a>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function loadPortfolio() {
+    const { data, error } = await sb
+      .from('portfolio_photos')
+      .select('*')
+      .eq('show_on_homepage', true)
+      .order('created_at', { ascending: false })
+      .limit(9);
+
+    if (error || !data || data.length === 0) return;
+
+    const grid = document.getElementById('portfolio-grid');
+    grid.innerHTML = '';
+    data.forEach(photo => {
+      const item = document.createElement('div');
+      item.className = 'portfolio-item';
+      item.innerHTML = `
+        <img src="${photo.url}" alt="${photo.sport || 'Sports photo'}" loading="lazy"/>
+        <div class="portfolio-item-overlay"><span>${photo.sport || ''}</span></div>
+      `;
+      item.addEventListener('click', () => openLightbox(photo.url));
+      grid.appendChild(item);
+    });
+  }
+
+  function openLightbox(url) {
+    document.getElementById('lightbox-img').src = url;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  loadPortfolio();
+</script>
+</body>
+</html>
