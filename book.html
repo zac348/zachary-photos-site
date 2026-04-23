@@ -392,7 +392,11 @@ async function fetchAddr(q){
 }
 function pickAddr(i){
   var r=acResults[i];if(!r)return;
-  document.getElementById('addr-input').value=r.display_name.split(', ').slice(0,3).join(', ');
+  var label=r.display_name.split(', ').slice(0,3).join(', ');
+  document.getElementById('addr-input').value=label;
+  // autofill venue field in the form below
+  var venueField=document.getElementById('venue');
+  if(venueField&&!venueField.value) venueField.value=label;
   closeDD();calcTravel(parseFloat(r.lat),parseFloat(r.lon));
 }
 function onAddrKey(e){
@@ -405,11 +409,38 @@ function onAddrKey(e){
 function closeDD(){var dd=document.getElementById('addr-drop');dd.classList.remove('open');dd.innerHTML='';}
 document.addEventListener('click',function(e){if(!e.target.closest('.addr-wrap'))closeDD();});
 
-function calcTravel(lat,lng){
-  var ow=haversine(ORIGIN.lat,ORIGIN.lng,lat,lng),rt=ow*2,gal=rt/MPG;
-  document.getElementById('tr-mi').textContent=rt.toFixed(1)+' mi';
+async function calcTravel(lat,lng){
+  document.getElementById('tr-mi').textContent='Calculating...';
+  document.getElementById('tr-gal').textContent='—';
+  document.getElementById('travel-result').classList.add('show');
+  document.getElementById('tr-fee-row').style.display='none';
+  document.getElementById('tr-free').style.display='none';
+
+  var drivingMi=null;
+  try{
+    // OSRM public API — real driving distance, free, no key needed
+    var url='https://router.project-osrm.org/route/v1/driving/'
+      +ORIGIN.lng+','+ORIGIN.lat+';'+lng+','+lat
+      +'?overview=false';
+    var resp=await fetch(url);
+    var data=await resp.json();
+    if(data.routes&&data.routes.length){
+      // OSRM returns meters — convert to miles one-way
+      var onewayMi=data.routes[0].distance*0.000621371;
+      drivingMi=onewayMi;
+    }
+  }catch(e){}
+
+  // fallback to haversine if OSRM fails
+  if(!drivingMi){
+    drivingMi=haversine(ORIGIN.lat,ORIGIN.lng,lat,lng);
+  }
+
+  var rt=drivingMi*2,gal=rt/MPG;
+  document.getElementById('tr-mi').textContent=rt.toFixed(1)+' mi (driving)';
   document.getElementById('tr-gal').textContent=gal.toFixed(2)+' gal';
-  if(ow<=FREE_MI){
+
+  if(drivingMi<=FREE_MI){
     travelCost=0;
     document.getElementById('tr-fee-row').style.display='none';
     document.getElementById('tr-free').style.display='flex';
@@ -419,7 +450,6 @@ function calcTravel(lat,lng){
     document.getElementById('tr-free').style.display='none';
     document.getElementById('tr-fee').textContent='$'+travelCost.toFixed(2);
   }
-  document.getElementById('travel-result').classList.add('show');
   updateCost();
 }
 function haversine(a,b,c,d){
