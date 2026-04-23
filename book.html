@@ -418,22 +418,22 @@ async function calcTravel(lat,lng){
 
   var drivingMi=null;
   try{
-    // OSRM public API — real driving distance, free, no key needed
     var url='https://router.project-osrm.org/route/v1/driving/'
       +ORIGIN.lng+','+ORIGIN.lat+';'+lng+','+lat
       +'?overview=false';
     var resp=await fetch(url);
     var data=await resp.json();
-    if(data.routes&&data.routes.length){
-      // OSRM returns meters — convert to miles one-way
-      var onewayMi=data.routes[0].distance*0.000621371;
-      drivingMi=onewayMi;
+    if(data.code==='Ok'&&data.routes&&data.routes.length){
+      // OSRM returns meters one-way — convert to miles
+      drivingMi=data.routes[0].distance*0.000621371;
     }
-  }catch(e){}
+  }catch(e){
+    console.warn('OSRM failed, using haversine fallback',e);
+  }
 
-  // fallback to haversine if OSRM fails
+  // fallback to haversine * 1.3 road factor if OSRM fails
   if(!drivingMi){
-    drivingMi=haversine(ORIGIN.lat,ORIGIN.lng,lat,lng);
+    drivingMi=haversine(ORIGIN.lat,ORIGIN.lng,lat,lng)*1.3;
   }
 
   var rt=drivingMi*2,gal=rt/MPG;
