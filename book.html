@@ -8,33 +8,30 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0a0a;--s1:#111;--s2:#181818;--s3:#222;
+  --bg:#0a0a0a;--s1:#111;--s2:#181818;
   --b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;
   --t1:#efefef;--t2:#aaa;--t3:#666;
-  --accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
+  --accent:#00b7e3;--accent-d:#0099c4;
+  --accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
   --red:#ff4d4d;--radius:8px;
 }
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6}
 
-/* NAV */
 nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1);position:sticky;top:0;background:var(--bg);z-index:100;gap:12px}
-.nav-logo{font-size:13px;font-weight:500;color:var(--t1);white-space:nowrap;text-decoration:none}
-.nav-links{display:flex;gap:20px;align-items:center}
+.nav-logo{font-size:13px;font-weight:500;color:var(--t1);text-decoration:none}
+.nav-links{display:flex;gap:20px}
 .nav-links a{font-size:12px;color:var(--t3);text-decoration:none;transition:color .15s}
 .nav-links a:hover{color:var(--t1)}
 .nav-cta{font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:7px 16px;border-radius:4px;text-decoration:none;transition:background .15s;white-space:nowrap;flex-shrink:0}
 .nav-cta:hover{background:var(--accent-d)}
 @media(max-width:560px){.nav-links{display:none}}
 
-/* PAGE */
 .page{max-width:760px;margin:0 auto;padding:40px 20px 80px}
 @media(max-width:600px){.page{padding:28px 16px 60px}}
 
-/* SECTION LABELS */
 .sec-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:10px}
 .sec-label::after{content:'';flex:1;height:1px;background:var(--b2)}
-
 .block{margin-bottom:40px}
 
 /* PACKAGES */
@@ -55,12 +52,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .pkg-features li{font-size:11px;color:var(--t2);padding:2px 0;display:flex;gap:6px;line-height:1.4}
 .pkg-features li::before{content:'–';color:var(--b3);flex-shrink:0}
 
-/* QTY PILLS */
+/* QTY */
 .addons-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.addons-grid .qty-pill{grid-column:auto}
-.addons-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:0}
+.addons-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 @media(max-width:600px){.addons-toggles{grid-template-columns:1fr 1fr}}
 @media(max-width:380px){.addons-grid{grid-template-columns:1fr}.addons-toggles{grid-template-columns:1fr}}
+
 .qty-pill{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 14px;transition:border-color .15s,background .15s}
 .qty-pill.active{border-color:var(--accent);background:var(--accent-bg)}
 .qty-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
@@ -68,14 +65,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .qty-pill.active .qty-label{color:var(--t1)}
 .qty-rate{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3)}
 .qty-pill.active .qty-rate{color:var(--accent)}
-.qty-row{display:flex;align-items:center;gap:0;border:1px solid var(--b2);border-radius:6px;overflow:hidden;width:fit-content}
+.qty-row{display:flex;align-items:center;border:1px solid var(--b2);border-radius:6px;overflow:hidden;width:fit-content}
 .qty-btn{background:var(--s2);border:none;color:var(--t2);width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;user-select:none}
 .qty-btn:hover{background:var(--b2);color:var(--t1)}
 .qty-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--t1);width:36px;text-align:center;background:var(--s1);border:none;border-left:1px solid var(--b2);border-right:1px solid var(--b2);height:30px;line-height:30px}
 .qty-sub{font-size:10px;color:var(--t3);margin-top:5px;font-family:'DM Mono',monospace}
 .qty-pill.active .qty-sub{color:var(--t2)}
 
-/* TOGGLE PILLS */
+/* TOGGLES */
 .toggle-pill{display:flex;justify-content:space-between;align-items:center;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:11px 14px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;gap:8px}
 .toggle-pill:hover{border-color:var(--b2)}
 .toggle-pill.active{border-color:var(--accent);background:var(--accent-bg)}
@@ -95,7 +92,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .travel-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3)}
 .gas-pill{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:4px;padding:3px 8px}
 .travel-hint{font-size:11px;color:var(--t3);margin-bottom:12px;line-height:1.5}
-.addr-wrap{position:relative;margin-bottom:4px}
+.addr-wrap{position:relative}
 .addr-drop{position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--b3);border-top:none;border-radius:0 0 6px 6px;z-index:50;max-height:200px;overflow-y:auto;display:none}
 .addr-drop.open{display:block}
 .addr-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s}
@@ -103,7 +100,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .addr-item:hover,.addr-item.focused{background:var(--b2)}
 .addr-main{font-size:12px;color:var(--t1)}
 .addr-sub{font-size:10px;color:var(--t3);margin-top:1px}
-.travel-err{font-size:11px;color:var(--red);margin-top:5px;display:none}
+.travel-err{font-size:11px;color:var(--red);margin-top:6px;display:none}
 .travel-result{border-top:1px solid var(--b1);padding-top:12px;margin-top:12px;display:none}
 .travel-result.show{display:block}
 .tr-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);padding:2px 0}
@@ -135,17 +132,14 @@ input[type="date"],input[type="time"]{cursor:pointer}
 .cost-line.deposit{font-size:12px;font-weight:500;color:var(--accent)}
 .cost-line.balance{font-size:11px;color:var(--t3)}
 
-/* SUBMIT */
 .submit-wrap{grid-column:1/-1;margin-top:6px}
 .submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
 .submit-btn:hover{background:var(--accent-d)}
 
-/* SUCCESS */
 .success{display:none;text-align:center;padding:60px 20px}
 .success h3{font-size:16px;font-weight:500;margin-bottom:6px}
 .success p{font-size:12px;color:var(--t2)}
 
-/* FOOTER */
 footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 footer span{font-size:11px;color:var(--t3)}
 .foot-links{display:flex;gap:16px}
@@ -235,7 +229,7 @@ footer span{font-size:11px;color:var(--t3)}
         <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
       </div>
     </div>
-    <div class="addons-toggles" style="margin-top:8px">
+    <div class="addons-toggles">
       <div class="toggle-pill" data-addon="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
         <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery (24 hrs)</span></div>
         <span class="toggle-price">+$40</span>
@@ -259,7 +253,7 @@ footer span{font-size:11px;color:var(--t3)}
         <span class="travel-title">Fuel cost calculator</span>
         <span class="gas-pill">Valdosta avg: $3.69/gal</span>
       </div>
-      <p class="travel-hint">Type an address or venue below and pick from the results. Round-trip from Valdosta at 22.5 MPG, rounded down to nearest $0.10. Under 15 miles = no charge.</p>
+      <p class="travel-hint">Type an address or venue and pick from the results. Driving distance calculated from Valdosta at 22.5 MPG, rounded down to nearest $0.10. Under 15 miles = no charge.</p>
       <div class="addr-wrap">
         <div class="field" style="margin:0">
           <label for="addr-input">Shoot location</label>
@@ -269,9 +263,9 @@ footer span{font-size:11px;color:var(--t3)}
       </div>
       <p class="travel-err" id="travel-err">No results found — try adding a city or state.</p>
       <div class="travel-result" id="travel-result">
-        <div class="tr-row"><span>Round trip</span><span id="tr-mi">—</span></div>
+        <div class="tr-row"><span>One way distance</span><span id="tr-mi">—</span></div>
         <div class="tr-row"><span>Gas price</span><span id="tr-gas">$3.69/gal</span></div>
-        <div class="tr-row"><span>Fuel used</span><span id="tr-gal">—</span></div>
+        <div class="tr-row"><span>Fuel used (round trip)</span><span id="tr-gal">—</span></div>
         <div class="tr-row big" id="tr-fee-row"><span>Travel fee</span><span id="tr-fee">—</span></div>
         <div class="tr-row free" id="tr-free" style="display:none">No travel fee — within 15 miles!</div>
       </div>
@@ -360,182 +354,216 @@ footer span{font-size:11px;color:var(--t3)}
 </footer>
 
 <script>
-var selPkg=null,qPhotos=0,qPrints=0,addons=[],travelCost=0;
-var acTimer=null,acResults=[],acIdx=-1;
-var ORIGIN={lat:30.8327,lng:-83.2785},GAS=3.69,MPG=22.5,FREE_MI=15;
+// ── CONFIG ──
+// Origin stored as coordinates only — no address in source
+var ORIGIN = { lat: 30.8876, lng: -83.3089 };
+var GAS    = 3.69;
+var MPG    = 22.5;
+var FREE_MI = 15;
+
+// ── STATE ──
+var selPkg = null, qPhotos = 0, qPrints = 0, addons = [], travelCost = 0;
+var acTimer = null, acResults = [], acIdx = -1;
 
 // ── ADDRESS SEARCH ──
-function onAddrInput(v){
+function onAddrInput(v) {
   clearTimeout(acTimer);
-  document.getElementById('travel-err').style.display='none';
+  document.getElementById('travel-err').style.display = 'none';
   document.getElementById('travel-result').classList.remove('show');
-  travelCost=0;updateCost();
-  if(v.length<3){closeDD();return;}
-  acTimer=setTimeout(function(){fetchAddr(v);},400);
+  travelCost = 0; updateCost();
+  if (v.length < 3) { closeDD(); return; }
+  acTimer = setTimeout(function() { fetchAddr(v); }, 400);
 }
-async function fetchAddr(q){
-  try{
-    var r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q='+encodeURIComponent(q),{headers:{'Accept-Language':'en-US','User-Agent':'ZRPBooking/1.0'}});
-    var d=await r.json();
-    acResults=d;acIdx=-1;
-    if(!d.length){document.getElementById('travel-err').style.display='block';closeDD();return;}
-    var dd=document.getElementById('addr-drop');
-    dd.innerHTML=d.map(function(r,i){
-      var p=r.display_name.split(', ');
-      return '<div class="addr-item" onmousedown="pickAddr('+i+')">'
-        +'<div class="addr-main">'+p.slice(0,2).join(', ')+'</div>'
-        +'<div class="addr-sub">'+p.slice(2,5).join(', ')+'</div>'
-        +'</div>';
+
+async function fetchAddr(q) {
+  try {
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q);
+    var r = await fetch(url, { headers: { 'Accept-Language': 'en-US', 'User-Agent': 'ZRPBooking/1.0' } });
+    var d = await r.json();
+    acResults = d; acIdx = -1;
+    if (!d.length) { document.getElementById('travel-err').style.display = 'block'; closeDD(); return; }
+    var dd = document.getElementById('addr-drop');
+    dd.innerHTML = d.map(function(r, i) {
+      var p = r.display_name.split(', ');
+      return '<div class="addr-item" onmousedown="pickAddr(' + i + ')">'
+        + '<div class="addr-main">' + p.slice(0, 2).join(', ') + '</div>'
+        + '<div class="addr-sub">' + p.slice(2, 5).join(', ') + '</div>'
+        + '</div>';
     }).join('');
     dd.classList.add('open');
-  }catch(e){closeDD();}
+  } catch(e) { closeDD(); }
 }
-function pickAddr(i){
-  var r=acResults[i];if(!r)return;
-  var label=r.display_name.split(', ').slice(0,3).join(', ');
-  document.getElementById('addr-input').value=label;
-  // autofill venue field in the form below
-  var venueField=document.getElementById('venue');
-  if(venueField&&!venueField.value) venueField.value=label;
-  closeDD();calcTravel(parseFloat(r.lat),parseFloat(r.lon));
-}
-function onAddrKey(e){
-  var items=document.querySelectorAll('.addr-item');
-  if(e.key==='ArrowDown'){e.preventDefault();acIdx=Math.min(acIdx+1,items.length-1);items.forEach(function(el,i){el.classList.toggle('focused',i===acIdx);});}
-  else if(e.key==='ArrowUp'){e.preventDefault();acIdx=Math.max(acIdx-1,0);items.forEach(function(el,i){el.classList.toggle('focused',i===acIdx);});}
-  else if(e.key==='Enter'){e.preventDefault();if(acIdx>=0&&items[acIdx])items[acIdx].dispatchEvent(new MouseEvent('mousedown'));}
-  else if(e.key==='Escape')closeDD();
-}
-function closeDD(){var dd=document.getElementById('addr-drop');dd.classList.remove('open');dd.innerHTML='';}
-document.addEventListener('click',function(e){if(!e.target.closest('.addr-wrap'))closeDD();});
 
-async function calcTravel(lat,lng){
-  document.getElementById('tr-mi').textContent='Calculating...';
-  document.getElementById('tr-gal').textContent='—';
-  document.getElementById('travel-result').classList.add('show');
-  document.getElementById('tr-fee-row').style.display='none';
-  document.getElementById('tr-free').style.display='none';
+function pickAddr(i) {
+  var r = acResults[i]; if (!r) return;
+  var label = r.display_name.split(', ').slice(0, 3).join(', ');
+  document.getElementById('addr-input').value = label;
+  // autofill venue field if empty
+  var vf = document.getElementById('venue');
+  if (vf && !vf.value) vf.value = label;
+  closeDD();
+  calcTravel(parseFloat(r.lat), parseFloat(r.lon));
+}
 
-  var drivingMi=null;
-  try{
-    var url='https://router.project-osrm.org/route/v1/driving/'
-      +ORIGIN.lng+','+ORIGIN.lat+';'+lng+','+lat
-      +'?overview=false';
-    var resp=await fetch(url);
-    var data=await resp.json();
-    if(data.code==='Ok'&&data.routes&&data.routes.length){
-      // OSRM returns meters one-way — convert to miles
-      drivingMi=data.routes[0].distance*0.000621371;
+function onAddrKey(e) {
+  var items = document.querySelectorAll('.addr-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx + 1, items.length - 1); items.forEach(function(el, i) { el.classList.toggle('focused', i === acIdx); }); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx - 1, 0); items.forEach(function(el, i) { el.classList.toggle('focused', i === acIdx); }); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (acIdx >= 0 && items[acIdx]) items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
+  else if (e.key === 'Escape') closeDD();
+}
+
+function closeDD() { var dd = document.getElementById('addr-drop'); dd.classList.remove('open'); dd.innerHTML = ''; }
+document.addEventListener('click', function(e) { if (!e.target.closest('.addr-wrap')) closeDD(); });
+
+// ── TRAVEL CALC ──
+async function calcTravel(lat, lng) {
+  var resultEl = document.getElementById('travel-result');
+  document.getElementById('tr-mi').textContent = 'Calculating...';
+  document.getElementById('tr-gal').textContent = '—';
+  document.getElementById('tr-fee-row').style.display = 'none';
+  document.getElementById('tr-free').style.display = 'none';
+  resultEl.classList.add('show');
+
+  var onewayMi = null;
+
+  try {
+    // OSRM — real driving distance, free, no API key
+    var url = 'https://router.project-osrm.org/route/v1/driving/'
+      + ORIGIN.lng + ',' + ORIGIN.lat + ';' + lng + ',' + lat
+      + '?overview=false';
+    var resp = await fetch(url);
+    var data = await resp.json();
+    if (data.code === 'Ok' && data.routes && data.routes.length) {
+      // OSRM returns meters — convert to miles (one way)
+      onewayMi = data.routes[0].distance * 0.000621371;
     }
-  }catch(e){
-    console.warn('OSRM failed, using haversine fallback',e);
+  } catch(e) {
+    console.warn('OSRM unavailable, using haversine fallback');
   }
 
-  // fallback to haversine * 1.3 road factor if OSRM fails
-  if(!drivingMi){
-    drivingMi=haversine(ORIGIN.lat,ORIGIN.lng,lat,lng)*1.3;
+  // Fallback: straight-line × 1.3 road factor
+  if (!onewayMi) {
+    onewayMi = haversine(ORIGIN.lat, ORIGIN.lng, lat, lng) * 1.3;
   }
 
-  var rt=drivingMi*2,gal=rt/MPG;
-  document.getElementById('tr-mi').textContent=rt.toFixed(1)+' mi (driving)';
-  document.getElementById('tr-gal').textContent=gal.toFixed(2)+' gal';
+  var roundTrip = onewayMi * 2;
+  var gallons   = roundTrip / MPG;
 
-  if(drivingMi<=FREE_MI){
-    travelCost=0;
-    document.getElementById('tr-fee-row').style.display='none';
-    document.getElementById('tr-free').style.display='flex';
-  }else{
-    travelCost=Math.floor(gal*GAS*10)/10;
-    document.getElementById('tr-fee-row').style.display='flex';
-    document.getElementById('tr-free').style.display='none';
-    document.getElementById('tr-fee').textContent='$'+travelCost.toFixed(2);
+  document.getElementById('tr-mi').textContent  = onewayMi.toFixed(1) + ' mi (driving)';
+  document.getElementById('tr-gal').textContent = gallons.toFixed(2) + ' gal';
+
+  if (onewayMi <= FREE_MI) {
+    travelCost = 0;
+    document.getElementById('tr-fee-row').style.display = 'none';
+    document.getElementById('tr-free').style.display = 'flex';
+  } else {
+    // Round DOWN to nearest $0.10
+    travelCost = Math.floor(gallons * GAS * 10) / 10;
+    document.getElementById('tr-fee-row').style.display = 'flex';
+    document.getElementById('tr-free').style.display = 'none';
+    document.getElementById('tr-fee').textContent = '$' + travelCost.toFixed(2);
   }
+
   updateCost();
 }
-function haversine(a,b,c,d){
-  var R=3958.8,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;
-  var x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+
+function haversine(a, b, c, d) {
+  var R = 3958.8, dL = (c - a) * Math.PI / 180, dN = (d - b) * Math.PI / 180;
+  var x = Math.sin(dL/2)*Math.sin(dL/2) + Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
 
 // ── PACKAGES ──
-function selectPkg(card){
-  document.querySelectorAll('.pkg-card').forEach(function(c){c.classList.remove('selected');});
+function selectPkg(card) {
+  document.querySelectorAll('.pkg-card').forEach(function(c) { c.classList.remove('selected'); });
   card.classList.add('selected');
-  selPkg={name:card.dataset.package,price:parseFloat(card.dataset.price)};
-  var d=document.getElementById('pkg-display');
-  d.value=selPkg.name+' — $'+selPkg.price;d.style.color='var(--t1)';
+  selPkg = { name: card.dataset.package, price: parseFloat(card.dataset.price) };
+  var d = document.getElementById('pkg-display');
+  d.value = selPkg.name + ' — $' + selPkg.price; d.style.color = 'var(--t1)';
   updateCost();
 }
 
 // ── QTY ──
-function chQty(t,d){
-  if(t==='photos'){
-    qPhotos=Math.max(0,qPhotos+d);
-    document.getElementById('qv-photos').textContent=qPhotos;
-    document.getElementById('qs-photos').textContent=qPhotos+' set'+(qPhotos!==1?'s':'')+' · $'+(qPhotos*15).toFixed(2);
-    document.getElementById('qp-photos').classList.toggle('active',qPhotos>0);
-  }else{
-    qPrints=Math.max(0,qPrints+d);
-    document.getElementById('qv-prints').textContent=qPrints;
-    document.getElementById('qs-prints').textContent=qPrints+' print'+(qPrints!==1?'s':'')+' · $'+(qPrints*3).toFixed(2);
-    document.getElementById('qp-prints').classList.toggle('active',qPrints>0);
+function chQty(t, d) {
+  if (t === 'photos') {
+    qPhotos = Math.max(0, qPhotos + d);
+    document.getElementById('qv-photos').textContent = qPhotos;
+    document.getElementById('qs-photos').textContent = qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · $' + (qPhotos * 15).toFixed(2);
+    document.getElementById('qp-photos').classList.toggle('active', qPhotos > 0);
+  } else {
+    qPrints = Math.max(0, qPrints + d);
+    document.getElementById('qv-prints').textContent = qPrints;
+    document.getElementById('qs-prints').textContent = qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · $' + (qPrints * 3).toFixed(2);
+    document.getElementById('qp-prints').classList.toggle('active', qPrints > 0);
   }
   updateCost();
 }
 
 // ── TOGGLES ──
-function togAddon(pill){
+function togAddon(pill) {
   pill.classList.toggle('active');
-  var n=pill.dataset.addon,p=parseFloat(pill.dataset.price);
-  if(pill.classList.contains('active'))addons.push({n:n,p:p});
-  else addons=addons.filter(function(a){return a.n!==n;});
+  var n = pill.dataset.addon, p = parseFloat(pill.dataset.price);
+  if (pill.classList.contains('active')) addons.push({ n: n, p: p });
+  else addons = addons.filter(function(a) { return a.n !== n; });
   updateCost();
 }
 
 // ── COST ──
-function showLine(id,show,vid,val){
-  var r=document.getElementById(id);
-  if(show){r.classList.remove('hide');if(vid)document.getElementById(vid).textContent=val;}
+function showLine(id, show, vid, val) {
+  var r = document.getElementById(id);
+  if (show) { r.classList.remove('hide'); if (vid) document.getElementById(vid).textContent = val; }
   else r.classList.add('hide');
 }
-function updateCost(){
-  if(!selPkg){document.getElementById('cost-empty').style.display='block';document.getElementById('cost-lines').style.display='none';return;}
-  document.getElementById('cost-empty').style.display='none';document.getElementById('cost-lines').style.display='block';
-  var pc=qPhotos*15,pr=qPrints*3;
-  document.getElementById('cl-pkg-n').textContent=selPkg.name+' package';
-  document.getElementById('cl-pkg-p').textContent='$'+selPkg.price.toFixed(2);
-  showLine('cl-photos',qPhotos>0,'cl-photos-v',qPhotos+' set'+(qPhotos!==1?'s':'')+' · +$'+pc.toFixed(2));
-  showLine('cl-prints',qPrints>0,'cl-prints-v',qPrints+' print'+(qPrints!==1?'s':'')+' · +$'+pr.toFixed(2));
-  showLine('cl-travel',travelCost>0,'cl-travel-v','+$'+travelCost.toFixed(2));
-  var at=0,an=[];
-  if(qPhotos>0)an.push('Extra photos x'+qPhotos);
-  if(qPrints>0)an.push('Prints x'+qPrints);
-  if(travelCost>0)an.push('Travel $'+travelCost.toFixed(2));
-  ['cl-a0','cl-a1','cl-a2'].forEach(function(id,i){
-    var row=document.getElementById(id),a=addons[i];
-    if(a){row.classList.remove('hide');row.children[0].textContent=a.n;row.children[1].textContent='+$'+a.p.toFixed(2);at+=a.p;an.push(a.n);}
+
+function updateCost() {
+  if (!selPkg) {
+    document.getElementById('cost-empty').style.display = 'block';
+    document.getElementById('cost-lines').style.display = 'none';
+    return;
+  }
+  document.getElementById('cost-empty').style.display = 'none';
+  document.getElementById('cost-lines').style.display = 'block';
+
+  var pc = qPhotos * 15, pr = qPrints * 3;
+  document.getElementById('cl-pkg-n').textContent = selPkg.name + ' package';
+  document.getElementById('cl-pkg-p').textContent = '$' + selPkg.price.toFixed(2);
+  showLine('cl-photos', qPhotos > 0, 'cl-photos-v', qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · +$' + pc.toFixed(2));
+  showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
+  showLine('cl-travel', travelCost > 0, 'cl-travel-v', '+$' + travelCost.toFixed(2));
+
+  var at = 0, an = [];
+  if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
+  if (qPrints > 0) an.push('Prints x' + qPrints);
+  if (travelCost > 0) an.push('Travel $' + travelCost.toFixed(2));
+
+  ['cl-a0','cl-a1','cl-a2'].forEach(function(id, i) {
+    var row = document.getElementById(id), a = addons[i];
+    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.n; row.children[1].textContent = '+$' + a.p.toFixed(2); at += a.p; an.push(a.n); }
     else row.classList.add('hide');
   });
-  var total=selPkg.price+pc+pr+travelCost+at;
-  var dep=Math.round(total*50)/100,bal=total-dep;
-  document.getElementById('cl-total').textContent='$'+total.toFixed(2);
-  document.getElementById('cl-deposit').textContent='$'+dep.toFixed(2);
-  document.getElementById('cl-balance').textContent='$'+bal.toFixed(2);
-  document.getElementById('h-pkg').value=selPkg.name+' $'+selPkg.price;
-  document.getElementById('h-addons').value=an.join(', ')||'None';
-  document.getElementById('h-total').value='$'+total.toFixed(2);
-  document.getElementById('h-deposit').value='$'+dep.toFixed(2);
-  document.getElementById('h-travel').value=travelCost>0?'$'+travelCost.toFixed(2):'None';
+
+  var total   = selPkg.price + pc + pr + travelCost + at;
+  var deposit = Math.round(total * 50) / 100;
+  var balance = total - deposit;
+
+  document.getElementById('cl-total').textContent   = '$' + total.toFixed(2);
+  document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
+  document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
+  document.getElementById('h-pkg').value     = selPkg.name + ' $' + selPkg.price;
+  document.getElementById('h-addons').value  = an.join(', ') || 'None';
+  document.getElementById('h-total').value   = '$' + total.toFixed(2);
+  document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
+  document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
 }
 
 // ── SUBMIT ──
-function handleSubmit(e){
+function handleSubmit(e) {
   e.preventDefault();
-  if(!selPkg){alert('Please select a package first.');return;}
-  document.getElementById('form-wrap').style.display='none';
-  document.getElementById('success').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
+  if (!selPkg) { alert('Please select a package first.'); return; }
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('success').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 </body>
