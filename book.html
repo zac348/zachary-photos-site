@@ -48,11 +48,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .pkg-check svg{width:8px;height:8px;stroke:var(--bg);stroke-width:2.5;fill:none}
 .pkg-card.selected .pkg-check{display:flex}
 .pkg-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
-.pkg-sale-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#ff4d4d;background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.25);border-radius:4px;padding:2px 7px;display:inline-block;margin-bottom:4px;visibility:hidden}
+.pkg-price-header{height:44px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:4px}
+.pkg-sale-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#ff4d4d;background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.25);border-radius:4px;padding:2px 7px;display:inline-block;width:fit-content;visibility:hidden;margin-bottom:3px;line-height:1.4}
 .pkg-sale-badge.visible{visibility:visible}
-.pkg-price-orig{font-size:13px;color:var(--t3);text-decoration:line-through;margin-bottom:2px;font-weight:400;min-height:18px;visibility:hidden}
+.pkg-price-orig{font-size:13px;color:var(--t3);text-decoration:line-through;font-weight:400;visibility:hidden;line-height:1.4}
 .pkg-price-orig.visible{visibility:visible}
-.pkg-price{font-size:26px;font-weight:300;color:var(--t1);letter-spacing:-.02em;line-height:1;margin-bottom:14px}
+.pkg-price{font-size:26px;font-weight:300;color:var(--t1);letter-spacing:-.02em;line-height:1;margin-bottom:14px;margin-top:4px}
 .pkg-price small{font-size:12px;color:var(--t3);font-weight:400}
 .pkg-price.sale{color:#00e5a0}
 .pkg-features{list-style:none;border-top:1px solid var(--b1);padding-top:12px;flex:1}
@@ -786,18 +787,16 @@ async function loadPackagePricing() {
     var activePrice = (pkg.on_sale && pkg.sale_price) ? pkg.sale_price : pkg.base_price;
     var features = pkgFeatures[pkg.package_name] || [];
 
-    var priceHTML = '';
-    if (pkg.on_sale && pkg.sale_price) {
-      priceHTML =
-        '<p class="pkg-sale-badge visible">Sale</p>' +
-        '<p class="pkg-price-orig visible">$' + pkg.base_price + ' <small>/ event</small></p>' +
-        '<p class="pkg-price sale">$' + pkg.sale_price + ' <small>/ event</small></p>';
-    } else {
-      priceHTML =
-        '<p class="pkg-sale-badge"></p>' +
-        '<p class="pkg-price-orig"></p>' +
-        '<p class="pkg-price">$' + pkg.base_price + ' <small>/ event</small></p>';
-    }
+    var onSale = pkg.on_sale && pkg.sale_price;
+    var activePrice = onSale ? pkg.sale_price : pkg.base_price;
+    var features = pkgFeatures[pkg.package_name] || [];
+
+    var priceHTML =
+      '<div class="pkg-price-header">' +
+        '<span class="pkg-sale-badge' + (onSale ? ' visible' : '') + '">Sale</span>' +
+        '<span class="pkg-price-orig' + (onSale ? ' visible' : '') + '">$' + pkg.base_price + ' <small>/ event</small></span>' +
+      '</div>' +
+      '<p class="pkg-price' + (onSale ? ' sale' : '') + '">$' + activePrice + ' <small>/ event</small></p>';
 
     return '<div class="pkg-card" data-package="' + pkg.package_name + '" data-price="' + activePrice + '" onclick="selectPkg(this)">' +
       '<div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>' +
