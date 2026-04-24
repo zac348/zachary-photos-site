@@ -85,7 +85,22 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 .check-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .check-row label{font-size:12px;text-transform:none;letter-spacing:0;color:var(--t2);cursor:pointer}
 
-/* INVOICE + PAYMENT */
+/* COUPONS */
+.coupon-form-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.coupon-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.coupon-row{display:flex;align-items:center;justify-content:space-between;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;flex-wrap:wrap;gap:10px}
+.coupon-row.inactive{opacity:.5}
+.coupon-code{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:.06em}
+.coupon-meta{font-size:11px;color:var(--t3);margin-top:3px}
+.coupon-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid;margin-left:8px}
+.coupon-badge.percent{color:#a78bfa;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.08)}
+.coupon-badge.fixed{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08)}
+.coupon-badge.travel{color:#60a5fa;border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.08)}
+.coupon-actions{display:flex;gap:6px}
+.toggle-active-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.06em}
+.toggle-active-btn:hover{border-color:var(--accent);color:var(--accent)}
+.del-coupon-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.06em}
+.del-coupon-btn:hover{border-color:var(--red);color:var(--red)}
 .paid-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid}
 .paid-badge.paid{color:#22c55e;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
 .paid-badge.unpaid{color:var(--yellow);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
@@ -167,6 +182,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <button class="sb-link" onclick="switchTab('galleries',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries</button>
     <button class="sb-link" onclick="switchTab('bookings',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bookings</button>
     <button class="sb-link" onclick="switchTab('calendar',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg>Availability</button>
+    <button class="sb-link" onclick="switchTab('coupons',this)"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Coupons</button>
     <a class="sb-link" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View site</a>
   </nav>
   <div class="sidebar-footer"><button class="logout-btn" onclick="logout()">Sign out</button></div>
@@ -274,6 +290,48 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div class="blocks-list" id="blocks-list"><p class="no-data">No blocks set for this month.</p></div>
   </div>
 
+  <!-- COUPONS -->
+  <div class="tab" id="tab-coupons">
+    <h1 class="main-title">Coupons</h1>
+    <p class="main-sub">Create and manage discount codes for clients.</p>
+
+    <div class="coupon-form-card">
+      <div class="sec-label" style="margin-bottom:16px">new coupon</div>
+      <div class="coupon-form-grid">
+        <div class="field" style="margin:0">
+          <label>Code</label>
+          <input type="text" id="cp-code" placeholder="e.g. SUMMER25" style="text-transform:uppercase"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Type</label>
+          <select id="cp-type" onchange="onCouponTypeChange()">
+            <option value="percent">Percentage off</option>
+            <option value="fixed">Fixed $ off</option>
+            <option value="travel">Negate travel fee</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="cp-value-wrap">
+          <label id="cp-value-label">Discount %</label>
+          <input type="number" id="cp-value" placeholder="e.g. 20" min="0"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Expires (optional)</label>
+          <input type="date" id="cp-expires" style="color-scheme:dark"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Max uses (optional)</label>
+          <input type="number" id="cp-max-uses" placeholder="Unlimited"/>
+        </div>
+        <div class="field" style="margin:0;align-self:flex-end">
+          <button class="acc-btn" style="width:100%" onclick="createCoupon()">Create coupon</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">all coupons</div>
+    <div id="coupons-list"><p class="no-data">No coupons yet.</p></div>
+  </div>
+
 </main>
 </div>
 <div class="toast" id="toast"></div>
@@ -298,7 +356,7 @@ function toast(msg) { const t = document.getElementById('toast'); t.textContent 
 let allPhotos = [], allGalleries = [], allBookings = [], allBlocks = [];
 
 async function loadAll() {
-  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks()]);
+  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons()]);
   updateStats();
 }
 
@@ -909,6 +967,98 @@ async function deleteBlock(id) {
 const _now = new Date();
 calYear = _now.getFullYear();
 calMonth = _now.getMonth();
+
+// ── COUPONS ──
+let allCoupons = [];
+
+async function loadCoupons() {
+  const { data } = await sb.from('coupons').select('*').order('created_at', { ascending: false });
+  allCoupons = data || [];
+  renderCoupons();
+}
+
+function onCouponTypeChange() {
+  const type = document.getElementById('cp-type').value;
+  const wrap = document.getElementById('cp-value-wrap');
+  const lbl  = document.getElementById('cp-value-label');
+  if (type === 'travel') {
+    wrap.style.display = 'none';
+  } else {
+    wrap.style.display = 'flex';
+    lbl.textContent = type === 'percent' ? 'Discount %' : 'Discount $';
+  }
+}
+
+async function createCoupon() {
+  const code     = document.getElementById('cp-code').value.trim().toUpperCase();
+  const type     = document.getElementById('cp-type').value;
+  const value    = type !== 'travel' ? parseFloat(document.getElementById('cp-value').value) : null;
+  const expires  = document.getElementById('cp-expires').value || null;
+  const maxUses  = document.getElementById('cp-max-uses').value ? parseInt(document.getElementById('cp-max-uses').value) : null;
+
+  if (!code) { toast('Enter a coupon code.'); return; }
+  if (type !== 'travel' && (!value || value <= 0)) { toast('Enter a valid discount value.'); return; }
+  if (type === 'percent' && value > 100) { toast('Percentage can\'t exceed 100%.'); return; }
+
+  const { error } = await sb.from('coupons').insert({ code, type, value, expires_at: expires, max_uses: maxUses, active: true });
+  if (error) {
+    if (error.code === '23505') toast('That code already exists.');
+    else toast('Error creating coupon.');
+    return;
+  }
+
+  // Reset form
+  document.getElementById('cp-code').value = '';
+  document.getElementById('cp-value').value = '';
+  document.getElementById('cp-expires').value = '';
+  document.getElementById('cp-max-uses').value = '';
+
+  await loadCoupons();
+  toast('Coupon created!');
+}
+
+function renderCoupons() {
+  const el = document.getElementById('coupons-list');
+  if (!allCoupons.length) { el.innerHTML = '<p class="no-data">No coupons yet.</p>'; return; }
+
+  el.innerHTML = allCoupons.map(c => {
+    const typeLabel = c.type === 'percent' ? c.value + '% off'
+      : c.type === 'fixed' ? '$' + c.value + ' off'
+      : 'Travel fee waived';
+    const expires = c.expires_at ? 'Expires ' + c.expires_at : 'No expiry';
+    const uses = c.max_uses ? c.uses + ' / ' + c.max_uses + ' uses' : c.uses + ' uses';
+    const expired = c.expires_at && new Date(c.expires_at) < new Date();
+
+    return `<div class="coupon-row ${!c.active ? 'inactive' : ''}">
+      <div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="coupon-code">${c.code}</span>
+          <span class="coupon-badge ${c.type}">${typeLabel}</span>
+          ${expired ? '<span class="coupon-badge" style="color:var(--red);border-color:rgba(255,77,77,.3);background:rgba(255,77,77,.08)">Expired</span>' : ''}
+          ${!c.active ? '<span class="coupon-badge" style="color:var(--t3);border-color:var(--b3)">Inactive</span>' : ''}
+        </div>
+        <div class="coupon-meta">${expires} · ${uses}</div>
+      </div>
+      <div class="coupon-actions">
+        <button class="toggle-active-btn" onclick="toggleCoupon('${c.id}',${c.active})">${c.active ? 'Disable' : 'Enable'}</button>
+        <button class="del-coupon-btn" onclick="deleteCoupon('${c.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleCoupon(id, cur) {
+  await sb.from('coupons').update({ active: !cur }).eq('id', id);
+  await loadCoupons();
+  toast(cur ? 'Coupon disabled.' : 'Coupon enabled!');
+}
+
+async function deleteCoupon(id) {
+  if (!confirm('Delete this coupon permanently?')) return;
+  await sb.from('coupons').delete().eq('id', id);
+  await loadCoupons();
+  toast('Coupon deleted.');
+}
 </script>
 </body>
 </html>

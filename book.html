@@ -110,7 +110,16 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .tr-row.free{color:var(--accent);justify-content:center;font-size:11px;margin-top:6px}
 .travel-calculating{font-size:11px;color:var(--t3);margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:.06em;display:none}
 
-/* AVAILABILITY CALENDAR */
+/* COUPON */
+.coupon-input-wrap{display:flex;gap:8px}
+.coupon-input-wrap input{flex:1}
+.coupon-apply-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:6px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.coupon-apply-btn:hover{border-color:var(--accent);color:var(--accent)}
+.coupon-status{font-size:11px;margin-top:6px;min-height:16px}
+.coupon-status.ok{color:#a78bfa}
+.coupon-status.err{color:var(--red)}
+
+
 .avail-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden}
 .avail-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b1);flex-wrap:wrap;gap:8px}
 .avail-hint{font-size:11px;color:var(--t3)}
@@ -379,13 +388,24 @@ footer span{font-size:11px;color:var(--t3)}
               <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
               <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
               <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
+              <div class="cost-line hide" id="cl-coupon" style="color:#a78bfa"><span id="cl-coupon-label">Coupon</span><span id="cl-coupon-val"></span></div>
               <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
               <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
             </div>
           </div>
           <hr class="divider"/>
+          <!-- COUPON -->
+          <div class="field full" style="margin:0">
+            <label>Coupon code (optional)</label>
+            <div class="coupon-input-wrap">
+              <input type="text" id="coupon-input" placeholder="e.g. SUMMER25" autocomplete="off" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyCoupon();}"/>
+              <button type="button" class="coupon-apply-btn" onclick="applyCoupon()">Apply</button>
+            </div>
+            <div class="coupon-status" id="coupon-status"></div>
+          </div>
+          <hr class="divider"/>
           <div class="field full">
-            <label>How'd you find me?</label>
+            <label>How'd you find Zachary?</label>
             <select name="Referral" id="referral" required>
               <option value="" disabled selected>Select...</option>
               <option>Instagram (@zacharyroutsongphotos)</option>
@@ -425,8 +445,9 @@ var FREE_MI  = 15;
 
 // ── STATE ──
 var selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
-var travelCost = 0, travelReady = true; // travelReady = false while OSRM is calculating
+var travelCost = 0, travelReady = true;
 var acTimer = null, acResults = [], acIdx = -1;
+var activeCoupon = null; // {code, type, value}
 
 // ── FORM SUBMIT ──
 document.getElementById('booking-form').addEventListener('submit', async function(e) {
@@ -510,9 +531,16 @@ document.getElementById('booking-form').addEventListener('submit', async functio
 function syncHiddenFields() {
   var pc = qPhotos * 15, pr = qPrints * 3;
   var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
-  var total   = (selPkg ? selPkg.price : 0) + pc + pr + travelCost + at;
+  var effectiveTravel = (activeCoupon && activeCoupon.type === 'travel') ? 0 : travelCost;
+  var subtotal = (selPkg ? selPkg.price : 0) + pc + pr + effectiveTravel + at;
+  var discount = 0;
+  if (activeCoupon) {
+    if (activeCoupon.type === 'percent') discount = Math.floor(subtotal * (activeCoupon.value / 100) * 100) / 100;
+    else if (activeCoupon.type === 'fixed') discount = Math.min(parseFloat(activeCoupon.value), subtotal);
+    else if (activeCoupon.type === 'travel') discount = travelCost;
+  }
+  var total   = Math.max(0, subtotal - discount);
   var deposit = Math.round(total * 50) / 100;
-  var balance = total - deposit;
   var an = [];
   if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
   if (qPrints > 0) an.push('Prints x' + qPrints);
@@ -524,6 +552,11 @@ function syncHiddenFields() {
   document.getElementById('h-total').value   = '$' + total.toFixed(2);
   document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
   document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
+  if (activeCoupon) {
+    document.getElementById('h-booking-num').value = (document.getElementById('h-booking-num').value || '') ;
+    // Increment coupon usage in Supabase
+    sb.from('coupons').update({ uses: (activeCoupon.uses || 0) + 1 }).eq('id', activeCoupon.id);
+  }
 }
 
 // ── ADDRESS SEARCH ──
@@ -690,16 +723,19 @@ async function calcTravel(lat, lng) {
 
   var onewayMi = null;
   try {
+    var controller = new AbortController();
+    var osrmTimeout = setTimeout(function() { controller.abort(); }, 5000);
     var url = 'https://router.project-osrm.org/route/v1/driving/'
       + ORIGIN.lng + ',' + ORIGIN.lat + ';'
       + lng + ',' + lat + '?overview=false';
-    var resp = await fetch(url);
+    var resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(osrmTimeout);
     var data = await resp.json();
     if (data.code === 'Ok' && data.routes && data.routes.length) {
       onewayMi = data.routes[0].distance * 0.000621371;
     }
   } catch(e) {
-    console.warn('OSRM unavailable, using haversine fallback');
+    console.warn('OSRM unavailable or timed out, using haversine fallback');
   }
 
   if (!onewayMi) {
@@ -770,7 +806,51 @@ function togAddon(pill) {
   updateCost();
 }
 
-// ── COST ──
+// ── COUPON ──
+async function applyCoupon() {
+  var code = document.getElementById('coupon-input').value.trim().toUpperCase();
+  var statusEl = document.getElementById('coupon-status');
+  statusEl.className = 'coupon-status';
+  statusEl.textContent = '';
+
+  if (!code) { statusEl.className = 'coupon-status err'; statusEl.textContent = 'Enter a code first.'; return; }
+
+  var result = await sb.from('coupons').select('*').eq('code', code).eq('active', true).single();
+
+  if (result.error || !result.data) {
+    activeCoupon = null;
+    statusEl.className = 'coupon-status err';
+    statusEl.textContent = 'Invalid or expired code.';
+    updateCost(); return;
+  }
+
+  var c = result.data;
+
+  // Check expiry
+  if (c.expires_at && new Date(c.expires_at) < new Date()) {
+    activeCoupon = null;
+    statusEl.className = 'coupon-status err';
+    statusEl.textContent = 'This code has expired.';
+    updateCost(); return;
+  }
+
+  // Check max uses
+  if (c.max_uses !== null && c.uses >= c.max_uses) {
+    activeCoupon = null;
+    statusEl.className = 'coupon-status err';
+    statusEl.textContent = 'This code has reached its usage limit.';
+    updateCost(); return;
+  }
+
+  activeCoupon = c;
+  statusEl.className = 'coupon-status ok';
+  statusEl.textContent = c.type === 'percent' ? '✓ ' + c.value + '% off applied!'
+    : c.type === 'fixed' ? '✓ $' + c.value + ' off applied!'
+    : '✓ Travel fee waived!';
+  updateCost();
+}
+
+
 function showLine(id, show, vid, val) {
   var r = document.getElementById(id);
   if (show) { r.classList.remove('hide'); if (vid) document.getElementById(vid).textContent = val; }
@@ -791,7 +871,10 @@ function updateCost() {
   document.getElementById('cl-pkg-p').textContent = '$' + selPkg.price.toFixed(2);
   showLine('cl-photos', qPhotos > 0, 'cl-photos-v', qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · +$' + pc.toFixed(2));
   showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
-  showLine('cl-travel', travelCost > 0, 'cl-travel-v', '+$' + travelCost.toFixed(2));
+
+  // Travel — waived if travel coupon applied
+  var effectiveTravel = (activeCoupon && activeCoupon.type === 'travel') ? 0 : travelCost;
+  showLine('cl-travel', effectiveTravel > 0, 'cl-travel-v', '+$' + effectiveTravel.toFixed(2));
 
   var at = 0;
   ['cl-a0','cl-a1','cl-a2'].forEach(function(id, i) {
@@ -800,11 +883,39 @@ function updateCost() {
     else row.classList.add('hide');
   });
 
-  var total   = selPkg.price + pc + pr + travelCost + at;
+  var subtotal = selPkg.price + pc + pr + effectiveTravel + at;
+
+  // Coupon discount
+  var discount = 0;
+  var couponRow = document.getElementById('cl-coupon');
+  if (activeCoupon) {
+    if (activeCoupon.type === 'percent') {
+      discount = Math.floor(subtotal * (activeCoupon.value / 100) * 100) / 100;
+      couponRow.classList.remove('hide');
+      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' (' + activeCoupon.value + '% off)';
+      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
+    } else if (activeCoupon.type === 'fixed') {
+      discount = Math.min(parseFloat(activeCoupon.value), subtotal);
+      couponRow.classList.remove('hide');
+      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' ($' + activeCoupon.value + ' off)';
+      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
+    } else if (activeCoupon.type === 'travel' && travelCost > 0) {
+      discount = travelCost;
+      couponRow.classList.remove('hide');
+      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' (travel waived)';
+      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
+    } else {
+      couponRow.classList.add('hide');
+    }
+  } else {
+    couponRow.classList.add('hide');
+  }
+
+  var total   = Math.max(0, subtotal - discount);
   var deposit = Math.round(total * 50) / 100;
   var balance = total - deposit;
 
-  document.getElementById('cl-total').textContent   = '$' + total.toFixed(2);
+  document.getElementById('cl-total').textContent   = '$' + subtotal.toFixed(2) + (discount > 0 ? ' → $' + total.toFixed(2) : '');
   document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
   document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
 }
