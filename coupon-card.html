@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Coupon Card Generator — ZRP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--s1:#111;--s2:#181818;
+  --b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;
+  --t1:#efefef;--t2:#aaa;--t3:#666;
+  --accent:#00b7e3;--accent-d:#0099c4;
+  --accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
+  --radius:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;padding:40px 20px}
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1);margin:-40px -20px 40px;position:sticky;top:0;background:var(--bg);z-index:10}
+.nav-logo{font-size:13px;font-weight:500;color:var(--t1);text-decoration:none}
+.nav-back{font-size:12px;color:var(--t3);text-decoration:none;transition:color .15s}
+.nav-back:hover{color:var(--t1)}
+
+.page{max-width:900px;margin:0 auto;display:grid;grid-template-columns:320px 1fr;gap:40px;align-items:start}
+@media(max-width:700px){.page{grid-template-columns:1fr}}
+
+/* CONTROLS */
+.controls{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:20px;position:sticky;top:80px}
+.ctrl-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.ctrl-title::after{content:'';flex:1;height:1px;background:var(--b2)}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+input,select{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%;appearance:none;color-scheme:dark}
+input:focus,select:focus{border-color:var(--b3)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select option{background:var(--s2)}
+.btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;margin-top:4px}
+.btn:hover{background:var(--accent-d)}
+.btn-ghost{width:100%;background:none;color:var(--t2);border:1px solid var(--b2);border-radius:6px;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;margin-top:8px}
+.btn-ghost:hover{border-color:var(--t3);color:var(--t1)}
+
+/* PREVIEW AREA */
+.preview-area{}
+.preview-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.preview-label::after{content:'';flex:1;height:1px;background:var(--b2)}
+
+/* THE CARD — 1080x1080 ratio for IG, scaled down for preview */
+.card-wrap{width:100%;aspect-ratio:1;position:relative}
+.card{
+  width:100%;height:100%;
+  background:#0a0a0a;
+  border-radius:12px;
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:8%;
+}
+
+/* Background texture */
+.card::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 20% 80%, rgba(0,183,227,.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0,183,227,.04) 0%, transparent 50%);
+  pointer-events:none;
+}
+
+/* Perforated edge */
+.card-perf{
+  position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);
+  height:2px;
+  background:repeating-linear-gradient(90deg,transparent,transparent 8px,#1e1e1e 8px,#1e1e1e 14px);
+  pointer-events:none;
+  z-index:1;
+  display:none; /* shown when style=ticket */
+}
+
+/* TOP SECTION */
+.card-top{position:relative;z-index:2}
+.card-brand{font-family:'DM Mono',monospace;font-size:clamp(8px,1.8vw,13px);letter-spacing:.18em;text-transform:uppercase;color:var(--t3);margin-bottom:clamp(8px,2vw,16px)}
+.card-headline{font-size:clamp(12px,3vw,22px);font-weight:300;color:var(--t1);line-height:1.2;letter-spacing:-.02em;margin-bottom:clamp(4px,1vw,8px)}
+.card-sub{font-size:clamp(9px,1.6vw,12px);color:var(--t3);line-height:1.5}
+
+/* MIDDLE — discount display */
+.card-mid{position:relative;z-index:2;text-align:center;padding:clamp(12px,3vw,24px) 0}
+.discount-num{font-family:'DM Mono',monospace;font-size:clamp(36px,10vw,80px);font-weight:300;color:var(--accent);letter-spacing:-.04em;line-height:1}
+.discount-unit{font-family:'DM Mono',monospace;font-size:clamp(10px,2.5vw,20px);color:var(--accent);opacity:.7;margin-top:clamp(2px,.5vw,4px)}
+.discount-label{font-family:'DM Mono',monospace;font-size:clamp(7px,1.4vw,10px);letter-spacing:.2em;text-transform:uppercase;color:var(--t3);margin-top:clamp(4px,1vw,8px)}
+
+/* BOTTOM */
+.card-bottom{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(8px,2vw,16px)}
+.code-block{}
+.code-tag{font-family:'DM Mono',monospace;font-size:clamp(6px,1.2vw,9px);letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:clamp(3px,.8vw,6px)}
+.code-val{font-family:'DM Mono',monospace;font-size:clamp(14px,4vw,28px);font-weight:500;color:var(--t1);letter-spacing:.1em;background:var(--b1);border:1px solid var(--b2);border-radius:4px;padding:clamp(4px,1vw,8px) clamp(8px,2vw,16px);display:inline-block}
+.expiry-tag{font-family:'DM Mono',monospace;font-size:clamp(6px,1.2vw,9px);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:clamp(4px,1vw,8px)}
+.qr-wrap{flex-shrink:0;background:white;border-radius:6px;padding:clamp(4px,1vw,8px);display:flex;align-items:center;justify-content:center}
+.qr-wrap canvas{display:block;width:clamp(50px,12vw,90px) !important;height:clamp(50px,12vw,90px) !important}
+
+/* Accent line top */
+.card-accent-line{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),rgba(0,183,227,.2));z-index:3}
+
+/* STYLE VARIANTS */
+.card.style-light{background:#f5f5f0}
+.card.style-light .card-brand{color:#999}
+.card.style-light .card-headline{color:#111}
+.card.style-light .card-sub{color:#888}
+.card.style-light .discount-label{color:#999}
+.card.style-light .code-val{background:#e8e8e4;border-color:#d5d5d0;color:#111}
+.card.style-light .code-tag{color:#999}
+.card.style-light .expiry-tag{color:#aaa}
+.card.style-light::before{background-image:radial-gradient(circle at 20% 80%, rgba(0,183,227,.08) 0%, transparent 50%),radial-gradient(circle at 80% 20%, rgba(0,183,227,.05) 0%, transparent 50%)}
+.card.style-light .qr-wrap{background:#111;border-radius:6px}
+
+.card.style-minimal{background:#0f0f0f;border:1px solid #1e1e1e}
+.card.style-minimal .discount-num{color:#efefef}
+.card.style-minimal .discount-unit{color:#aaa}
+.card.style-minimal .card-accent-line{background:#222}
+
+/* Download hint */
+.preview-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:12px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="admin.html" class="nav-logo">ZRP</a>
+  <a href="admin.html" class="nav-back">← Back to admin</a>
+</nav>
+
+<div class="page">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="ctrl-title">customize</div>
+
+    <div class="field">
+      <label>Coupon code</label>
+      <input type="text" id="ctrl-code" placeholder="ZAC15" value="ZAC15" oninput="update()" style="text-transform:uppercase"/>
+    </div>
+    <div class="field">
+      <label>Discount type</label>
+      <select id="ctrl-type" onchange="update()">
+        <option value="percent">Percentage off</option>
+        <option value="fixed">Fixed $ off</option>
+        <option value="travel">Travel fee waived</option>
+      </select>
+    </div>
+    <div class="field" id="val-wrap">
+      <label id="val-label">Discount %</label>
+      <input type="number" id="ctrl-val" value="15" min="0" oninput="update()"/>
+    </div>
+    <div class="field">
+      <label>Headline (optional)</label>
+      <input type="text" id="ctrl-headline" placeholder="Book your next game day!" value="Book your next game day!" oninput="update()"/>
+    </div>
+    <div class="field">
+      <label>Expires</label>
+      <input type="text" id="ctrl-expires" placeholder="April 30, 2026" value="" oninput="update()"/>
+    </div>
+    <div class="field">
+      <label>Style</label>
+      <select id="ctrl-style" onchange="update()">
+        <option value="dark">Dark (IG-ready)</option>
+        <option value="light">Light (print-friendly)</option>
+        <option value="minimal">Minimal</option>
+      </select>
+    </div>
+
+    <button class="btn" onclick="downloadCard()">Download PNG</button>
+    <button class="btn-ghost" onclick="window.print()">Print</button>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-area">
+    <div class="preview-label">preview</div>
+    <div class="card-wrap">
+      <div class="card" id="card">
+        <div class="card-accent-line"></div>
+        <div class="card-perf" id="card-perf"></div>
+
+        <div class="card-top">
+          <div class="card-brand">Zachary Routsong Photography · Valdosta, GA</div>
+          <div class="card-headline" id="card-headline">Book your next game day!</div>
+          <div class="card-sub">Sports photography for local teams &amp; events.<br/>Fast turnaround · zrphotos.net</div>
+        </div>
+
+        <div class="card-mid">
+          <div class="discount-num" id="disc-num">15</div>
+          <div class="discount-unit" id="disc-unit">% off</div>
+          <div class="discount-label" id="disc-label">your booking</div>
+        </div>
+
+        <div class="card-bottom">
+          <div class="code-block">
+            <div class="code-tag">Use code at checkout</div>
+            <div class="code-val" id="card-code">ZAC15</div>
+            <div class="expiry-tag" id="card-expiry"></div>
+          </div>
+          <div class="qr-wrap" id="qr-wrap">
+            <canvas id="qr-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="preview-hint">Download as PNG to share on Instagram, or hit Print for a physical copy.</p>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+// Pre-fill from URL params if coming from admin
+const params = new URLSearchParams(window.location.search);
+if (params.get('code'))    document.getElementById('ctrl-code').value    = params.get('code').toUpperCase();
+if (params.get('type'))    document.getElementById('ctrl-type').value    = params.get('type');
+if (params.get('value'))   document.getElementById('ctrl-val').value     = params.get('value');
+if (params.get('expires')) document.getElementById('ctrl-expires').value = params.get('expires');
+
+function update() {
+  const code    = document.getElementById('ctrl-code').value.toUpperCase() || 'CODE';
+  const type    = document.getElementById('ctrl-type').value;
+  const val     = document.getElementById('ctrl-val').value;
+  const headline= document.getElementById('ctrl-headline').value;
+  const expires = document.getElementById('ctrl-expires').value;
+  const style   = document.getElementById('ctrl-style').value;
+
+  // Value field visibility
+  const valWrap = document.getElementById('val-wrap');
+  const valLabel = document.getElementById('val-label');
+  valWrap.style.display = type === 'travel' ? 'none' : 'flex';
+  valLabel.textContent = type === 'percent' ? 'Discount %' : 'Discount $';
+
+  // Discount display
+  const discNum  = document.getElementById('disc-num');
+  const discUnit = document.getElementById('disc-unit');
+  const discLabel= document.getElementById('disc-label');
+  if (type === 'travel') {
+    discNum.textContent  = 'FREE';
+    discNum.style.fontSize = 'clamp(28px,7vw,56px)';
+    discUnit.textContent = 'travel included';
+    discLabel.textContent= 'no fuel surcharge';
+  } else if (type === 'percent') {
+    discNum.textContent  = val || '0';
+    discNum.style.fontSize = '';
+    discUnit.textContent = '% off';
+    discLabel.textContent= 'your booking';
+  } else {
+    discNum.textContent  = '$' + (val || '0');
+    discNum.style.fontSize = 'clamp(28px,7vw,56px)';
+    discUnit.textContent = 'off your booking';
+    discLabel.textContent= 'applied at checkout';
+  }
+
+  // Code and expiry
+  document.getElementById('card-code').textContent = code;
+  document.getElementById('card-headline').textContent = headline || '';
+  document.getElementById('card-expiry').textContent = expires ? 'Valid until ' + expires : '';
+
+  // Style
+  const card = document.getElementById('card');
+  card.className = 'card' + (style !== 'dark' ? ' style-' + style : '');
+
+  // QR code — points to booking page with code pre-filled
+  const bookingUrl = 'https://zrphotos.net/book.html?coupon=' + encodeURIComponent(code);
+  const qrColor = style === 'light' ? { dark: '#111111', light: '#ffffff' } : { dark: '#ffffff', light: '#111111' };
+  QRCode.toCanvas(document.getElementById('qr-canvas'), bookingUrl, {
+    width: 90, margin: 1,
+    color: qrColor,
+    errorCorrectionLevel: 'M'
+  });
+}
+
+async function downloadCard() {
+  const card = document.getElementById('card');
+  const code = document.getElementById('ctrl-code').value.toUpperCase() || 'COUPON';
+  try {
+    const canvas = await html2canvas(card, {
+      scale: 4, // high res
+      useCORS: true,
+      backgroundColor: null,
+      logging: false
+    });
+    const a = document.createElement('a');
+    a.download = 'ZRP-coupon-' + code + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } catch(e) {
+    alert('Download failed — try the Print option instead.');
+  }
+}
+
+// Auto-fill coupon from Supabase if code param passed
+async function autoFill() {
+  const code = params.get('code');
+  if (!code) return;
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data } = await sb.from('coupons').select('*').eq('code', code.toUpperCase()).single();
+  if (data) {
+    document.getElementById('ctrl-type').value = data.type;
+    if (data.value) document.getElementById('ctrl-val').value = data.value;
+    if (data.expires_at) document.getElementById('ctrl-expires').value = new Date(data.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+  update();
+}
+
+// Init
+update();
+autoFill();
+</script>
+</body>
+</html>
