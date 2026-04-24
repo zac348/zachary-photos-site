@@ -532,7 +532,7 @@ ${booking && (booking['Deposit Due'] || booking.deposit) ? `
   setTimeout(() => win.print(), 600);
 }
 
-
+async function createGallery() {
   const name = document.getElementById('new-gal-name').value.trim();
   if (!name) { toast('Enter a client name first.'); return; }
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
