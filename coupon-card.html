@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Coupon Card Generator — ZRP</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -199,7 +198,7 @@ select option{background:var(--s2)}
             <div class="expiry-tag" id="card-expiry"></div>
           </div>
           <div class="qr-wrap" id="qr-wrap">
-            <canvas id="qr-canvas"></canvas>
+            <img id="qr-img" src="" alt="QR" style="display:block;width:clamp(50px,12vw,90px);height:clamp(50px,12vw,90px)" crossorigin="anonymous"/>
           </div>
         </div>
       </div>
@@ -264,14 +263,12 @@ function update() {
   const card = document.getElementById('card');
   card.className = 'card' + (style !== 'dark' ? ' style-' + style : '');
 
-  // QR code — points to booking page with code pre-filled
+  // QR code — use img src so it always works
   const bookingUrl = 'https://zrphotos.net/book.html?coupon=' + encodeURIComponent(code);
-  const qrColor = style === 'light' ? { dark: '#111111', light: '#ffffff' } : { dark: '#ffffff', light: '#111111' };
-  QRCode.toCanvas(document.getElementById('qr-canvas'), bookingUrl, {
-    width: 90, margin: 1,
-    color: qrColor,
-    errorCorrectionLevel: 'M'
-  });
+  const qrBg = style === 'light' ? 'ffffff' : '111111';
+  const qrFg = style === 'light' ? '111111' : 'ffffff';
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&bgcolor=${qrBg}&color=${qrFg}&margin=4&data=${encodeURIComponent(bookingUrl)}`;
+  document.getElementById('qr-img').src = qrSrc;
 }
 
 async function downloadCard() {
