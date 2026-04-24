@@ -446,6 +446,9 @@ var GAS      = 3.69;
 var MPG      = 22.5;
 var FREE_MI  = 15;
 
+// Supabase client — defined at top so it's available everywhere
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // ── STATE ──
 var selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
 var travelCost = 0, travelReady = true;
@@ -484,27 +487,28 @@ document.getElementById('booking-form').addEventListener('submit', async functio
     var deposit = Math.round(total * 50) / 100;
 
     var insertData = {
-      first_name:     document.getElementById('fname').value,
-      last_name:      document.getElementById('lname').value,
-      email:          document.getElementById('email').value,
-      phone:          document.getElementById('phone').value,
-      event_date:     document.getElementById('edate').value,
-      event_time:     document.getElementById('etime').value,
-      sport_type:     document.getElementById('sport').value,
-      event_location: document.getElementById('venue').value,
+      first_name:       document.getElementById('fname').value,
+      last_name:        document.getElementById('lname').value,
+      email:            document.getElementById('email').value,
+      phone:            document.getElementById('phone').value,
+      event_date:       document.getElementById('edate').value,
+      event_time:       document.getElementById('etime').value,
+      sport_type:       document.getElementById('sport').value,
+      event_location:   document.getElementById('venue').value,
       package_selected: selPkg.name + ' — $' + selPkg.price,
-      addons:         document.getElementById('h-addons').value,
-      total:          '$' + total.toFixed(2),
-      deposit:        '$' + deposit.toFixed(2),
-      travel_fee:     travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None',
-      referral:       document.getElementById('referral').value,
-      notes:          document.getElementById('notes').value,
-      status:         'pending'
+      addons:           document.getElementById('h-addons').value,
+      total:            '$' + total.toFixed(2),
+      deposit:          '$' + deposit.toFixed(2),
+      travel_fee:       travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None',
+      referral:         document.getElementById('referral').value || null,
+      notes:            document.getElementById('notes').value || null,
+      status:           'pending'
     };
 
     var result = await sb.from('bookings').insert(insertData).select('id').single();
-    if (result.data && result.data.id) {
-      // Use the Supabase row ID suffix as the booking number
+    if (result.error) {
+      console.error('Supabase insert error:', result.error);
+    } else if (result.data && result.data.id) {
       var shortId = result.data.id.slice(-5).toUpperCase();
       bookingNum = 'ZRP-' + year + '-' + shortId;
       await sb.from('bookings').update({ booking_number: bookingNum }).eq('id', result.data.id);
@@ -708,8 +712,7 @@ function renderPublicCal() {
   }
 }
 
-// Load Supabase for public calendar
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Load calendar
 initCalendar();
 
 async function calcTravel(lat, lng) {
