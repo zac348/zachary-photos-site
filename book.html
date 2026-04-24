@@ -47,6 +47,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 @media(max-width:560px){.pkg-grid{grid-template-columns:1fr}}
 .pkg-card{background:var(--s1);padding:18px 16px 18px;cursor:pointer;transition:background .15s;position:relative;display:flex;flex-direction:column}
 .pkg-card:hover{background:var(--s2)}
+.pkg-card.unavailable{opacity:.4;cursor:not-allowed;pointer-events:none}
+.pkg-card.unavailable::after{content:'Unavailable';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);background:rgba(255,77,77,.06);border-radius:0}
+.pkg-header-cell.unavailable .pkg-header-name{color:var(--t4)}
+.pkg-header-cell.unavailable::after{content:'Unavailable';font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.2);border-radius:3px;padding:2px 7px}
+.toggle-pill.unavailable{opacity:.4;cursor:not-allowed;pointer-events:none;position:relative}
+.toggle-pill.unavailable::after{content:'Unavailable';position:absolute;right:12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--red)}
 .pkg-card.selected{background:var(--s2)}
 .pkg-card.selected::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
 .pkg-check{display:none;position:absolute;top:10px;right:12px;width:16px;height:16px;background:var(--accent);border-radius:50%;align-items:center;justify-content:center}
@@ -782,29 +788,34 @@ var pkgFeatures = {
 };
 
 async function loadPackagePricing() {
-  var { data, error } = await sb.from('package_pricing').select('*').order('base_price');
-  if (error || !data || !data.length) {
-    // Fall back to hardcoded prices if table doesn't exist yet
+  var pkgRes = await sb.from('package_pricing').select('*').order('base_price');
+  var addonRes = await sb.from('addon_pricing').select('*').order('price');
+
+  var data = pkgRes.data;
+  if (pkgRes.error || !data || !data.length) {
     data = [
-      { package_name: 'Basic',    base_price: 40,  sale_price: null, on_sale: false },
-      { package_name: 'Standard', base_price: 75,  sale_price: null, on_sale: false },
-      { package_name: 'Premium',  base_price: 120, sale_price: null, on_sale: false }
+      { package_name: 'Basic',    base_price: 40,  sale_price: null, on_sale: false, available: true },
+      { package_name: 'Standard', base_price: 75,  sale_price: null, on_sale: false, available: true },
+      { package_name: 'Premium',  base_price: 120, sale_price: null, on_sale: false, available: true }
     ];
   }
 
-  // Rebuild header with real names
+  // Rebuild header
   var header = document.getElementById('pkg-header');
   header.innerHTML = data.map(function(pkg) {
     var isPopular = pkg.package_name === 'Standard';
-    return '<div class="pkg-header-cell">' +
+    var unavail = pkg.available === false;
+    return '<div class="pkg-header-cell' + (unavail ? ' unavailable' : '') + '">' +
       '<span class="pkg-header-name">' + pkg.package_name + '</span>' +
-      (isPopular ? '<span class="pkg-popular">Popular</span>' : '') +
+      (isPopular && !unavail ? '<span class="pkg-popular">Popular</span>' : '') +
       '</div>';
   }).join('');
 
+  // Rebuild cards
   var grid = document.getElementById('pkg-grid');
   grid.innerHTML = data.map(function(pkg) {
     var onSale = pkg.on_sale && pkg.sale_price;
+    var unavail = pkg.available === false;
     var activePrice = onSale ? pkg.sale_price : pkg.base_price;
     var features = pkgFeatures[pkg.package_name] || [];
 
@@ -815,12 +826,28 @@ async function loadPackagePricing() {
       '</div>' +
       '<p class="pkg-price' + (onSale ? ' sale' : '') + '">$' + activePrice + ' <small>/ event</small></p>';
 
-    return '<div class="pkg-card" data-package="' + pkg.package_name + '" data-price="' + activePrice + '" onclick="selectPkg(this)">' +
+    return '<div class="pkg-card' + (unavail ? ' unavailable' : '') + '" data-package="' + pkg.package_name + '" data-price="' + activePrice + '" onclick="selectPkg(this)">' +
       '<div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>' +
       priceHTML +
       '<ul class="pkg-features">' + features.map(function(f) { return '<li>' + f + '</li>'; }).join('') + '</ul>' +
       '</div>';
   }).join('');
+
+  // Apply add-on availability
+  if (addonRes.data) {
+    addonRes.data.forEach(function(a) {
+      if (a.available === false) {
+        // Find toggle pill matching this addon name
+        document.querySelectorAll('.toggle-pill').forEach(function(pill) {
+          if (pill.dataset.addon === a.addon_name) {
+            pill.classList.add('unavailable');
+            // Remove from addons if somehow selected
+            addons = addons.filter(function(x) { return x.n !== a.addon_name; });
+          }
+        });
+      }
+    });
+  }
 }
 
 // ── PACKAGES ──
