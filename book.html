@@ -3,433 +3,115 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Book — Zachary Routsong Photography</title>
+<title>Your Gallery — ZRP</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0a0a0a;--s1:#111;--s2:#181818;
   --b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;
   --t1:#efefef;--t2:#aaa;--t3:#666;
-  --accent:#00b7e3;--accent-d:#0099c4;
-  --accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
-  --red:#ff4d4d;--radius:8px;
+  --accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
+  --radius:8px;
 }
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6}
-
-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1);position:sticky;top:0;background:var(--bg);z-index:100;gap:12px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6;min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1)}
 .nav-logo{font-size:13px;font-weight:500;color:var(--t1);text-decoration:none}
-.nav-links{display:flex;gap:20px}
-.nav-links a{font-size:12px;color:var(--t3);text-decoration:none;transition:color .15s}
-.nav-links a:hover{color:var(--t1)}
-.nav-cta{font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:7px 16px;border-radius:4px;text-decoration:none;transition:background .15s;white-space:nowrap;flex-shrink:0}
-.nav-cta:hover{background:var(--accent-d)}
-@media(max-width:560px){.nav-links{display:none}}
-
-.page{max-width:760px;margin:0 auto;padding:40px 20px 80px}
+.nav-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);background:var(--s1);border:1px solid var(--b2);border-radius:4px;padding:3px 8px}
+.page{max-width:960px;margin:0 auto;padding:40px 20px 80px}
 @media(max-width:600px){.page{padding:28px 16px 60px}}
-
-.sec-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.sec-label::after{content:'';flex:1;height:1px;background:var(--b2)}
-.block{margin-bottom:40px}
-
-/* PACKAGES */
-.pkg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden}
-@media(max-width:560px){.pkg-grid{grid-template-columns:1fr}}
-.pkg-card{background:var(--s1);padding:42px 16px 18px;cursor:pointer;transition:background .15s;position:relative}
-.pkg-card:hover{background:var(--s2)}
-.pkg-card.selected{background:var(--s2)}
-.pkg-card.selected::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
-.pkg-popular{position:absolute;top:14px;left:16px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:var(--accent);padding:2px 7px;border-radius:3px}
-.pkg-check{display:none;position:absolute;top:12px;right:12px;width:16px;height:16px;background:var(--accent);border-radius:50%;align-items:center;justify-content:center}
-.pkg-check svg{width:8px;height:8px;stroke:var(--bg);stroke-width:2.5;fill:none}
-.pkg-card.selected .pkg-check{display:flex}
-.pkg-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
-.pkg-price{font-size:26px;font-weight:300;color:var(--t1);letter-spacing:-.02em;line-height:1;margin-bottom:14px}
-.pkg-price small{font-size:12px;color:var(--t3);font-weight:400}
-.pkg-features{list-style:none;border-top:1px solid var(--b1);padding-top:12px}
-.pkg-features li{font-size:11px;color:var(--t2);padding:2px 0;display:flex;gap:6px;line-height:1.4}
-.pkg-features li::before{content:'–';color:var(--b3);flex-shrink:0}
-
-/* QTY */
-.addons-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.addons-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
-@media(max-width:600px){.addons-toggles{grid-template-columns:1fr 1fr}}
-@media(max-width:380px){.addons-grid{grid-template-columns:1fr}.addons-toggles{grid-template-columns:1fr}}
-
-.qty-pill{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 14px;transition:border-color .15s,background .15s}
-.qty-pill.active{border-color:var(--accent);background:var(--accent-bg)}
-.qty-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
-.qty-label{font-size:12px;color:var(--t2)}
-.qty-pill.active .qty-label{color:var(--t1)}
-.qty-rate{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3)}
-.qty-pill.active .qty-rate{color:var(--accent)}
-.qty-row{display:flex;align-items:center;border:1px solid var(--b2);border-radius:6px;overflow:hidden;width:fit-content}
-.qty-btn{background:var(--s2);border:none;color:var(--t2);width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;user-select:none}
-.qty-btn:hover{background:var(--b2);color:var(--t1)}
-.qty-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--t1);width:36px;text-align:center;background:var(--s1);border:none;border-left:1px solid var(--b2);border-right:1px solid var(--b2);height:30px;line-height:30px}
-.qty-sub{font-size:10px;color:var(--t3);margin-top:5px;font-family:'DM Mono',monospace}
-.qty-pill.active .qty-sub{color:var(--t2)}
-
-/* TOGGLES */
-.toggle-pill{display:flex;justify-content:space-between;align-items:center;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:11px 14px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;gap:8px}
-.toggle-pill:hover{border-color:var(--b2)}
-.toggle-pill.active{border-color:var(--accent);background:var(--accent-bg)}
-.toggle-left{display:flex;align-items:center;gap:10px;flex:1}
-.toggle-box{width:14px;height:14px;border-radius:3px;border:1px solid var(--b3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
-.toggle-pill.active .toggle-box{background:var(--accent);border-color:var(--accent)}
-.toggle-box svg{width:8px;height:8px;stroke:var(--bg);stroke-width:2.5;fill:none;display:none}
-.toggle-pill.active .toggle-box svg{display:block}
-.toggle-name{font-size:12px;color:var(--t2)}
-.toggle-pill.active .toggle-name{color:var(--t1)}
-.toggle-price{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);white-space:nowrap;flex-shrink:0}
-.toggle-pill.active .toggle-price{color:var(--accent)}
-
-/* TRAVEL */
-.travel-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:18px}
-.travel-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.travel-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3)}
-.gas-pill{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:4px;padding:3px 8px}
-.travel-hint{font-size:11px;color:var(--t3);margin-bottom:12px;line-height:1.5}
-.addr-wrap{position:relative}
-.addr-drop{position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--b3);border-top:none;border-radius:0 0 6px 6px;z-index:50;max-height:200px;overflow-y:auto;display:none}
-.addr-drop.open{display:block}
-.addr-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s}
-.addr-item:last-child{border-bottom:none}
-.addr-item:hover,.addr-item.focused{background:var(--b2)}
-.addr-main{font-size:12px;color:var(--t1)}
-.addr-sub{font-size:10px;color:var(--t3);margin-top:1px}
-.travel-err{font-size:11px;color:var(--red);margin-top:6px;display:none}
-.travel-result{border-top:1px solid var(--b1);padding-top:12px;margin-top:12px;display:none}
-.travel-result.show{display:block}
-.tr-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);padding:2px 0}
-.tr-row.big{font-size:13px;font-weight:500;color:var(--t1);border-top:1px solid var(--b1);margin-top:6px;padding-top:8px}
-.tr-row.free{color:var(--accent);justify-content:center;font-size:11px;margin-top:6px}
-.travel-calculating{font-size:11px;color:var(--t3);margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:.06em;display:none}
-
-/* COUPON */
-.coupon-input-wrap{display:flex;gap:8px}
-.coupon-input-wrap input{flex:1}
-.coupon-apply-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:6px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.coupon-apply-btn:hover{border-color:var(--accent);color:var(--accent)}
-.coupon-status{font-size:11px;margin-top:6px;min-height:16px}
-.coupon-status.ok{color:#a78bfa}
-.coupon-status.err{color:var(--red)}
-
-
-.avail-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden}
-.avail-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b1);flex-wrap:wrap;gap:8px}
-.avail-hint{font-size:11px;color:var(--t3)}
-.avail-nav{display:flex;align-items:center;gap:10px}
-.avail-month{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--t2);min-width:110px;text-align:center}
-.avail-nav-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t3);border-radius:4px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.avail-nav-btn:hover{color:var(--t1);border-color:var(--b3)}
-.avail-grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.avail-dow{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);text-align:center;padding:8px 0;border-bottom:1px solid var(--b1)}
-.avail-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--t3);position:relative;transition:background .1s;flex-direction:column;gap:1px}
-.avail-day.clickable{cursor:pointer}
-.avail-day.clickable:hover{background:var(--s2);color:var(--t1)}
-.avail-day.empty{pointer-events:none}
-.avail-day.past{color:var(--b3);pointer-events:none}
-.avail-day.today{color:var(--accent)}
-.avail-day.picked{background:var(--accent-bg);color:var(--accent);outline:1px solid var(--accent-border)}
-.avail-day.unavailable{color:#ff4d4d;background:rgba(255,77,77,.06)}
-.avail-day.partial{color:#f59e0b;background:rgba(245,158,11,.06);cursor:pointer}
-.avail-day.available{color:#22c55e;background:rgba(34,197,94,.06);cursor:pointer}
-.avail-day.unavailable.clickable{cursor:not-allowed}
-.avail-dot-sm{width:3px;height:3px;border-radius:50%;flex-shrink:0}
-.avail-legend{display:flex;gap:14px;padding:10px 16px;border-top:1px solid var(--b1);flex-wrap:wrap}
-.avail-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
-.avail-dot{width:6px;height:6px;border-radius:50%}
-
-
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:5px}
-.field.full{grid-column:1/-1}
-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-input,select,textarea{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:10px 12px;outline:none;transition:border-color .15s;width:100%;appearance:none;-webkit-appearance:none;color-scheme:dark}
-input::placeholder{color:var(--t3)}
-input:focus,select:focus,textarea:focus{border-color:var(--b3);background:var(--s2)}
-textarea{resize:vertical;min-height:76px}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
-select option{background:var(--s2);color:var(--t1)}
-input[type="date"],input[type="time"]{cursor:pointer}
-.divider{grid-column:1/-1;border:none;border-top:1px solid var(--b1);margin:2px 0}
-
-/* COST BOX */
-.cost-box{grid-column:1/-1;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:16px}
-.cost-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
-.cost-empty{font-size:12px;color:var(--t3);font-style:italic}
-.cost-line{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);padding:2px 0}
-.cost-line.hide{display:none}
-.cost-line.total{border-top:1px solid var(--b1);margin-top:8px;padding-top:9px;font-size:13px;font-weight:500;color:var(--t1)}
-.cost-line.deposit{font-size:12px;font-weight:500;color:var(--accent)}
-.cost-line.balance{font-size:11px;color:var(--t3)}
-
-.submit-wrap{grid-column:1/-1;margin-top:6px}
-.submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;position:relative}
-.submit-btn:hover:not(:disabled){background:var(--accent-d)}
-.submit-btn:disabled{opacity:.6;cursor:not-allowed}
-
-.success{display:none;text-align:center;padding:60px 20px}
-.success h3{font-size:16px;font-weight:500;margin-bottom:6px}
-.success p{font-size:12px;color:var(--t2)}
-
+.gallery-header{margin-bottom:36px}
+.gallery-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.gallery-title{font-size:22px;font-weight:400;letter-spacing:-.02em;margin-bottom:6px}
+.gallery-meta{font-size:12px;color:var(--t3)}
+.gallery-meta span{color:var(--accent)}
+.watermark-notice{display:none;margin-top:12px;padding:10px 14px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:6px;font-size:12px;color:#f59e0b}
+.dl-all{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:9px 18px;border-radius:6px;cursor:pointer;border:none;transition:background .15s;font-family:'DM Sans',sans-serif}
+.dl-all:hover{background:var(--accent-d)}
+.dl-all svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.dl-all:disabled{opacity:.4;cursor:not-allowed}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:3px}
+@media(max-width:480px){.photo-grid{grid-template-columns:repeat(2,1fr)}}
+.photo-item{aspect-ratio:4/3;background:var(--s1);overflow:hidden;position:relative;cursor:pointer}
+.photo-item canvas{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.photo-item:hover canvas{transform:scale(1.04)}
+.photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .25s;display:flex;align-items:center;justify-content:center;gap:10px}
+.photo-item:hover .photo-overlay{opacity:1}
+.ov-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:6px 10px;cursor:pointer;text-decoration:none;border:1px solid rgba(255,255,255,.2);color:var(--t1);background:rgba(255,255,255,.08);transition:background .15s}
+.ov-btn:hover{background:rgba(255,255,255,.16)}
+.ov-btn.dl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.ov-btn.dl:hover{background:rgba(0,183,227,.18)}
+.empty{text-align:center;padding:80px 20px}
+.empty h2{font-size:16px;font-weight:400;margin-bottom:6px}
+.empty p{font-size:12px;color:var(--t2)}
+.loading{text-align:center;padding:80px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--t3)}
+.not-found{text-align:center;padding:100px 20px}
+.not-found h2{font-size:18px;font-weight:400;margin-bottom:8px}
+.not-found p{font-size:12px;color:var(--t2);margin-bottom:20px}
+.not-found a{color:var(--accent);text-decoration:none;font-size:12px}
+.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.lb.open{display:flex}
+.lb canvas{max-width:90vw;max-height:78vh;object-fit:contain;border-radius:4px}
+.lb-actions{display:flex;gap:10px}
+.lb-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:8px 14px;cursor:pointer;text-decoration:none;border:1px solid rgba(255,255,255,.2);color:var(--t2);background:rgba(255,255,255,.06);transition:all .15s}
+.lb-btn:hover{color:var(--t1);border-color:rgba(255,255,255,.35)}
+.lb-btn.dl{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.lb-btn.dl:hover{background:rgba(0,183,227,.18)}
+.lb-close{position:absolute;top:18px;right:22px;font-size:22px;color:var(--t3);cursor:pointer;background:none;border:none}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2)}
+.lb-nav:hover{background:rgba(255,255,255,.12);color:var(--t1)}
+.lb-nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+#lb-prev{left:16px}#lb-next{right:16px}
+@media(max-width:600px){.lb-nav{display:none}}
 footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 footer span{font-size:11px;color:var(--t3)}
 .foot-links{display:flex;gap:16px}
-.foot-links a{font-size:11px;color:var(--t3);text-decoration:none;transition:color .15s}
+.foot-links a{font-size:11px;color:var(--t3);text-decoration:none}
 .foot-links a:hover{color:var(--t1)}
 </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="nav-logo">ZRP</a>
-  <div class="nav-links">
-    <a href="index.html#portfolio">Work</a>
-    <a href="index.html#about">About</a>
-    <a href="tel:2293001006">229-300-1006</a>
-    <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">Instagram</a>
-  </div>
-  <a href="#book" class="nav-cta">Book now</a>
+  <span class="nav-badge">Private gallery</span>
 </nav>
-
-<div class="page" id="book">
-
-  <!-- PACKAGES -->
-  <div class="block">
-    <div class="sec-label">packages</div>
-    <div class="pkg-grid">
-      <div class="pkg-card" data-package="Basic" data-price="40" onclick="selectPkg(this)">
-        <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-        <p class="pkg-name">Basic</p>
-        <p class="pkg-price">$40 <small>/ event</small></p>
-        <ul class="pkg-features">
-          <li>1–2 hours coverage</li>
-          <li>25 edited photos</li>
-          <li>Online gallery delivery</li>
-          <li>Personal use license</li>
-        </ul>
+<div class="page">
+  <div id="loading" class="loading">Loading your gallery...</div>
+  <div id="gallery-content" style="display:none">
+    <div class="gallery-header">
+      <p class="gallery-tag">Private client gallery</p>
+      <h1 class="gallery-title" id="g-title">Your Photos</h1>
+      <p class="gallery-meta" id="g-meta"></p>
+      <div class="watermark-notice" id="wm-notice">
+        ⚠️ These are preview photos with a watermark. Full resolution unwatermarked photos will be available once payment is confirmed.
       </div>
-      <div class="pkg-card" data-package="Standard" data-price="75" onclick="selectPkg(this)">
-        <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-        <span class="pkg-popular">Popular</span>
-        <p class="pkg-name">Standard</p>
-        <p class="pkg-price">$75 <small>/ event</small></p>
-        <ul class="pkg-features">
-          <li>Full game or 3 hrs</li>
-          <li>60 edited photos</li>
-          <li>Online gallery delivery</li>
-          <li>1 free 5×7 print</li>
-          <li>Personal use license</li>
-        </ul>
-      </div>
-      <div class="pkg-card" data-package="Premium" data-price="120" onclick="selectPkg(this)">
-        <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-        <p class="pkg-name">Premium</p>
-        <p class="pkg-price">$120 <small>/ event</small></p>
-        <ul class="pkg-features">
-          <li>Full day or double-header</li>
-          <li>100+ edited photos</li>
-          <li>Online gallery delivery</li>
-          <li>3 free 5×7 prints</li>
-          <li>Action highlight reel</li>
-          <li>Personal use license</li>
-        </ul>
-      </div>
+      <button class="dl-all" id="dl-all-btn" onclick="downloadAll()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download all
+      </button>
     </div>
+    <div class="photo-grid" id="photo-grid"></div>
   </div>
-
-  <!-- ADD-ONS -->
-  <div class="block">
-    <div class="sec-label">add-ons</div>
-    <div class="addons-grid">
-      <div class="qty-pill" id="qp-photos">
-        <div class="qty-top"><span class="qty-label">Extra edited photos (+25)</span><span class="qty-rate">$15/set</span></div>
-        <div class="qty-row">
-          <button class="qty-btn" onclick="chQty('photos',-1)">−</button>
-          <div class="qty-val" id="qv-photos">0</div>
-          <button class="qty-btn" onclick="chQty('photos',1)">+</button>
-        </div>
-        <div class="qty-sub" id="qs-photos">0 sets · $0.00</div>
-      </div>
-      <div class="qty-pill" id="qp-prints">
-        <div class="qty-top"><span class="qty-label">Printed 4×6 photos</span><span class="qty-rate">$3 each</span></div>
-        <div class="qty-row">
-          <button class="qty-btn" onclick="chQty('prints',-1)">−</button>
-          <div class="qty-val" id="qv-prints">0</div>
-          <button class="qty-btn" onclick="chQty('prints',1)">+</button>
-        </div>
-        <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
-      </div>
-    </div>
-    <div class="addons-toggles">
-      <div class="toggle-pill" data-addon="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery (24 hrs)</span></div>
-        <span class="toggle-price">+$40</span>
-      </div>
-      <div class="toggle-pill" data-addon="Video highlight reel" data-price="50" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Video highlight reel</span></div>
-        <span class="toggle-price">+$50</span>
-      </div>
-      <div class="toggle-pill" data-addon="Social media crop pack" data-price="10" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Social media crop pack</span></div>
-        <span class="toggle-price">+$10</span>
-      </div>
-    </div>
+  <div id="empty-state" class="empty" style="display:none">
+    <h2>Photos coming soon</h2>
+    <p>Check back shortly — Zachary is still editing your photos.</p>
   </div>
-
-  <!-- TRAVEL -->
-  <div class="block">
-    <div class="sec-label">travel estimate</div>
-    <div class="travel-card">
-      <div class="travel-top">
-        <span class="travel-title">Fuel cost calculator</span>
-        <span class="gas-pill">Valdosta avg: $3.69/gal</span>
-      </div>
-      <p class="travel-hint">Type an address or venue and pick from the results. Driving distance from Valdosta at 22.5 MPG, rounded down to nearest $0.10. Under 15 miles = no charge.</p>
-      <div class="addr-wrap">
-        <div class="field" style="margin:0">
-          <label for="addr-input">Shoot location</label>
-          <input type="text" id="addr-input" placeholder="e.g. Lowndes High School, Valdosta GA" autocomplete="off" oninput="onAddrInput(this.value)" onkeydown="onAddrKey(event)"/>
-        </div>
-        <div class="addr-drop" id="addr-drop"></div>
-      </div>
-      <p class="travel-err" id="travel-err">No results found — try adding a city or state.</p>
-      <p class="travel-calculating" id="travel-calc-status">Calculating driving distance...</p>
-      <div class="travel-result" id="travel-result">
-        <div class="tr-row"><span>One way distance</span><span id="tr-mi">—</span></div>
-        <div class="tr-row"><span>Gas price</span><span id="tr-gas">$3.69/gal</span></div>
-        <div class="tr-row"><span>Fuel used (round trip)</span><span id="tr-gal">—</span></div>
-        <div class="tr-row big" id="tr-fee-row"><span>Travel fee</span><span id="tr-fee">—</span></div>
-        <div class="tr-row free" id="tr-free" style="display:none">No travel fee — within 15 miles!</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AVAILABILITY -->
-  <div class="block">
-    <div class="sec-label">availability</div>
-    <div class="avail-card">
-      <div class="avail-header">
-        <span class="avail-hint">Click an available date to pre-fill your event date below.</span>
-        <div class="avail-nav">
-          <button class="avail-nav-btn" onclick="shiftCalMonth(-1)"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
-          <span class="avail-month" id="avail-month"></span>
-          <button class="avail-nav-btn" onclick="shiftCalMonth(1)"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg></button>
-        </div>
-      </div>
-      <div class="avail-grid" id="avail-dow">
-        <div class="avail-dow">Sun</div><div class="avail-dow">Mon</div><div class="avail-dow">Tue</div>
-        <div class="avail-dow">Wed</div><div class="avail-dow">Thu</div><div class="avail-dow">Fri</div><div class="avail-dow">Sat</div>
-      </div>
-      <div class="avail-grid" id="avail-grid"></div>
-      <div class="avail-legend">
-        <div class="avail-legend-item"><div class="avail-dot" style="background:#ff4d4d"></div>Unavailable</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:#f59e0b"></div>Partially available</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:#22c55e"></div>Available</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--b3)"></div>Not set</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FORM -->
-  <div class="block">
-    <div class="sec-label">your details</div>
-    <div id="form-wrap">
-      <!-- Formspree endpoint — all hidden fields get submitted too -->
-      <form id="booking-form" action="https://formspree.io/f/xzdyygdl" method="POST">
-        <!-- Hidden fields populated by JS -->
-        <input type="hidden" name="Package"      id="h-pkg"/>
-        <input type="hidden" name="Add-Ons"      id="h-addons"/>
-        <input type="hidden" name="Total"        id="h-total"/>
-        <input type="hidden" name="Deposit Due"  id="h-deposit"/>
-        <input type="hidden" name="Travel Fee"   id="h-travel"/>
-        <!-- Formspree redirect back to same page with ?success=1 -->
-        <input type="hidden" name="_next" value="thanks.html"/>
-        <input type="hidden" name="_subject" value="New booking request — ZRP"/>
-        <input type="hidden" name="Booking Number" id="h-booking-num"/>
-
-        <div class="form-grid">
-          <div class="field"><label>First name</label><input type="text" name="First Name" id="fname" placeholder="Jordan" required/></div>
-          <div class="field"><label>Last name</label><input type="text" name="Last Name" id="lname" placeholder="Smith" required/></div>
-          <div class="field"><label>Email</label><input type="email" name="Email" id="email" placeholder="you@email.com" required/></div>
-          <div class="field"><label>Phone</label><input type="tel" name="Phone" id="phone" placeholder="(229) 555-0100"/></div>
-          <hr class="divider"/>
-          <div class="field"><label>Event date</label><input type="date" name="Event Date" id="edate" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
-          <div class="field"><label>Start time</label><input type="time" name="Start Time" id="etime" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
-          <div class="field">
-            <label>Sport / event type</label>
-            <select name="Sport" id="sport" required>
-              <option value="" disabled selected>Select...</option>
-              <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
-              <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
-              <option>Wrestling</option><option>Swimming</option><option>Other</option>
-            </select>
-          </div>
-          <div class="field"><label>Venue / location</label><input type="text" name="Venue" id="venue" placeholder="Valdosta High School Stadium" required/></div>
-          <hr class="divider"/>
-          <div class="field"><label>Player last name</label><input type="text" name="Player Last Name" id="player-name" placeholder="e.g. Smith"/></div>
-          <div class="field"><label>Player number</label><input type="text" name="Player Number" id="player-num" placeholder="e.g. 24"/></div>
-          <hr class="divider"/>
-          <div class="field full"><label>Selected package</label><input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default;color:var(--t3)"/></div>
-          <hr class="divider"/>
-          <div class="cost-box">
-            <div class="cost-label">Estimate</div>
-            <div id="cost-empty" class="cost-empty">Select a package to see your total.</div>
-            <div id="cost-lines" style="display:none">
-              <div class="cost-line" id="cl-pkg"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
-              <div class="cost-line hide" id="cl-photos"><span>Extra photos</span><span id="cl-photos-v"></span></div>
-              <div class="cost-line hide" id="cl-prints"><span>Printed 4×6</span><span id="cl-prints-v"></span></div>
-              <div class="cost-line hide" id="cl-travel"><span>Travel (fuel)</span><span id="cl-travel-v"></span></div>
-              <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
-              <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
-              <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
-              <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
-              <div class="cost-line hide" id="cl-coupon" style="color:#a78bfa"><span id="cl-coupon-label">Coupon</span><span id="cl-coupon-val"></span></div>
-              <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
-              <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
-            </div>
-          </div>
-          <hr class="divider"/>
-          <!-- COUPON -->
-          <div class="field full" style="margin:0">
-            <label>Coupon code (optional)</label>
-            <div class="coupon-input-wrap">
-              <input type="text" id="coupon-input" placeholder="e.g. SUMMER25" autocomplete="off" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyCoupon();}"/>
-              <button type="button" class="coupon-apply-btn" onclick="applyCoupon()">Apply</button>
-            </div>
-            <div class="coupon-status" id="coupon-status"></div>
-          </div>
-          <hr class="divider"/>
-          <div class="field full">
-            <label>How'd you find Zachary?</label>
-            <select name="Referral" id="referral" required>
-              <option value="" disabled selected>Select...</option>
-              <option>Instagram (@zacharyroutsongphotos)</option>
-              <option>Word of mouth / friend</option>
-              <option>Saw photos at an event</option>
-              <option>Google search</option>
-              <option>School / team recommendation</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="field full"><label>Anything else? (optional)</label><textarea name="Notes" id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
-          <div class="submit-wrap">
-            <button type="submit" class="submit-btn" id="submit-btn">Send booking request</button>
-          </div>
-        </div>
-      </form>
-    </div>
-
+  <div id="not-found" class="not-found" style="display:none">
+    <h2>Gallery not found</h2>
+    <p>This link may be invalid or the gallery has been removed.</p>
+    <a href="index.html">← Back to site</a>
   </div>
 </div>
-
+<div class="lb" id="lb">
+  <button class="lb-close" onclick="closeLB()">×</button>
+  <button class="lb-nav" id="lb-prev" onclick="navLB(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <button class="lb-nav" id="lb-next" onclick="navLB(1)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+  <canvas id="lb-canvas"></canvas>
+  <div class="lb-actions">
+    <button class="lb-btn" onclick="closeLB()">Close</button>
+    <button class="lb-btn dl" id="lb-dl-btn" onclick="downloadCurrent()">Download</button>
+  </div>
+</div>
 <footer>
   <span>© 2025 Zachary Routsong Photography</span>
   <div class="foot-links">
@@ -437,493 +119,192 @@ footer span{font-size:11px;color:var(--t3)}
     <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">@zacharyroutsongphotos</a>
   </div>
 </footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script>
-// ── CONFIG ──
-// Origin: coordinates only, no address stored in source
-var ORIGIN   = { lat: 30.8876, lng: -83.3089 };
-var GAS      = 3.69;
-var MPG      = 22.5;
-var FREE_MI  = 15;
-
-// Supabase client — defined at top so it's available everywhere
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let photos = [], lbIdx = 0, useWatermark = true, galleryName = '';
 
-// ── STATE ──
-var selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
-var travelCost = 0, travelReady = true;
-var acTimer = null, acResults = [], acIdx = -1;
-var activeCoupon = null; // {code, type, value}
+// ── WATERMARK ──
+function applyWatermark(img, canvas, small = false) {
+  canvas.width  = img.naturalWidth  || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-// ── FORM SUBMIT ──
-document.getElementById('booking-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  if (!selPkg) {
-    alert('Please select a package first.');
-    document.querySelector('.pkg-grid').scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
-  if (!travelReady) {
-    alert('Travel fee is still calculating — please wait a moment and try again.');
-    return;
-  }
+  if (!useWatermark) return;
 
-  var btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
+  const text = '© ZRP — zachary routsong photography';
+  const fontSize = Math.max(14, Math.floor(canvas.width * 0.022));
+  ctx.font = `${fontSize}px DM Sans, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
 
-  syncHiddenFields();
-
-  // Generate booking number: ZRP-YYYY-XXX
-  var year = new Date().getFullYear();
-  var seq = Math.floor(Math.random() * 900) + 100; // fallback random if seq not available
-  var bookingNum = 'ZRP-' + year + '-' + String(seq).padStart(3, '0');
-
-  // Write to Supabase first to get a real sequential number
-  try {
-    var pc = qPhotos * 15, pr = qPrints * 3;
-    var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
-    var total = (selPkg ? selPkg.price : 0) + pc + pr + travelCost + at;
-    var deposit = Math.round(total * 50) / 100;
-
-    var insertData = {
-      first_name:       document.getElementById('fname').value,
-      last_name:        document.getElementById('lname').value,
-      email:            document.getElementById('email').value,
-      phone:            document.getElementById('phone').value,
-      event_date:       document.getElementById('edate').value,
-      event_time:       document.getElementById('etime').value,
-      sport_type:       document.getElementById('sport').value,
-      event_location:   document.getElementById('venue').value,
-      package_selected: selPkg.name + ' — $' + selPkg.price,
-      addons:           document.getElementById('h-addons').value,
-      total:            '$' + total.toFixed(2),
-      deposit:          '$' + deposit.toFixed(2),
-      travel_fee:       travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None',
-      referral:         document.getElementById('referral').value || null,
-      notes:            document.getElementById('notes').value || null,
-      status:           'pending'
-    };
-
-    var result = await sb.from('bookings').insert(insertData).select('id').single();
-    if (result.error) {
-      console.error('Supabase insert error:', result.error);
-    } else if (result.data && result.data.id) {
-      var shortId = result.data.id.slice(-5).toUpperCase();
-      bookingNum = 'ZRP-' + year + '-' + shortId;
-      await sb.from('bookings').update({ booking_number: bookingNum }).eq('id', result.data.id);
+  // Diagonal repeating watermark
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = '#ffffff';
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-Math.PI / 6);
+  const step = Math.max(120, canvas.width * 0.28);
+  for (let y = -canvas.height; y < canvas.height; y += step) {
+    for (let x = -canvas.width; x < canvas.width; x += step) {
+      ctx.fillText(text, x, y);
     }
-  } catch(err) {
-    console.warn('Supabase insert failed, continuing with Formspree only', err);
+  }
+  ctx.restore();
+
+  // Bottom corner tag
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  const tagFont = Math.max(10, Math.floor(canvas.width * 0.016));
+  ctx.font = `500 ${tagFont}px DM Sans, sans-serif`;
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  const tagPad = tagFont * 0.6;
+  const tagText = '© Zachary Routsong Photography';
+  const tw = ctx.measureText(tagText).width;
+  ctx.fillRect(canvas.width - tw - tagPad * 2 - 8, canvas.height - tagFont * 2.4, tw + tagPad * 2, tagFont * 1.8);
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(tagText, canvas.width - tw - tagPad - 8, canvas.height - tagFont * 1.5);
+  ctx.restore();
+}
+
+function loadImageToCanvas(url, canvas, small = false) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { applyWatermark(img, canvas, small); resolve(); };
+    img.onerror = () => {
+      // fallback: draw placeholder
+      canvas.width = 400; canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#111'; ctx.fillRect(0, 0, 400, 300);
+      resolve();
+    };
+    img.src = url;
+  });
+}
+
+// ── LOAD ──
+async function load() {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('id');
+  if (!slug) { showNotFound(); return; }
+
+  const { data: gallery, error } = await sb.from('client_galleries').select('*').eq('slug', slug).single();
+  if (error || !gallery) { showNotFound(); return; }
+
+  useWatermark = gallery.watermark !== false; // default true unless explicitly false
+  galleryName  = gallery.name;
+
+  const { data: imgs } = await sb.from('portfolio_photos').select('*').eq('gallery_id', gallery.id).order('created_at', { ascending: true });
+  photos = imgs || [];
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('g-title').textContent = gallery.name;
+
+  if (useWatermark) {
+    document.getElementById('wm-notice').style.display = 'block';
+    document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — preview watermarks shown`;
+  } else {
+    document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — original files, click any to view or download`;
   }
 
-  // Store booking number for thanks page
-  sessionStorage.setItem('zrp_booking_num', bookingNum);
-  document.getElementById('h-booking-num').value = bookingNum;
+  if (photos.length) {
+    document.getElementById('dl-all-btn').style.display = 'inline-flex';
+    document.getElementById('gallery-content').style.display = 'block';
+    const grid = document.getElementById('photo-grid');
 
-  // Now submit to Formspree
-  var form = document.getElementById('booking-form');
-  var data = new FormData(form);
-  try {
-    await fetch(form.action, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    });
-  } catch(err) { console.warn('Formspree submit failed', err); }
+    for (let i = 0; i < photos.length; i++) {
+      const p = photos[i];
+      const el = document.createElement('div');
+      el.className = 'photo-item';
 
-  window.location.href = 'thanks.html';
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'photo-overlay';
+      overlay.innerHTML = `
+        <button class="ov-btn" onclick="openLB(${i})">View</button>
+        <button class="ov-btn dl" onclick="downloadPhoto(${i})">Download</button>`;
+
+      el.appendChild(canvas);
+      el.appendChild(overlay);
+      grid.appendChild(el);
+
+      // Load async so UI doesn't block
+      loadImageToCanvas(p.url, canvas, true);
+    }
+  } else {
+    document.getElementById('gallery-content').style.display = 'block';
+    document.getElementById('empty-state').style.display = 'block';
+  }
+}
+
+function showNotFound() { document.getElementById('loading').style.display = 'none'; document.getElementById('not-found').style.display = 'block'; }
+
+// ── LIGHTBOX ──
+async function openLB(i) {
+  lbIdx = i;
+  const canvas = document.getElementById('lb-canvas');
+  canvas.style.cssText = 'max-width:90vw;max-height:78vh;border-radius:4px';
+  await loadImageToCanvas(photos[i].url, canvas);
+  document.getElementById('lb').classList.add('open');
+}
+function closeLB() { document.getElementById('lb').classList.remove('open'); }
+function navLB(d) { openLB((lbIdx + d + photos.length) % photos.length); }
+document.getElementById('lb').addEventListener('click', e => { if (e.target === e.currentTarget) closeLB(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLB();
+  if (e.key === 'ArrowRight') navLB(1);
+  if (e.key === 'ArrowLeft') navLB(-1);
 });
 
-function syncHiddenFields() {
-  var pc = qPhotos * 15, pr = qPrints * 3;
-  var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
-  var effectiveTravel = (activeCoupon && activeCoupon.type === 'travel') ? 0 : travelCost;
-  var subtotal = (selPkg ? selPkg.price : 0) + pc + pr + effectiveTravel + at;
-  var discount = 0;
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent') discount = Math.floor(subtotal * (activeCoupon.value / 100) * 100) / 100;
-    else if (activeCoupon.type === 'fixed') discount = Math.min(parseFloat(activeCoupon.value), subtotal);
-    else if (activeCoupon.type === 'travel') discount = travelCost;
-  }
-  var total   = Math.max(0, subtotal - discount);
-  var deposit = Math.round(total * 50) / 100;
-  var an = [];
-  if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
-  if (qPrints > 0) an.push('Prints x' + qPrints);
-  if (travelCost > 0) an.push('Travel $' + travelCost.toFixed(2));
-  addons.forEach(function(a) { an.push(a.n); });
-
-  document.getElementById('h-pkg').value     = selPkg ? selPkg.name + ' — $' + selPkg.price : '';
-  document.getElementById('h-addons').value  = an.join(', ') || 'None';
-  document.getElementById('h-total').value   = '$' + total.toFixed(2);
-  document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
-  document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
-  if (activeCoupon) {
-    // Atomically increment uses by 1
-    sb.rpc('increment_coupon_uses', { coupon_id: activeCoupon.id });
-  }
-}
-
-// ── ADDRESS SEARCH ──
-function onAddrInput(v) {
-  clearTimeout(acTimer);
-  document.getElementById('travel-err').style.display = 'none';
-  document.getElementById('travel-result').classList.remove('show');
-  document.getElementById('travel-calc-status').style.display = 'none';
-  travelCost = 0; travelReady = true;
-  updateCost();
-  if (v.length < 3) { closeDD(); return; }
-  acTimer = setTimeout(function() { fetchAddr(v); }, 400);
-}
-
-async function fetchAddr(q) {
-  try {
-    var r = await fetch(
-      'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q),
-      { headers: { 'Accept-Language': 'en-US', 'User-Agent': 'ZRPBooking/1.0' } }
-    );
-    var d = await r.json();
-    acResults = d; acIdx = -1;
-    if (!d.length) { document.getElementById('travel-err').style.display = 'block'; closeDD(); return; }
-    var dd = document.getElementById('addr-drop');
-    dd.innerHTML = d.map(function(item, i) {
-      var p = item.display_name.split(', ');
-      return '<div class="addr-item" onmousedown="pickAddr(' + i + ')">'
-        + '<div class="addr-main">' + p.slice(0, 2).join(', ') + '</div>'
-        + '<div class="addr-sub">' + p.slice(2, 5).join(', ') + '</div>'
-        + '</div>';
-    }).join('');
-    dd.classList.add('open');
-  } catch(e) { closeDD(); }
-}
-
-function pickAddr(i) {
-  var r = acResults[i]; if (!r) return;
-  var label = r.display_name.split(', ').slice(0, 3).join(', ');
-  document.getElementById('addr-input').value = label;
-  var vf = document.getElementById('venue');
-  if (vf && !vf.value) vf.value = label;
-  closeDD();
-  calcTravel(parseFloat(r.lat), parseFloat(r.lon));
-}
-
-function onAddrKey(e) {
-  var items = document.querySelectorAll('.addr-item');
-  if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx + 1, items.length - 1); items.forEach(function(el, i) { el.classList.toggle('focused', i === acIdx); }); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx - 1, 0); items.forEach(function(el, i) { el.classList.toggle('focused', i === acIdx); }); }
-  else if (e.key === 'Enter') { e.preventDefault(); if (acIdx >= 0 && items[acIdx]) items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
-  else if (e.key === 'Escape') closeDD();
-}
-function closeDD() { var dd = document.getElementById('addr-drop'); dd.classList.remove('open'); dd.innerHTML = ''; }
-document.addEventListener('click', function(e) { if (!e.target.closest('.addr-wrap')) closeDD(); });
-
-// ── PUBLIC AVAILABILITY CALENDAR ──
-let calYear, calMonth, calBlocks = [], pickedDate = null;
-
-async function initCalendar() {
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
-  const { data } = await fetch_blocks();
-  calBlocks = data || [];
-  renderPublicCal();
-}
-
-async function fetch_blocks() {
-  // fetch 2 months worth to cover navigation
-  const from = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-01`;
-  const nextM = calMonth === 11 ? 1 : calMonth + 2;
-  const nextY = calMonth === 11 ? calYear + 1 : calYear;
-  const to = `${nextY}-${String(nextM).padStart(2,'0')}-01`;
-  return await sb.from('availability').select('*').gte('date', from).lt('date', to);
-}
-
-async function shiftCalMonth(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  const { data } = await fetch_blocks();
-  calBlocks = data || [];
-  renderPublicCal();
-}
-
-function getPublicStatus(dateStr) {
-  const blocks = calBlocks.filter(b => b.date === dateStr);
-  if (!blocks.length) return null;
-  if (blocks.some(b => b.status === 'unavailable' && !b.start_time)) return 'unavailable';
-  if (blocks.some(b => b.status === 'partial')) return 'partial';
-  if (blocks.some(b => b.status === 'available')) return 'available';
-  return null;
-}
-
-function renderPublicCal() {
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  const label = new Date(calYear, calMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-  document.getElementById('avail-month').textContent = label;
-
-  const grid = document.getElementById('avail-grid');
-  grid.innerHTML = '';
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-
-  for (let i = 0; i < firstDay; i++) {
-    const el = document.createElement('div');
-    el.className = 'avail-day empty';
-    grid.appendChild(el);
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const status = getPublicStatus(dateStr);
-    const isPast = dateStr < today;
-    const isToday = dateStr === today;
-    const isPicked = dateStr === pickedDate;
-
-    const el = document.createElement('div');
-    let cls = 'avail-day';
-    if (isPast) cls += ' past';
-    else cls += ' clickable';
-    if (isToday) cls += ' today';
-    if (isPicked) cls += ' picked';
-    if (status) cls += ' ' + status;
-    el.className = cls;
-    el.innerHTML = `<span>${d}</span>`;
-
-    if (status) {
-      const dot = document.createElement('div');
-      dot.className = 'avail-dot-sm';
-      dot.style.background = status === 'unavailable' ? '#ff4d4d' : status === 'partial' ? '#f59e0b' : '#22c55e';
-      el.appendChild(dot);
-    }
-
-    if (!isPast && status !== 'unavailable') {
-      el.addEventListener('click', () => {
-        pickedDate = dateStr;
-        const edateInput = document.getElementById('edate');
-        if (edateInput) edateInput.value = dateStr;
-        renderPublicCal();
-        document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
-      });
-    }
-
-    grid.appendChild(el);
-  }
-}
-
-// Load calendar
-initCalendar();
-
-async function calcTravel(lat, lng) {
-  travelReady = false;
-  travelCost  = 0;
-  var statusEl = document.getElementById('travel-calc-status');
-  var resultEl = document.getElementById('travel-result');
-
-  statusEl.style.display = 'block';
-  resultEl.classList.remove('show');
-  document.getElementById('tr-fee-row').style.display = 'none';
-  document.getElementById('tr-free').style.display = 'none';
-
-  var onewayMi = null;
-  try {
-    var controller = new AbortController();
-    var osrmTimeout = setTimeout(function() { controller.abort(); }, 5000);
-    var url = 'https://router.project-osrm.org/route/v1/driving/'
-      + ORIGIN.lng + ',' + ORIGIN.lat + ';'
-      + lng + ',' + lat + '?overview=false';
-    var resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(osrmTimeout);
-    var data = await resp.json();
-    if (data.code === 'Ok' && data.routes && data.routes.length) {
-      onewayMi = data.routes[0].distance * 0.000621371;
-    }
-  } catch(e) {
-    console.warn('OSRM unavailable or timed out, using haversine fallback');
-  }
-
-  if (!onewayMi) {
-    onewayMi = haversine(ORIGIN.lat, ORIGIN.lng, lat, lng) * 1.3;
-  }
-
-  var roundTrip = onewayMi * 2;
-  var gallons   = roundTrip / MPG;
-
-  document.getElementById('tr-mi').textContent  = onewayMi.toFixed(1) + ' mi (driving)';
-  document.getElementById('tr-gal').textContent = gallons.toFixed(2) + ' gal';
-  statusEl.style.display = 'none';
-
-  if (onewayMi <= FREE_MI) {
-    travelCost = 0;
-    document.getElementById('tr-fee-row').style.display = 'none';
-    document.getElementById('tr-free').style.display = 'flex';
+// ── DOWNLOAD — original if paid, watermarked canvas if not ──
+function downloadPhoto(i) {
+  const p = photos[i];
+  if (!useWatermark) {
+    // Paid — download original file directly
+    const a = document.createElement('a');
+    a.href = p.url;
+    a.download = p.file_name || `photo-${i + 1}.jpg`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   } else {
-    travelCost = Math.floor(gallons * GAS * 10) / 10;
-    document.getElementById('tr-fee-row').style.display = 'flex';
-    document.getElementById('tr-free').style.display = 'none';
-    document.getElementById('tr-fee').textContent = '$' + travelCost.toFixed(2);
+    // Unpaid — bake watermark into canvas and download that
+    const tmpCanvas = document.createElement('canvas');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      applyWatermark(img, tmpCanvas);
+      tmpCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = p.file_name || `photo-${i + 1}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.92);
+    };
+    img.src = p.url;
   }
-
-  resultEl.classList.add('show');
-  travelReady = true;
-  updateCost();
 }
 
-function haversine(a, b, c, d) {
-  var R = 3958.8, dL = (c - a) * Math.PI / 180, dN = (d - b) * Math.PI / 180;
-  var x = Math.sin(dL/2)*Math.sin(dL/2) + Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-}
+function downloadCurrent() { downloadPhoto(lbIdx); }
 
-// ── PACKAGES ──
-function selectPkg(card) {
-  document.querySelectorAll('.pkg-card').forEach(function(c) { c.classList.remove('selected'); });
-  card.classList.add('selected');
-  selPkg = { name: card.dataset.package, price: parseFloat(card.dataset.price) };
-  var d = document.getElementById('pkg-display');
-  d.value = selPkg.name + ' — $' + selPkg.price; d.style.color = 'var(--t1)';
-  updateCost();
-}
-
-// ── QTY ──
-function chQty(t, d) {
-  if (t === 'photos') {
-    qPhotos = Math.max(0, qPhotos + d);
-    document.getElementById('qv-photos').textContent = qPhotos;
-    document.getElementById('qs-photos').textContent = qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · $' + (qPhotos * 15).toFixed(2);
-    document.getElementById('qp-photos').classList.toggle('active', qPhotos > 0);
-  } else {
-    qPrints = Math.max(0, qPrints + d);
-    document.getElementById('qv-prints').textContent = qPrints;
-    document.getElementById('qs-prints').textContent = qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · $' + (qPrints * 3).toFixed(2);
-    document.getElementById('qp-prints').classList.toggle('active', qPrints > 0);
+async function downloadAll() {
+  for (let i = 0; i < photos.length; i++) {
+    downloadPhoto(i);
+    await new Promise(r => setTimeout(r, 400));
   }
-  updateCost();
 }
 
-// ── TOGGLES ──
-function togAddon(pill) {
-  pill.classList.toggle('active');
-  var n = pill.dataset.addon, p = parseFloat(pill.dataset.price);
-  if (pill.classList.contains('active')) addons.push({ n: n, p: p });
-  else addons = addons.filter(function(a) { return a.n !== n; });
-  updateCost();
-}
-
-// ── COUPON ──
-async function applyCoupon() {
-  var code = document.getElementById('coupon-input').value.trim().toUpperCase();
-  var statusEl = document.getElementById('coupon-status');
-  statusEl.className = 'coupon-status';
-  statusEl.textContent = '';
-
-  if (!code) { statusEl.className = 'coupon-status err'; statusEl.textContent = 'Enter a code first.'; return; }
-
-  var result = await sb.from('coupons').select('*').eq('code', code).eq('active', true).single();
-
-  if (result.error || !result.data) {
-    activeCoupon = null;
-    statusEl.className = 'coupon-status err';
-    statusEl.textContent = 'Invalid or expired code.';
-    updateCost(); return;
-  }
-
-  var c = result.data;
-
-  // Check expiry
-  if (c.expires_at && new Date(c.expires_at) < new Date()) {
-    activeCoupon = null;
-    statusEl.className = 'coupon-status err';
-    statusEl.textContent = 'This code has expired.';
-    updateCost(); return;
-  }
-
-  // Check max uses
-  if (c.max_uses !== null && c.uses >= c.max_uses) {
-    activeCoupon = null;
-    statusEl.className = 'coupon-status err';
-    statusEl.textContent = 'This code has reached its usage limit.';
-    updateCost(); return;
-  }
-
-  activeCoupon = c;
-  statusEl.className = 'coupon-status ok';
-  statusEl.textContent = c.type === 'percent' ? '✓ ' + c.value + '% off applied!'
-    : c.type === 'fixed' ? '✓ $' + c.value + ' off applied!'
-    : '✓ Travel fee waived!';
-  updateCost();
-}
-
-
-function showLine(id, show, vid, val) {
-  var r = document.getElementById(id);
-  if (show) { r.classList.remove('hide'); if (vid) document.getElementById(vid).textContent = val; }
-  else r.classList.add('hide');
-}
-
-function updateCost() {
-  if (!selPkg) {
-    document.getElementById('cost-empty').style.display = 'block';
-    document.getElementById('cost-lines').style.display = 'none';
-    return;
-  }
-  document.getElementById('cost-empty').style.display = 'none';
-  document.getElementById('cost-lines').style.display = 'block';
-
-  var pc = qPhotos * 15, pr = qPrints * 3;
-  document.getElementById('cl-pkg-n').textContent = selPkg.name + ' package';
-  document.getElementById('cl-pkg-p').textContent = '$' + selPkg.price.toFixed(2);
-  showLine('cl-photos', qPhotos > 0, 'cl-photos-v', qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · +$' + pc.toFixed(2));
-  showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
-
-  // Travel — waived if travel coupon applied
-  var effectiveTravel = (activeCoupon && activeCoupon.type === 'travel') ? 0 : travelCost;
-  showLine('cl-travel', effectiveTravel > 0, 'cl-travel-v', '+$' + effectiveTravel.toFixed(2));
-
-  var at = 0;
-  ['cl-a0','cl-a1','cl-a2'].forEach(function(id, i) {
-    var row = document.getElementById(id), a = addons[i];
-    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.n; row.children[1].textContent = '+$' + a.p.toFixed(2); at += a.p; }
-    else row.classList.add('hide');
-  });
-
-  var subtotal = selPkg.price + pc + pr + effectiveTravel + at;
-
-  // Coupon discount
-  var discount = 0;
-  var couponRow = document.getElementById('cl-coupon');
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent') {
-      discount = Math.floor(subtotal * (activeCoupon.value / 100) * 100) / 100;
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' (' + activeCoupon.value + '% off)';
-      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
-    } else if (activeCoupon.type === 'fixed') {
-      discount = Math.min(parseFloat(activeCoupon.value), subtotal);
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' ($' + activeCoupon.value + ' off)';
-      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
-    } else if (activeCoupon.type === 'travel' && travelCost > 0) {
-      discount = travelCost;
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' (travel waived)';
-      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
-    } else {
-      couponRow.classList.add('hide');
-    }
-  } else {
-    couponRow.classList.add('hide');
-  }
-
-  var total   = Math.max(0, subtotal - discount);
-  var deposit = Math.round(total * 50) / 100;
-  var balance = total - deposit;
-
-  document.getElementById('cl-total').textContent   = '$' + subtotal.toFixed(2) + (discount > 0 ? ' → $' + total.toFixed(2) : '');
-  document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
-  document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
-}
+load();
 </script>
 </body>
 </html>
