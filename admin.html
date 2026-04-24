@@ -499,13 +499,13 @@ function renderGalleries() {
       <div class="gal-info">
         <h3>
           ${g.name}
-          <span class="badge ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? 'Paid' : 'Unpaid'}</span>
+          <span class="badge ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? 'Deposit received' : 'Deposit pending'}</span>
           ${isDelivered ? '<span class="badge delivered">Delivered</span>' : ''}
         </h3>
         <p>${cnt} photo${cnt !== 1 ? 's' : ''} · Watermark ${hasWm ? 'on' : 'off'}</p>
       </div>
       <div class="gal-actions">
-        <button class="btn-sm ${isPaid ? 'on-green' : ''}" onclick="togglePaid('${g.id}',${isPaid})">${isPaid ? 'Mark unpaid' : 'Mark paid'}</button>
+        <button class="btn-sm ${isPaid ? 'on-green' : ''}" onclick="togglePaid('${g.id}',${isPaid})">${isPaid ? 'Deposit received ✓' : 'Mark deposit received'}</button>
         <button class="btn-sm ${hasWm ? 'on-yellow' : 'on-green'}" onclick="toggleWatermark('${g.id}',${hasWm})">${hasWm ? 'WM on' : 'WM off'}</button>
         ${!isDelivered
           ? `<button class="btn-sm accent" onclick="markDelivered('${g.id}')">Mark delivered</button>`
@@ -537,7 +537,7 @@ async function delGallery(id) {
 async function togglePaid(id, cur) {
   await sb.from('client_galleries').update({ paid: !cur }).eq('id', id);
   await loadGalleries();
-  toast(cur ? 'Marked unpaid.' : '✓ Marked as paid!');
+  toast(cur ? 'Deposit marked as pending.' : '✓ Deposit received!');
 }
 
 async function toggleWatermark(id, cur) {
@@ -645,11 +645,19 @@ function getGallerySlug(galId) {
 async function approveBooking(id) {
   const booking = allBookings.find(b => b.id === id);
   if (!booking) return;
+
+  // Update status FIRST, then create gallery
+  const { error: statusErr } = await sb.from('bookings').update({ status: 'approved' }).eq('id', id);
+  if (statusErr) { toast('Error: ' + statusErr.message); return; }
+
   const slug = [booking.first_name, booking.last_name, booking.event_date].filter(Boolean).join('-').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
   const galName = `${booking.first_name || ''} ${booking.last_name || ''}${booking.event_date ? ' — ' + booking.event_date : ''}`.trim();
-  const { data: gal, error } = await sb.from('client_galleries').insert({ name: galName, slug, paid: false, watermark: true, delivered: false }).select('id,slug').single();
-  if (error) { toast('Error creating gallery: ' + error.message); return; }
-  await sb.from('bookings').update({ status: 'approved', gallery_id: gal.id }).eq('id', id);
+  const { data: gal, error: galErr } = await sb.from('client_galleries').insert({ name: galName, slug, paid: false, watermark: true, delivered: false }).select('id,slug').single();
+  if (galErr) { toast('Gallery error: ' + galErr.message); return; }
+
+  await sb.from('bookings').update({ gallery_id: gal.id }).eq('id', id);
+
+  // Reload fresh from DB so status is definitely updated
   await loadBookings();
   await loadGalleries();
   toast('✓ Approved — gallery created!');
