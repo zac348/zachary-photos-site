@@ -374,6 +374,9 @@ footer span{font-size:11px;color:var(--t3)}
           </div>
           <div class="field"><label>Venue / location</label><input type="text" name="Venue" id="venue" placeholder="Valdosta High School Stadium" required/></div>
           <hr class="divider"/>
+          <div class="field"><label>Player last name</label><input type="text" name="Player Last Name" id="player-name" placeholder="e.g. Smith"/></div>
+          <div class="field"><label>Player number</label><input type="text" name="Player Number" id="player-num" placeholder="e.g. 24"/></div>
+          <hr class="divider"/>
           <div class="field full"><label>Selected package</label><input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default;color:var(--t3)"/></div>
           <hr class="divider"/>
           <div class="cost-box">
@@ -553,9 +556,8 @@ function syncHiddenFields() {
   document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
   document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
   if (activeCoupon) {
-    document.getElementById('h-booking-num').value = (document.getElementById('h-booking-num').value || '') ;
-    // Increment coupon usage in Supabase
-    sb.from('coupons').update({ uses: (activeCoupon.uses || 0) + 1 }).eq('id', activeCoupon.id);
+    // Atomically increment uses by 1
+    sb.rpc('increment_coupon_uses', { coupon_id: activeCoupon.id });
   }
 }
 
