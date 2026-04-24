@@ -161,6 +161,25 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 .block-status-badge.partial{color:var(--yellow);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
 .block-status-badge.available{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
 
+/* PRICING */
+.pricing-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:20px 22px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+.pricing-card.on-sale{border-color:rgba(0,229,160,.25);background:rgba(0,229,160,.04)}
+.pricing-pkg-name{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:4px}
+.pricing-pkg-sub{font-size:11px;color:var(--t3)}
+.pricing-right{display:flex;flex-direction:column;gap:10px;min-width:280px}
+.pricing-row{display:flex;align-items:center;gap:8px}
+.pricing-row label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);width:80px;flex-shrink:0}
+.pricing-row input[type="number"]{font-family:'DM Mono',monospace;font-size:13px;color:var(--t1);background:var(--s2);border:1px solid var(--b2);border-radius:6px;padding:6px 10px;outline:none;width:90px;transition:all .15s;color-scheme:dark}
+.pricing-row input[type="number"]:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,183,227,.08)}
+.pricing-row input[type="number"]:disabled{opacity:.35;cursor:not-allowed}
+.pricing-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.pricing-toggle input[type="checkbox"]{width:16px;height:16px;accent-color:#00e5a0;cursor:pointer}
+.pricing-toggle-label{font-size:12px;color:var(--t2)}
+.pricing-toggle input:checked + .pricing-toggle-label{color:#00e5a0}
+.save-price-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:4px;padding:5px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;align-self:flex-end}
+.save-price-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sale-active-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#00e5a0;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);border-radius:4px;padding:2px 8px;display:inline-block}
+
 /* COUPONS */
 .coupon-form-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:18px;margin-bottom:22px}
 .coupon-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
@@ -209,6 +228,9 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     </button>
     <button class="sb-link" onclick="switchTab('coupons',this)">
       <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Coupons
+    </button>
+    <button class="sb-link" onclick="switchTab('pricing',this)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pricing
     </button>
     <a class="sb-link" href="index.html" target="_blank">
       <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View site
@@ -352,6 +374,14 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div class="coupon-list" id="coupon-list"><p class="no-data">No coupons yet.</p></div>
   </div>
 
+  <!-- PRICING -->
+  <div class="tab" id="tab-pricing">
+    <h1 class="main-title">Package Pricing</h1>
+    <p class="main-sub">Set base prices and run sales on individual packages. Changes go live on the booking page immediately.</p>
+    <div class="sec-label">packages</div>
+    <div id="pricing-list"><p class="no-data">Loading...</p></div>
+  </div>
+
 </main>
 </div>
 <div class="toast" id="toast"></div>
@@ -388,7 +418,7 @@ function toast(msg) {
 let allPhotos = [], allGalleries = [], allBookings = [], allBlocks = [], allCoupons = [];
 
 async function loadAll() {
-  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons()]);
+  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons(), loadPricing()]);
   updateStats();
 }
 
@@ -843,6 +873,72 @@ function renderBlocksList() {
 async function deleteBlock(id) {
   await sb.from('availability').delete().eq('id', id);
   await loadBlocks(); renderCalendar(); toast('Block removed.');
+}
+
+// ── PRICING ──
+let allPricing = [];
+
+async function loadPricing() {
+  const { data, error } = await sb.from('package_pricing').select('*').order('base_price');
+  if (error || !data) { document.getElementById('pricing-list').innerHTML = '<p class="no-data">Run the SQL to create the package_pricing table first.</p>'; return; }
+  allPricing = data;
+  renderPricing();
+}
+
+function renderPricing() {
+  const el = document.getElementById('pricing-list');
+  if (!allPricing.length) { el.innerHTML = '<p class="no-data">No packages found.</p>'; return; }
+
+  el.innerHTML = allPricing.map(pkg => {
+    const onSale = pkg.on_sale && pkg.sale_price;
+    return `<div class="pricing-card ${onSale ? 'on-sale' : ''}" id="pkg-row-${pkg.id}">
+      <div>
+        <div class="pricing-pkg-name">${pkg.package_name} ${onSale ? '<span class="sale-active-badge">Sale active</span>' : ''}</div>
+        <div class="pricing-pkg-sub">${onSale ? 'Currently showing $' + pkg.sale_price + ' (was $' + pkg.base_price + ')' : 'Currently showing $' + pkg.base_price}</div>
+      </div>
+      <div class="pricing-right">
+        <div class="pricing-row">
+          <label>Base price</label>
+          <input type="number" id="base-${pkg.id}" value="${pkg.base_price}" min="0" step="5" placeholder="40"/>
+        </div>
+        <div class="pricing-row">
+          <label>Sale price</label>
+          <input type="number" id="sale-${pkg.id}" value="${pkg.sale_price || ''}" min="0" step="5" placeholder="—" ${!pkg.on_sale ? '' : ''}/>
+        </div>
+        <div class="pricing-row">
+          <label></label>
+          <label class="pricing-toggle">
+            <input type="checkbox" id="onsale-${pkg.id}" ${pkg.on_sale ? 'checked' : ''} onchange="toggleSaleField('${pkg.id}',this.checked)"/>
+            <span class="pricing-toggle-label">Run sale</span>
+          </label>
+        </div>
+        <button class="save-price-btn" onclick="savePricing('${pkg.id}')">Save changes</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSaleField(id, checked) {
+  const saleInput = document.getElementById('sale-' + id);
+  if (!checked) saleInput.value = '';
+}
+
+async function savePricing(id) {
+  const basePrice = parseFloat(document.getElementById('base-' + id).value);
+  const salePrice = parseFloat(document.getElementById('sale-' + id).value) || null;
+  const onSale    = document.getElementById('onsale-' + id).checked;
+
+  if (!basePrice || basePrice <= 0) { toast('Enter a valid base price.'); return; }
+  if (onSale && (!salePrice || salePrice <= 0)) { toast('Enter a valid sale price.'); return; }
+  if (onSale && salePrice >= basePrice) { toast('Sale price must be less than base price.'); return; }
+
+  const { error } = await sb.from('package_pricing')
+    .update({ base_price: basePrice, sale_price: onSale ? salePrice : null, on_sale: onSale, updated_at: new Date().toISOString() })
+    .eq('id', id);
+
+  if (error) { toast('Error saving: ' + error.message); return; }
+  await loadPricing();
+  toast(onSale ? '✓ Sale is now live!' : '✓ Prices updated!');
 }
 
 // ── COUPONS ──
