@@ -46,7 +46,13 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .sports-inner{max-width:820px;margin:0 auto;padding:0 24px}
 @media(max-width:600px){.sports-inner{padding:0 16px}}
 .sports-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.sport-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--t3);border:1px solid var(--b2);border-radius:4px;padding:5px 10px}
+.sport-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--t3);border:1px solid var(--b2);border-radius:4px;padding:5px 10px;cursor:pointer;transition:all .15s;user-select:none}
+.sport-tag:hover{color:var(--t1);border-color:var(--b3)}
+.sport-tag.active{color:var(--accent);border-color:var(--accent);background:var(--accent-bg)}
+.sport-tag.disabled{opacity:.35;cursor:default;pointer-events:none}
+.port-nudge{font-size:12px;color:var(--t3);text-align:center;margin-top:16px;font-style:italic;transition:opacity .3s}
+.port-sport-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;display:none}
+.port-count{font-size:11px;color:var(--t3);margin-top:10px;text-align:center}
 
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 @media(max-width:600px){.about-grid{grid-template-columns:1fr;gap:28px}}
@@ -93,27 +99,21 @@ footer span{font-size:11px;color:var(--t3)}
 
 <div class="section" id="portfolio">
   <div class="sec-label">portfolio</div>
+  <div class="port-sport-label" id="port-sport-label"></div>
   <div class="grid" id="portfolio-grid">
-    <div class="grid-item placeholder"><span>Coming soon</span></div>
-    <div class="grid-item placeholder"><span>Coming soon</span></div>
-    <div class="grid-item placeholder"><span>Coming soon</span></div>
+    <div class="grid-item placeholder"><span>Loading...</span></div>
+    <div class="grid-item placeholder"><span>Loading...</span></div>
+    <div class="grid-item placeholder"><span>Loading...</span></div>
   </div>
+  <p class="port-nudge" id="port-nudge">Click a sport below to see more of my work →</p>
+  <p class="port-count" id="port-count"></p>
 </div>
 
 <div class="sports-strip">
   <div class="sports-inner">
     <div class="sec-label">sports covered</div>
-    <div class="sports-tags">
-      <span class="sport-tag">Football</span>
-      <span class="sport-tag">Basketball</span>
-      <span class="sport-tag">Baseball</span>
-      <span class="sport-tag">Softball</span>
-      <span class="sport-tag">Soccer</span>
-      <span class="sport-tag">Track &amp; Field</span>
-      <span class="sport-tag">Volleyball</span>
-      <span class="sport-tag">Wrestling</span>
-      <span class="sport-tag">Swimming</span>
-      <span class="sport-tag">And more</span>
+    <div class="sports-tags" id="sports-tags">
+      <span class="sport-tag disabled">Loading...</span>
     </div>
   </div>
 </div>
@@ -153,20 +153,94 @@ footer span{font-size:11px;color:var(--t3)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-async function loadPortfolio(){
-  const{data,error}=await sb.from('portfolio_photos').select('*').eq('show_on_homepage',true).order('created_at',{ascending:false}).limit(9);
-  if(error||!data||!data.length)return;
-  const g=document.getElementById('portfolio-grid');g.innerHTML='';
-  data.forEach(p=>{
-    const el=document.createElement('div');el.className='grid-item';
-    el.innerHTML=`<img src="${p.url}" alt="${p.sport||''}" loading="lazy"/><div class="grid-item-overlay"><span>${p.sport||''}</span></div>`;
-    el.addEventListener('click',()=>openLB(p.url));g.appendChild(el);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let allHpPhotos = [], activeSport = null;
+
+async function loadPortfolio() {
+  const { data, error } = await sb.from('portfolio_photos').select('*').eq('show_on_homepage', true).order('created_at', { ascending: false });
+  if (error || !data || !data.length) {
+    document.getElementById('portfolio-grid').innerHTML = '<div class="grid-item placeholder"><span>Coming soon</span></div><div class="grid-item placeholder"><span>Coming soon</span></div><div class="grid-item placeholder"><span>Coming soon</span></div>';
+    document.getElementById('port-nudge').style.display = 'none';
+    return;
+  }
+  allHpPhotos = data;
+
+  // Build sport tags from actual photos that have a sport set
+  const sportCounts = {};
+  data.forEach(p => {
+    if (p.sport) sportCounts[p.sport] = (sportCounts[p.sport] || 0) + 1;
+  });
+  const sports = Object.keys(sportCounts).sort();
+
+  const tagsEl = document.getElementById('sports-tags');
+  tagsEl.innerHTML = sports.map(s =>
+    `<span class="sport-tag" onclick="filterSport('${s}')">${s} <span style="font-size:8px;opacity:.6">(${sportCounts[s]})</span></span>`
+  ).join('') + (sports.length ? '<span class="sport-tag" onclick="filterSport(null)" id="tag-all" style="display:none">Show all</span>' : '');
+
+  if (!sports.length) {
+    tagsEl.innerHTML = '<span class="sport-tag disabled">No tagged photos yet</span>';
+  }
+
+  showRandom();
+}
+
+function showRandom() {
+  activeSport = null;
+  // Shuffle and pick 3
+  const shuffled = [...allHpPhotos].sort(() => Math.random() - 0.5).slice(0, 3);
+  renderGrid(shuffled);
+  document.getElementById('port-nudge').style.opacity = '1';
+  document.getElementById('port-nudge').textContent = 'Click a sport below to see more of my work →';
+  document.getElementById('port-count').textContent = '';
+  document.getElementById('port-sport-label').style.display = 'none';
+  // Reset tags
+  document.querySelectorAll('.sport-tag').forEach(t => t.classList.remove('active'));
+  const tagAll = document.getElementById('tag-all');
+  if (tagAll) tagAll.style.display = 'none';
+}
+
+function filterSport(sport) {
+  activeSport = sport;
+  if (!sport) { showRandom(); return; }
+
+  const filtered = allHpPhotos.filter(p => p.sport === sport);
+  renderGrid(filtered);
+
+  // Update nudge and label
+  const label = document.getElementById('port-sport-label');
+  label.textContent = sport;
+  label.style.display = 'block';
+  document.getElementById('port-nudge').style.opacity = '0';
+  document.getElementById('port-count').textContent = filtered.length + ' photo' + (filtered.length !== 1 ? 's' : '') + ' tagged ' + sport;
+
+  // Update tags
+  document.querySelectorAll('.sport-tag').forEach(t => {
+    t.classList.toggle('active', t.textContent.startsWith(sport));
+  });
+  const tagAll = document.getElementById('tag-all');
+  if (tagAll) tagAll.style.display = 'inline-block';
+}
+
+function renderGrid(photos) {
+  const g = document.getElementById('portfolio-grid');
+  if (!photos.length) {
+    g.innerHTML = '<div class="grid-item placeholder" style="grid-column:1/-1;aspect-ratio:auto;padding:48px"><span>No photos yet for this sport</span></div>';
+    return;
+  }
+  g.innerHTML = '';
+  photos.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'grid-item';
+    el.innerHTML = `<img src="${p.url}" alt="${p.sport||''}" loading="lazy"/><div class="grid-item-overlay"><span>${p.sport||''}</span></div>`;
+    el.addEventListener('click', () => openLB(p.url));
+    g.appendChild(el);
   });
 }
-function openLB(url){document.getElementById('lb-img').src=url;document.getElementById('lb').classList.add('open');}
-function closeLB(){document.getElementById('lb').classList.remove('open');document.getElementById('lb-img').src='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLB();});
+
+function openLB(url) { document.getElementById('lb-img').src = url; document.getElementById('lb').classList.add('open'); }
+function closeLB() { document.getElementById('lb').classList.remove('open'); document.getElementById('lb-img').src = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
 loadPortfolio();
 </script>
 </body>
