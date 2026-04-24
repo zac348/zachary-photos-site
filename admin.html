@@ -174,6 +174,17 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 /* PRICING */
 .pricing-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:20px 22px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
 .pricing-card.on-sale{border-color:rgba(0,229,160,.25);background:rgba(0,229,160,.04)}
+.pricing-card.unavailable{border-color:rgba(255,77,77,.2);background:rgba(255,77,77,.03);opacity:.7}
+.pricing-unavail-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.25);border-radius:4px;padding:2px 8px;display:inline-block;margin-left:6px}
+.addon-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.addon-card.unavailable{border-color:rgba(255,77,77,.2);background:rgba(255,77,77,.03);opacity:.7}
+.addon-card-left{display:flex;align-items:center;gap:10px}
+.addon-name{font-size:13px;font-weight:500;color:var(--t1)}
+.addon-price{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3)}
+.addon-card-right{display:flex;align-items:center;gap:10px}
+.avail-toggle{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;font-size:12px;color:var(--t2)}
+.avail-toggle input[type="checkbox"]{width:15px;height:15px;accent-color:var(--red);cursor:pointer}
+.avail-toggle.is-unavail{color:var(--red)}
 .pricing-pkg-name{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:4px}
 .pricing-pkg-sub{font-size:11px;color:var(--t3)}
 .pricing-right{display:flex;flex-direction:column;gap:10px;min-width:280px}
@@ -415,10 +426,12 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 
   <!-- PRICING -->
   <div class="tab" id="tab-pricing">
-    <h1 class="main-title">Package Pricing</h1>
-    <p class="main-sub">Set base prices and run sales on individual packages. Changes go live on the booking page immediately.</p>
+    <h1 class="main-title">Pricing &amp; Availability</h1>
+    <p class="main-sub">Set prices, run sales, and mark packages or add-ons as unavailable. Changes go live on the booking page immediately.</p>
     <div class="sec-label">packages</div>
     <div id="pricing-list"><p class="no-data">Loading...</p></div>
+    <div class="sec-label" style="margin-top:24px">add-ons</div>
+    <div id="addon-list"><p class="no-data">Loading...</p></div>
   </div>
 
 </main>
@@ -1005,13 +1018,19 @@ async function deleteBlock(id) {
 }
 
 // ── PRICING ──
-let allPricing = [];
+let allPricing = [], allAddonPricing = [];
 
 async function loadPricing() {
-  const { data, error } = await sb.from('package_pricing').select('*').order('base_price');
-  if (error || !data) { document.getElementById('pricing-list').innerHTML = '<p class="no-data">Run the SQL to create the package_pricing table first.</p>'; return; }
-  allPricing = data;
-  renderPricing();
+  const [pkgRes, addonRes] = await Promise.all([
+    sb.from('package_pricing').select('*').order('base_price'),
+    sb.from('addon_pricing').select('*').order('price')
+  ]);
+  allPricing = pkgRes.data || [];
+  allAddonPricing = addonRes.data || [];
+  if (pkgRes.error) document.getElementById('pricing-list').innerHTML = '<p class="no-data">Run the SQL to create the package_pricing table first.</p>';
+  else renderPricing();
+  if (addonRes.error) document.getElementById('addon-list').innerHTML = '<p class="no-data">Run the SQL to create the addon_pricing table first.</p>';
+  else renderAddonPricing();
 }
 
 function renderPricing() {
@@ -1020,10 +1039,15 @@ function renderPricing() {
 
   el.innerHTML = allPricing.map(pkg => {
     const onSale = pkg.on_sale && pkg.sale_price;
-    return `<div class="pricing-card ${onSale ? 'on-sale' : ''}" id="pkg-row-${pkg.id}">
+    const unavail = pkg.available === false;
+    return `<div class="pricing-card ${onSale ? 'on-sale' : ''} ${unavail ? 'unavailable' : ''}" id="pkg-row-${pkg.id}">
       <div>
-        <div class="pricing-pkg-name">${pkg.package_name} ${onSale ? '<span class="sale-active-badge">Sale active</span>' : ''}</div>
-        <div class="pricing-pkg-sub">${onSale ? 'Currently showing $' + pkg.sale_price + ' (was $' + pkg.base_price + ')' : 'Currently showing $' + pkg.base_price}</div>
+        <div class="pricing-pkg-name">
+          ${pkg.package_name}
+          ${onSale ? '<span class="sale-active-badge">Sale active</span>' : ''}
+          ${unavail ? '<span class="pricing-unavail-badge">Unavailable</span>' : ''}
+        </div>
+        <div class="pricing-pkg-sub">${onSale ? 'Showing $' + pkg.sale_price + ' (was $' + pkg.base_price + ')' : 'Showing $' + pkg.base_price}</div>
       </div>
       <div class="pricing-right">
         <div class="pricing-row">
@@ -1032,7 +1056,7 @@ function renderPricing() {
         </div>
         <div class="pricing-row">
           <label>Sale price</label>
-          <input type="number" id="sale-${pkg.id}" value="${pkg.sale_price || ''}" min="0" step="5" placeholder="—" ${!pkg.on_sale ? '' : ''}/>
+          <input type="number" id="sale-${pkg.id}" value="${pkg.sale_price || ''}" min="0" step="5" placeholder="—"/>
         </div>
         <div class="pricing-row">
           <label></label>
@@ -1041,33 +1065,68 @@ function renderPricing() {
             <span class="pricing-toggle-label">Run sale</span>
           </label>
         </div>
+        <div class="pricing-row">
+          <label></label>
+          <label class="pricing-toggle" style="${unavail ? 'color:var(--red)' : ''}">
+            <input type="checkbox" id="unavail-${pkg.id}" ${unavail ? 'checked' : ''} style="accent-color:var(--red)"/>
+            <span class="pricing-toggle-label">Mark unavailable</span>
+          </label>
+        </div>
         <button class="save-price-btn" onclick="savePricing('${pkg.id}')">Save changes</button>
       </div>
     </div>`;
   }).join('');
 }
 
+function renderAddonPricing() {
+  const el = document.getElementById('addon-list');
+  if (!allAddonPricing.length) { el.innerHTML = '<p class="no-data">No add-ons found. Run the SQL first.</p>'; return; }
+  el.innerHTML = allAddonPricing.map(a => {
+    const unavail = a.available === false;
+    return `<div class="addon-card ${unavail ? 'unavailable' : ''}">
+      <div class="addon-card-left">
+        <div>
+          <div class="addon-name">${a.addon_name} ${unavail ? '<span class="pricing-unavail-badge">Unavailable</span>' : ''}</div>
+          <div class="addon-price">+$${a.price}</div>
+        </div>
+      </div>
+      <div class="addon-card-right">
+        <label class="avail-toggle ${unavail ? 'is-unavail' : ''}">
+          <input type="checkbox" ${unavail ? 'checked' : ''} onchange="saveAddonAvailability('${a.id}',!this.checked)" style="accent-color:var(--red)"/>
+          <span>${unavail ? 'Unavailable' : 'Available'}</span>
+        </label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function toggleSaleField(id, checked) {
-  const saleInput = document.getElementById('sale-' + id);
-  if (!checked) saleInput.value = '';
+  if (!checked) document.getElementById('sale-' + id).value = '';
 }
 
 async function savePricing(id) {
   const basePrice = parseFloat(document.getElementById('base-' + id).value);
   const salePrice = parseFloat(document.getElementById('sale-' + id).value) || null;
   const onSale    = document.getElementById('onsale-' + id).checked;
+  const available = !document.getElementById('unavail-' + id).checked;
 
   if (!basePrice || basePrice <= 0) { toast('Enter a valid base price.'); return; }
   if (onSale && (!salePrice || salePrice <= 0)) { toast('Enter a valid sale price.'); return; }
   if (onSale && salePrice >= basePrice) { toast('Sale price must be less than base price.'); return; }
 
   const { error } = await sb.from('package_pricing')
-    .update({ base_price: basePrice, sale_price: onSale ? salePrice : null, on_sale: onSale, updated_at: new Date().toISOString() })
+    .update({ base_price: basePrice, sale_price: onSale ? salePrice : null, on_sale: onSale, available, updated_at: new Date().toISOString() })
     .eq('id', id);
 
   if (error) { toast('Error saving: ' + error.message); return; }
   await loadPricing();
-  toast(onSale ? '✓ Sale is now live!' : '✓ Prices updated!');
+  toast(!available ? '⚠ Package marked unavailable.' : onSale ? '✓ Sale is now live!' : '✓ Prices updated!');
+}
+
+async function saveAddonAvailability(id, available) {
+  await sb.from('addon_pricing').update({ available, updated_at: new Date().toISOString() }).eq('id', id);
+  await loadPricing();
+  toast(available ? '✓ Add-on enabled.' : '⚠ Add-on marked unavailable.');
 }
 
 // ── COUPONS ──
