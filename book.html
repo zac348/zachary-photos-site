@@ -344,6 +344,7 @@ footer span{font-size:11px;color:var(--t3)}
         <!-- Formspree redirect back to same page with ?success=1 -->
         <input type="hidden" name="_next" value="thanks.html"/>
         <input type="hidden" name="_subject" value="New booking request — ZRP"/>
+        <input type="hidden" name="Booking Number" id="h-booking-num"/>
 
         <div class="form-grid">
           <div class="field"><label>First name</label><input type="text" name="First Name" id="fname" placeholder="Jordan" required/></div>
@@ -427,22 +428,83 @@ var selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
 var travelCost = 0, travelReady = true; // travelReady = false while OSRM is calculating
 var acTimer = null, acResults = [], acIdx = -1;
 
-// ── FORM SUBMIT — validate then let Formspree handle it ──
-document.getElementById('booking-form').addEventListener('submit', function(e) {
+// ── FORM SUBMIT ──
+document.getElementById('booking-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
   if (!selPkg) {
-    e.preventDefault();
     alert('Please select a package first.');
     document.querySelector('.pkg-grid').scrollIntoView({ behavior: 'smooth' });
     return;
   }
   if (!travelReady) {
-    e.preventDefault();
     alert('Travel fee is still calculating — please wait a moment and try again.');
     return;
   }
-  // Sync all hidden fields before submit
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
   syncHiddenFields();
-  // Let the form POST naturally to Formspree
+
+  // Generate booking number: ZRP-YYYY-XXX
+  var year = new Date().getFullYear();
+  var seq = Math.floor(Math.random() * 900) + 100; // fallback random if seq not available
+  var bookingNum = 'ZRP-' + year + '-' + String(seq).padStart(3, '0');
+
+  // Write to Supabase first to get a real sequential number
+  try {
+    var pc = qPhotos * 15, pr = qPrints * 3;
+    var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
+    var total = (selPkg ? selPkg.price : 0) + pc + pr + travelCost + at;
+    var deposit = Math.round(total * 50) / 100;
+
+    var insertData = {
+      first_name:     document.getElementById('fname').value,
+      last_name:      document.getElementById('lname').value,
+      email:          document.getElementById('email').value,
+      phone:          document.getElementById('phone').value,
+      event_date:     document.getElementById('edate').value,
+      event_time:     document.getElementById('etime').value,
+      sport_type:     document.getElementById('sport').value,
+      event_location: document.getElementById('venue').value,
+      package_selected: selPkg.name + ' — $' + selPkg.price,
+      addons:         document.getElementById('h-addons').value,
+      total:          '$' + total.toFixed(2),
+      deposit:        '$' + deposit.toFixed(2),
+      travel_fee:     travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None',
+      referral:       document.getElementById('referral').value,
+      notes:          document.getElementById('notes').value,
+      status:         'pending'
+    };
+
+    var result = await sb.from('bookings').insert(insertData).select('id').single();
+    if (result.data && result.data.id) {
+      // Use the Supabase row ID suffix as the booking number
+      var shortId = result.data.id.slice(-5).toUpperCase();
+      bookingNum = 'ZRP-' + year + '-' + shortId;
+      await sb.from('bookings').update({ booking_number: bookingNum }).eq('id', result.data.id);
+    }
+  } catch(err) {
+    console.warn('Supabase insert failed, continuing with Formspree only', err);
+  }
+
+  // Store booking number for thanks page
+  sessionStorage.setItem('zrp_booking_num', bookingNum);
+  document.getElementById('h-booking-num').value = bookingNum;
+
+  // Now submit to Formspree
+  var form = document.getElementById('booking-form');
+  var data = new FormData(form);
+  try {
+    await fetch(form.action, {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    });
+  } catch(err) { console.warn('Formspree submit failed', err); }
+
+  window.location.href = 'thanks.html';
 });
 
 function syncHiddenFields() {
