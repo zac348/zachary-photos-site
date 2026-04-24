@@ -3,649 +3,815 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Book — Zachary Routsong Photography</title>
+<title>Admin — ZRP</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0a0a;--s1:#111;--s2:#181818;
-  --b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;
-  --t1:#efefef;--t2:#aaa;--t3:#666;
-  --accent:#00b7e3;--accent-d:#0099c4;
-  --accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);
-  --red:#ff4d4d;--radius:8px;
-}
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6}
-
-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--b1);position:sticky;top:0;background:var(--bg);z-index:100;gap:12px}
-.nav-logo{font-size:13px;font-weight:500;color:var(--t1);text-decoration:none}
-.nav-links{display:flex;gap:20px}
-.nav-links a{font-size:12px;color:var(--t3);text-decoration:none;transition:color .15s}
-.nav-links a:hover{color:var(--t1)}
-.nav-cta{font-size:12px;font-weight:500;color:var(--bg);background:var(--accent);padding:7px 16px;border-radius:4px;text-decoration:none;transition:background .15s;white-space:nowrap;flex-shrink:0}
-.nav-cta:hover{background:var(--accent-d)}
-@media(max-width:560px){.nav-links{display:none}}
-
-.page{max-width:760px;margin:0 auto;padding:40px 20px 80px}
-@media(max-width:600px){.page{padding:28px 16px 60px}}
-
-.sec-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+:root{--bg:#0a0a0a;--s1:#111;--s2:#181818;--b1:#1e1e1e;--b2:#2a2a2a;--b3:#333;--t1:#efefef;--t2:#aaa;--t3:#666;--accent:#00b7e3;--accent-d:#0099c4;--accent-bg:rgba(0,183,227,.08);--accent-border:rgba(0,183,227,.25);--red:#ff4d4d;--green:#22c55e;--yellow:#f59e0b;--radius:8px;}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:13px;line-height:1.6}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);padding:20px 0;display:flex;flex-direction:column}
+.sidebar-logo{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:0 18px;margin-bottom:24px}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:1px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:12px;color:var(--t3);cursor:pointer;transition:background .15s,color .15s;border:none;background:none;width:100%;text-align:left;text-decoration:none}
+.sb-link:hover,.sb-link.active{background:var(--s2);color:var(--t1)}
+.sb-link svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;flex-shrink:0}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--b1)}
+.logout-btn{font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s}
+.logout-btn:hover{color:var(--red)}
+.main{padding:32px;overflow-y:auto}
+@media(max-width:700px){.main{padding:20px 16px}}
+.tab{display:none}.tab.active{display:block}
+.main-title{font-size:18px;font-weight:400;letter-spacing:-.02em;margin-bottom:4px}
+.main-sub{font-size:12px;color:var(--t3);margin-bottom:28px}
+.sec-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .sec-label::after{content:'';flex:1;height:1px;background:var(--b2)}
-.block{margin-bottom:40px}
-
-/* PACKAGES */
-.pkg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden}
-@media(max-width:560px){.pkg-grid{grid-template-columns:1fr}}
-.pkg-card{background:var(--s1);padding:42px 16px 18px;cursor:pointer;transition:background .15s;position:relative}
-.pkg-card:hover{background:var(--s2)}
-.pkg-card.selected{background:var(--s2)}
-.pkg-card.selected::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
-.pkg-popular{position:absolute;top:14px;left:16px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:var(--accent);padding:2px 7px;border-radius:3px}
-.pkg-check{display:none;position:absolute;top:12px;right:12px;width:16px;height:16px;background:var(--accent);border-radius:50%;align-items:center;justify-content:center}
-.pkg-check svg{width:8px;height:8px;stroke:var(--bg);stroke-width:2.5;fill:none}
-.pkg-card.selected .pkg-check{display:flex}
-.pkg-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
-.pkg-price{font-size:26px;font-weight:300;color:var(--t1);letter-spacing:-.02em;line-height:1;margin-bottom:14px}
-.pkg-price small{font-size:12px;color:var(--t3);font-weight:400}
-.pkg-features{list-style:none;border-top:1px solid var(--b1);padding-top:12px}
-.pkg-features li{font-size:11px;color:var(--t2);padding:2px 0;display:flex;gap:6px;line-height:1.4}
-.pkg-features li::before{content:'–';color:var(--b3);flex-shrink:0}
-
-/* QTY */
-.addons-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.addons-toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
-@media(max-width:600px){.addons-toggles{grid-template-columns:1fr 1fr}}
-@media(max-width:380px){.addons-grid{grid-template-columns:1fr}.addons-toggles{grid-template-columns:1fr}}
-
-.qty-pill{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 14px;transition:border-color .15s,background .15s}
-.qty-pill.active{border-color:var(--accent);background:var(--accent-bg)}
-.qty-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
-.qty-label{font-size:12px;color:var(--t2)}
-.qty-pill.active .qty-label{color:var(--t1)}
-.qty-rate{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3)}
-.qty-pill.active .qty-rate{color:var(--accent)}
-.qty-row{display:flex;align-items:center;border:1px solid var(--b2);border-radius:6px;overflow:hidden;width:fit-content}
-.qty-btn{background:var(--s2);border:none;color:var(--t2);width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;user-select:none}
-.qty-btn:hover{background:var(--b2);color:var(--t1)}
-.qty-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--t1);width:36px;text-align:center;background:var(--s1);border:none;border-left:1px solid var(--b2);border-right:1px solid var(--b2);height:30px;line-height:30px}
-.qty-sub{font-size:10px;color:var(--t3);margin-top:5px;font-family:'DM Mono',monospace}
-.qty-pill.active .qty-sub{color:var(--t2)}
-
-/* TOGGLES */
-.toggle-pill{display:flex;justify-content:space-between;align-items:center;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:11px 14px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;gap:8px}
-.toggle-pill:hover{border-color:var(--b2)}
-.toggle-pill.active{border-color:var(--accent);background:var(--accent-bg)}
-.toggle-left{display:flex;align-items:center;gap:10px;flex:1}
-.toggle-box{width:14px;height:14px;border-radius:3px;border:1px solid var(--b3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
-.toggle-pill.active .toggle-box{background:var(--accent);border-color:var(--accent)}
-.toggle-box svg{width:8px;height:8px;stroke:var(--bg);stroke-width:2.5;fill:none;display:none}
-.toggle-pill.active .toggle-box svg{display:block}
-.toggle-name{font-size:12px;color:var(--t2)}
-.toggle-pill.active .toggle-name{color:var(--t1)}
-.toggle-price{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);white-space:nowrap;flex-shrink:0}
-.toggle-pill.active .toggle-price{color:var(--accent)}
-
-/* TRAVEL */
-.travel-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:18px}
-.travel-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.travel-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--t3)}
-.gas-pill{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:4px;padding:3px 8px}
-.travel-hint{font-size:11px;color:var(--t3);margin-bottom:12px;line-height:1.5}
-.addr-wrap{position:relative}
-.addr-drop{position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--b3);border-top:none;border-radius:0 0 6px 6px;z-index:50;max-height:200px;overflow-y:auto;display:none}
-.addr-drop.open{display:block}
-.addr-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s}
-.addr-item:last-child{border-bottom:none}
-.addr-item:hover,.addr-item.focused{background:var(--b2)}
-.addr-main{font-size:12px;color:var(--t1)}
-.addr-sub{font-size:10px;color:var(--t3);margin-top:1px}
-.travel-err{font-size:11px;color:var(--red);margin-top:6px;display:none}
-.travel-result{border-top:1px solid var(--b1);padding-top:12px;margin-top:12px;display:none}
-.travel-result.show{display:block}
-.tr-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);padding:2px 0}
-.tr-row.big{font-size:13px;font-weight:500;color:var(--t1);border-top:1px solid var(--b1);margin-top:6px;padding-top:8px}
-.tr-row.free{color:var(--accent);justify-content:center;font-size:11px;margin-top:6px}
-.travel-calculating{font-size:11px;color:var(--t3);margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:.06em;display:none}
-
-/* COUPON */
-.coupon-input-wrap{display:flex;gap:8px}
-.coupon-input-wrap input{flex:1}
-.coupon-apply-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:6px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.coupon-apply-btn:hover{border-color:var(--accent);color:var(--accent)}
-.coupon-status{font-size:11px;margin-top:6px;min-height:16px}
-.coupon-status.ok{color:#a78bfa}
-.coupon-status.err{color:var(--red)}
-
-
-.avail-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden}
-.avail-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b1);flex-wrap:wrap;gap:8px}
-.avail-hint{font-size:11px;color:var(--t3)}
-.avail-nav{display:flex;align-items:center;gap:10px}
-.avail-month{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--t2);min-width:110px;text-align:center}
-.avail-nav-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t3);border-radius:4px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.avail-nav-btn:hover{color:var(--t1);border-color:var(--b3)}
-.avail-grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.avail-dow{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);text-align:center;padding:8px 0;border-bottom:1px solid var(--b1)}
-.avail-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--t3);position:relative;transition:background .1s;flex-direction:column;gap:1px}
-.avail-day.clickable{cursor:pointer}
-.avail-day.clickable:hover{background:var(--s2);color:var(--t1)}
-.avail-day.empty{pointer-events:none}
-.avail-day.past{color:var(--b3);pointer-events:none}
-.avail-day.today{color:var(--accent)}
-.avail-day.picked{background:var(--accent-bg);color:var(--accent);outline:1px solid var(--accent-border)}
-.avail-day.unavailable{color:#ff4d4d;background:rgba(255,77,77,.06)}
-.avail-day.partial{color:#f59e0b;background:rgba(245,158,11,.06);cursor:pointer}
-.avail-day.available{color:#22c55e;background:rgba(34,197,94,.06);cursor:pointer}
-.avail-day.unavailable.clickable{cursor:not-allowed}
-.avail-dot-sm{width:3px;height:3px;border-radius:50%;flex-shrink:0}
-.avail-legend{display:flex;gap:14px;padding:10px 16px;border-top:1px solid var(--b1);flex-wrap:wrap}
-.avail-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
-.avail-dot{width:6px;height:6px;border-radius:50%}
-
-
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:5px}
-.field.full{grid-column:1/-1}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
+.stat{background:var(--s1);padding:16px}
+.stat-n{font-size:22px;font-weight:300;color:var(--accent);letter-spacing:-.02em}
+.stat-l{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-top:3px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
-input,select,textarea{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:10px 12px;outline:none;transition:border-color .15s;width:100%;appearance:none;-webkit-appearance:none;color-scheme:dark}
-input::placeholder{color:var(--t3)}
-input:focus,select:focus,textarea:focus{border-color:var(--b3);background:var(--s2)}
-textarea{resize:vertical;min-height:76px}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
-select option{background:var(--s2);color:var(--t1)}
-input[type="date"],input[type="time"]{cursor:pointer}
-.divider{grid-column:1/-1;border:none;border-top:1px solid var(--b1);margin:2px 0}
+input[type="text"],input[type="email"],input[type="time"],select,textarea{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;outline:none;transition:border-color .15s;width:100%;appearance:none;color-scheme:dark}
+input:focus,select:focus,textarea:focus{border-color:var(--b2);background:var(--s2)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select option{background:var(--s2)}
+.drop-zone{border:1px dashed var(--b3);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:12px}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:var(--accent-bg)}
+.drop-zone input{display:none}
+.drop-text{font-size:13px;color:var(--t2);margin-bottom:4px}
+.drop-sub{font-size:11px;color:var(--t3)}
+.prog-wrap{height:2px;background:var(--b2);border-radius:2px;margin-bottom:8px;display:none}
+.prog-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0}
+.upload-status{font-size:11px;color:var(--t2);min-height:16px;margin-bottom:16px}
+.acc-btn{background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.acc-btn:hover{background:var(--accent-d)}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:20px}
+.photo-card{background:var(--s1);border:1px solid var(--b1);border-radius:6px;overflow:hidden}
+.photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.photo-card-info{padding:7px 9px}
+.photo-sport{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.photo-name{font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.photo-actions{display:flex;gap:5px;padding:0 9px 9px}
+.tog-hp{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.tog-hp.on{border-color:var(--accent);color:var(--accent)}
+.del-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.del-btn:hover{border-color:var(--red);color:var(--red)}
+.gal-form{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.gal-form input{flex:1;min-width:160px}
+.gal-list{display:flex;flex-direction:column;gap:8px}
+.gal-row{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.gal-info h3{font-size:13px;font-weight:500}
+.gal-info p{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px}
+.gal-actions{display:flex;gap:7px}
+.copy-btn,.open-btn,.del-gal-btn{font-size:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:4px;padding:5px 11px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;transition:all .15s;display:inline-block}
+.copy-btn:hover,.open-btn:hover{color:var(--t1)}
+.copy-btn.copied{border-color:var(--accent);color:var(--accent)}
+.del-gal-btn:hover{border-color:var(--red);color:var(--red)}
+.booking-list{display:flex;flex-direction:column;gap:8px}
+.booking-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:16px}
+.booking-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.booking-name{font-size:14px;font-weight:500}
+.booking-pkg{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-border);padding:2px 8px;border-radius:3px}
+.booking-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.booking-detail{font-size:11px;color:var(--t2)}
+.booking-detail strong{display:block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:400;margin-bottom:1px}
+.no-data{font-size:12px;color:var(--t3);font-style:italic;padding:16px 0}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--b3);border-radius:6px;padding:10px 18px;font-size:12px;color:var(--t1);transform:translateY(60px);opacity:0;transition:all .3s;z-index:999}
+.toast.show{transform:translateY(0);opacity:1}
+input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+.check-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.check-row label{font-size:12px;text-transform:none;letter-spacing:0;color:var(--t2);cursor:pointer}
 
-/* COST BOX */
-.cost-box{grid-column:1/-1;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:16px}
-.cost-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
-.cost-empty{font-size:12px;color:var(--t3);font-style:italic}
-.cost-line{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);padding:2px 0}
-.cost-line.hide{display:none}
-.cost-line.total{border-top:1px solid var(--b1);margin-top:8px;padding-top:9px;font-size:13px;font-weight:500;color:var(--t1)}
-.cost-line.deposit{font-size:12px;font-weight:500;color:var(--accent)}
-.cost-line.balance{font-size:11px;color:var(--t3)}
+/* COUPONS */
+.coupon-form-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.coupon-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:800px){.coupon-form-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.coupon-form-grid{grid-template-columns:1fr}}
+.coupon-row{display:flex;align-items:center;justify-content:space-between;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 16px;margin-bottom:8px;gap:12px}
+.coupon-row.inactive{opacity:.5}
+.coupon-code{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.06em}
+.coupon-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.coupon-badges{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.coupon-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid}
+.coupon-badge.percent{color:#a78bfa;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.08)}
+.coupon-badge.fixed{color:#34d399;border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.08)}
+.coupon-badge.travel{color:#60a5fa;border-color:rgba(96,165,250,.3);background:rgba(96,165,250,.08)}
+.coupon-actions{display:flex;gap:6px;flex-shrink:0}
+.toggle-active-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:3px 9px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.toggle-active-btn:hover{border-color:var(--accent);color:var(--accent)}
+.del-coupon-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:3px 9px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.del-coupon-btn:hover{border-color:var(--red);color:var(--red)}
+.paid-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid}
+.paid-badge.paid{color:#22c55e;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.paid-badge.unpaid{color:var(--yellow);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+.pay-toggle{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.pay-toggle:hover{border-color:var(--green);color:var(--green)}
+.pay-toggle.paid:hover{border-color:var(--red);color:var(--red)}
+.invoice-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.invoice-btn:hover{border-color:var(--accent);color:var(--accent)}
+.wm-toggle{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
+.wm-toggle.wm-on{border-color:var(--yellow);color:var(--yellow)}
+.wm-toggle.wm-off{border-color:var(--green);color:var(--green)}
+.cal-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b1)}
+.cal-month{font-size:14px;font-weight:500;color:var(--t1)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav-btn{background:var(--s2);border:1px solid var(--b2);color:var(--t2);border-radius:4px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cal-nav-btn:hover{color:var(--t1);border-color:var(--b3)}
+.cal-nav-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);text-align:center;padding:10px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--t2);position:relative;transition:background .1s;border:1px solid transparent;flex-direction:column;gap:2px}
+.cal-day:hover{background:var(--s2);color:var(--t1)}
+.cal-day.empty{cursor:default;pointer-events:none}
+.cal-day.today{color:var(--accent);font-weight:500}
+.cal-day.past{color:var(--b3);cursor:default;pointer-events:none}
+.cal-day.selected{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.cal-day.unavailable{background:rgba(255,77,77,.08);color:var(--red)}
+.cal-day.partial{background:rgba(245,158,11,.08);color:var(--yellow)}
+.cal-day.available{background:rgba(34,197,94,.08);color:var(--green)}
+.cal-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+.cal-dot.red{background:var(--red)}
+.cal-dot.yellow{background:var(--yellow)}
+.cal-dot.green{background:var(--green)}
 
-.submit-wrap{grid-column:1/-1;margin-top:6px}
-.submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;position:relative}
-.submit-btn:hover:not(:disabled){background:var(--accent-d)}
-.submit-btn:disabled{opacity:.6;cursor:not-allowed}
+/* LEGEND */
+.cal-legend{display:flex;gap:16px;padding:12px 18px;border-top:1px solid var(--b1);flex-wrap:wrap}
+.cal-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-.success{display:none;text-align:center;padding:60px 20px}
-.success h3{font-size:16px;font-weight:500;margin-bottom:6px}
-.success p{font-size:12px;color:var(--t2)}
+/* DAY EDITOR */
+.day-editor{background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:18px;margin-bottom:20px;display:none}
+.day-editor.open{display:block}
+.day-editor-title{font-size:14px;font-weight:500;margin-bottom:14px;color:var(--t1)}
+.block-type-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.block-type-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--b2);background:none;border-radius:4px;padding:6px 12px;cursor:pointer;color:var(--t3);transition:all .15s}
+.block-type-btn:hover{border-color:var(--b3);color:var(--t2)}
+.block-type-btn.active.unavail{border-color:var(--red);color:var(--red);background:rgba(255,77,77,.08)}
+.block-type-btn.active.partial{border-color:var(--yellow);color:var(--yellow);background:rgba(245,158,11,.08)}
+.block-type-btn.active.avail{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08)}
+.block-type-btn.active.clear{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.time-row.hidden{display:none}
+.editor-actions{display:flex;gap:8px;margin-top:4px}
+.save-btn{background:var(--accent);color:var(--bg);border:none;border-radius:6px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:background .15s}
+.save-btn:hover{background:var(--accent-d)}
+.cancel-btn{background:none;border:1px solid var(--b2);color:var(--t3);border-radius:6px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .15s}
+.cancel-btn:hover{border-color:var(--b3);color:var(--t2)}
 
-footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-footer span{font-size:11px;color:var(--t3)}
-.foot-links{display:flex;gap:16px}
-.foot-links a{font-size:11px;color:var(--t3);text-decoration:none;transition:color .15s}
-.foot-links a:hover{color:var(--t1)}
+/* BLOCKS LIST */
+.blocks-list{display:flex;flex-direction:column;gap:6px}
+.block-row{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:10px 14px;gap:10px;flex-wrap:wrap}
+.block-row-info{font-size:12px;color:var(--t2)}
+.block-row-info strong{color:var(--t1);margin-right:6px}
+.block-status{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid}
+.block-status.unavailable{color:var(--red);border-color:rgba(255,77,77,.3);background:rgba(255,77,77,.08)}
+.block-status.partial{color:var(--yellow);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+.block-status.available{color:var(--green);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08)}
+.del-block-btn{font-size:9px;font-family:'DM Mono',monospace;border:1px solid var(--b2);background:none;color:var(--t3);border-radius:3px;padding:2px 7px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.del-block-btn:hover{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sidebar-logo">ZRP Admin</div>
+  <nav class="sidebar-nav">
+    <button class="sb-link active" onclick="switchTab('overview',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</button>
+    <button class="sb-link" onclick="switchTab('upload',this)"><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Upload</button>
+    <button class="sb-link" onclick="switchTab('galleries',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries</button>
+    <button class="sb-link" onclick="switchTab('bookings',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bookings</button>
+    <button class="sb-link" onclick="switchTab('calendar',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><circle cx="8" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="15" r="1" fill="currentColor"/><circle cx="16" cy="15" r="1" fill="currentColor"/></svg>Availability</button>
+    <button class="sb-link" onclick="switchTab('coupons',this)"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Coupons</button>
+    <a class="sb-link" href="index.html" target="_blank"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View site</a>
+  </nav>
+  <div class="sidebar-footer"><button class="logout-btn" onclick="logout()">Sign out</button></div>
+</aside>
+<main class="main">
 
-<nav>
-  <a href="index.html" class="nav-logo">ZRP</a>
-  <div class="nav-links">
-    <a href="index.html#portfolio">Work</a>
-    <a href="index.html#about">About</a>
-    <a href="tel:2293001006">229-300-1006</a>
-    <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">Instagram</a>
-  </div>
-  <a href="#book" class="nav-cta">Book now</a>
-</nav>
-
-<div class="page" id="book">
-
-  <!-- PACKAGES -->
-  <div class="block">
-    <div class="sec-label">packages</div>
-    <div class="pkg-grid">
-      <div class="pkg-card" data-package="Basic" data-price="40" onclick="selectPkg(this)">
-        <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-        <p class="pkg-name">Basic</p>
-        <p class="pkg-price">$40 <small>/ event</small></p>
-        <ul class="pkg-features">
-          <li>1–2 hours coverage</li>
-          <li>25 edited photos</li>
-          <li>Online gallery delivery</li>
-          <li>Personal use license</li>
-        </ul>
-      </div>
-      <div class="pkg-card" data-package="Standard" data-price="75" onclick="selectPkg(this)">
-        <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-        <span class="pkg-popular">Popular</span>
-        <p class="pkg-name">Standard</p>
-        <p class="pkg-price">$75 <small>/ event</small></p>
-        <ul class="pkg-features">
-          <li>Full game or 3 hrs</li>
-          <li>60 edited photos</li>
-          <li>Online gallery delivery</li>
-          <li>1 free 5×7 print</li>
-          <li>Personal use license</li>
-        </ul>
-      </div>
-      <div class="pkg-card" data-package="Premium" data-price="120" onclick="selectPkg(this)">
-        <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-        <p class="pkg-name">Premium</p>
-        <p class="pkg-price">$120 <small>/ event</small></p>
-        <ul class="pkg-features">
-          <li>Full day or double-header</li>
-          <li>100+ edited photos</li>
-          <li>Online gallery delivery</li>
-          <li>3 free 5×7 prints</li>
-          <li>Action highlight reel</li>
-          <li>Personal use license</li>
-        </ul>
-      </div>
+  <!-- OVERVIEW -->
+  <div class="tab active" id="tab-overview">
+    <h1 class="main-title">Dashboard</h1><p class="main-sub">Welcome back, Zachary.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-n" id="st-photos">—</div><div class="stat-l">Photos</div></div>
+      <div class="stat"><div class="stat-n" id="st-galleries">—</div><div class="stat-l">Galleries</div></div>
+      <div class="stat"><div class="stat-n" id="st-bookings">—</div><div class="stat-l">Bookings</div></div>
+      <div class="stat"><div class="stat-n" id="st-hp">—</div><div class="stat-l">On homepage</div></div>
     </div>
+    <div class="sec-label">recent bookings</div>
+    <div class="booking-list" id="ov-bookings"><p class="no-data">No bookings yet.</p></div>
   </div>
 
-  <!-- ADD-ONS -->
-  <div class="block">
-    <div class="sec-label">add-ons</div>
-    <div class="addons-grid">
-      <div class="qty-pill" id="qp-photos">
-        <div class="qty-top"><span class="qty-label">Extra edited photos (+25)</span><span class="qty-rate">$15/set</span></div>
-        <div class="qty-row">
-          <button class="qty-btn" onclick="chQty('photos',-1)">−</button>
-          <div class="qty-val" id="qv-photos">0</div>
-          <button class="qty-btn" onclick="chQty('photos',1)">+</button>
+  <!-- UPLOAD -->
+  <div class="tab" id="tab-upload">
+    <h1 class="main-title">Upload photos</h1><p class="main-sub">Add photos to your portfolio or a client gallery.</p>
+    <div class="field"><label>Sport / event</label>
+      <select id="up-sport"><option value="">Select sport...</option><option>Football</option><option>Basketball</option><option>Baseball</option><option>Softball</option><option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option><option>Wrestling</option><option>Swimming</option><option>Other</option></select>
+    </div>
+    <div class="field"><label>Client gallery (optional)</label><select id="up-gallery"><option value="">Portfolio only</option></select></div>
+    <div class="check-row"><input type="checkbox" id="up-hp"/><label for="up-hp">Show on homepage</label></div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <input type="file" id="file-input" accept="image/*" multiple/>
+      <p class="drop-text">Click to select photos, or drag and drop</p>
+      <p class="drop-sub">JPG, PNG, WEBP — multiple files OK</p>
+    </div>
+    <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+    <p class="upload-status" id="up-status"></p>
+    <div class="sec-label">all photos</div>
+    <div class="photos-grid" id="photos-grid"><p class="no-data">No photos yet.</p></div>
+  </div>
+
+  <!-- GALLERIES -->
+  <div class="tab" id="tab-galleries">
+    <h1 class="main-title">Client galleries</h1><p class="main-sub">Create a private gallery link for each client.</p>
+    <div class="gal-form">
+      <div class="field" style="flex:1;margin:0"><label>Client name</label><input type="text" id="new-gal-name" placeholder="e.g. Smith Family — Football 2025"/></div>
+      <button class="acc-btn" onclick="createGallery()" style="align-self:flex-end">Create gallery</button>
+    </div>
+    <div class="sec-label">all galleries</div>
+    <div class="gal-list" id="gal-list"><p class="no-data">No galleries yet.</p></div>
+  </div>
+
+  <!-- BOOKINGS -->
+  <div class="tab" id="tab-bookings">
+    <h1 class="main-title">Bookings</h1><p class="main-sub">Requests submitted through your booking form.</p>
+    <div class="sec-label">all bookings</div>
+    <div class="booking-list" id="all-bookings"><p class="no-data">No bookings yet.</p></div>
+  </div>
+
+  <!-- CALENDAR / AVAILABILITY -->
+  <div class="tab" id="tab-calendar">
+    <h1 class="main-title">Availability</h1>
+    <p class="main-sub">Click any date to mark it available, unavailable, or partially blocked. Clients see this on the booking page.</p>
+
+    <!-- CALENDAR -->
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <span class="cal-month" id="cal-month-label"></span>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="shiftMonth(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="cal-nav-btn" onclick="shiftMonth(1)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
         </div>
-        <div class="qty-sub" id="qs-photos">0 sets · $0.00</div>
       </div>
-      <div class="qty-pill" id="qp-prints">
-        <div class="qty-top"><span class="qty-label">Printed 4×6 photos</span><span class="qty-rate">$3 each</span></div>
-        <div class="qty-row">
-          <button class="qty-btn" onclick="chQty('prints',-1)">−</button>
-          <div class="qty-val" id="qv-prints">0</div>
-          <button class="qty-btn" onclick="chQty('prints',1)">+</button>
-        </div>
-        <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
+      <div class="cal-grid" id="cal-dow-row">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+        <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
       </div>
-    </div>
-    <div class="addons-toggles">
-      <div class="toggle-pill" data-addon="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery (24 hrs)</span></div>
-        <span class="toggle-price">+$40</span>
-      </div>
-      <div class="toggle-pill" data-addon="Video highlight reel" data-price="50" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Video highlight reel</span></div>
-        <span class="toggle-price">+$50</span>
-      </div>
-      <div class="toggle-pill" data-addon="Social media crop pack" data-price="10" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Social media crop pack</span></div>
-        <span class="toggle-price">+$10</span>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--red)"></div>Unavailable (full day)</div>
+        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Partially blocked</div>
+        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--green)"></div>Available (marked)</div>
       </div>
     </div>
+
+    <!-- DAY EDITOR -->
+    <div class="day-editor" id="day-editor">
+      <div class="day-editor-title" id="editor-title">Select a date</div>
+      <div class="block-type-row">
+        <button class="block-type-btn unavail" id="btn-unavail" onclick="setBlockType('unavailable')">Full day — unavailable</button>
+        <button class="block-type-btn partial" id="btn-partial" onclick="setBlockType('partial')">Partial block</button>
+        <button class="block-type-btn avail" id="btn-avail" onclick="setBlockType('available')">Mark available</button>
+        <button class="block-type-btn clear" id="btn-clear" onclick="setBlockType('clear')">Clear / reset</button>
+      </div>
+      <div class="time-row hidden" id="time-row">
+        <div class="field" style="margin:0"><label>From</label><input type="time" id="block-start" value="09:00"/></div>
+        <div class="field" style="margin:0"><label>To</label><input type="time" id="block-end" value="17:00"/></div>
+      </div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="block-note" placeholder="e.g. Football game booked"/></div>
+      <div class="editor-actions">
+        <button class="save-btn" onclick="saveBlock()">Save</button>
+        <button class="cancel-btn" onclick="closeEditor()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- EXISTING BLOCKS LIST -->
+    <div class="sec-label">all blocks this month</div>
+    <div class="blocks-list" id="blocks-list"><p class="no-data">No blocks set for this month.</p></div>
   </div>
 
-  <!-- TRAVEL -->
-  <div class="block">
-    <div class="sec-label">travel estimate</div>
-    <div class="travel-card">
-      <div class="travel-top">
-        <span class="travel-title">Fuel cost calculator</span>
-        <span class="gas-pill">Valdosta avg: $3.69/gal</span>
-      </div>
-      <p class="travel-hint">Type an address or venue and pick from the results. Driving distance from Valdosta at 22.5 MPG, rounded down to nearest $0.10. Under 15 miles = no charge.</p>
-      <div class="addr-wrap">
+  <!-- COUPONS -->
+  <div class="tab" id="tab-coupons">
+    <h1 class="main-title">Coupons</h1>
+    <p class="main-sub">Create and manage discount codes for clients.</p>
+
+    <div class="coupon-form-card">
+      <div class="sec-label" style="margin-bottom:16px">new coupon</div>
+      <div class="coupon-form-grid">
         <div class="field" style="margin:0">
-          <label for="addr-input">Shoot location</label>
-          <input type="text" id="addr-input" placeholder="e.g. Lowndes High School, Valdosta GA" autocomplete="off" oninput="onAddrInput(this.value)" onkeydown="onAddrKey(event)"/>
+          <label>Code</label>
+          <input type="text" id="cp-code" placeholder="e.g. SUMMER25" style="text-transform:uppercase"/>
         </div>
-        <div class="addr-drop" id="addr-drop"></div>
-      </div>
-      <p class="travel-err" id="travel-err">No results found — try adding a city or state.</p>
-      <p class="travel-calculating" id="travel-calc-status">Calculating driving distance...</p>
-      <div class="travel-result" id="travel-result">
-        <div class="tr-row"><span>One way distance</span><span id="tr-mi">—</span></div>
-        <div class="tr-row"><span>Gas price</span><span id="tr-gas">$3.69/gal</span></div>
-        <div class="tr-row"><span>Fuel used (round trip)</span><span id="tr-gal">—</span></div>
-        <div class="tr-row big" id="tr-fee-row"><span>Travel fee</span><span id="tr-fee">—</span></div>
-        <div class="tr-row free" id="tr-free" style="display:none">No travel fee — within 15 miles!</div>
+        <div class="field" style="margin:0">
+          <label>Type</label>
+          <select id="cp-type" onchange="onCouponTypeChange()">
+            <option value="percent">Percentage off</option>
+            <option value="fixed">Fixed $ off</option>
+            <option value="travel">Negate travel fee</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="cp-value-wrap">
+          <label id="cp-value-label">Discount %</label>
+          <input type="number" id="cp-value" placeholder="e.g. 20" min="0"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Expires (optional)</label>
+          <input type="date" id="cp-expires" style="color-scheme:dark"/>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Max uses (optional)</label>
+          <input type="number" id="cp-max-uses" placeholder="Unlimited"/>
+        </div>
+        <div class="field" style="margin:0;align-self:flex-end">
+          <button class="acc-btn" style="width:100%" onclick="createCoupon()">Create coupon</button>
+        </div>
       </div>
     </div>
+
+    <div class="sec-label">all coupons</div>
+    <div id="coupons-list"><p class="no-data">No coupons yet.</p></div>
   </div>
 
-  <!-- AVAILABILITY -->
-  <div class="block">
-    <div class="sec-label">availability</div>
-    <div class="avail-card">
-      <div class="avail-header">
-        <span class="avail-hint">Click an available date to pre-fill your event date below.</span>
-        <div class="avail-nav">
-          <button class="avail-nav-btn" onclick="shiftCalMonth(-1)"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
-          <span class="avail-month" id="avail-month"></span>
-          <button class="avail-nav-btn" onclick="shiftCalMonth(1)"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg></button>
-        </div>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+sb.auth.getSession().then(({data}) => { if (!data.session) window.location.href = 'login.html'; else loadAll(); });
+async function logout() { await sb.auth.signOut(); window.location.href = 'login.html'; }
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'calendar') renderCalendar();
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); }
+
+let allPhotos = [], allGalleries = [], allBookings = [], allBlocks = [];
+
+async function loadAll() {
+  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons()]);
+  updateStats();
+}
+
+// ── PHOTOS ──
+async function loadPhotos() {
+  const { data } = await sb.from('portfolio_photos').select('*').order('created_at', { ascending: false });
+  allPhotos = data || []; renderPhotos(); populateGalDrop();
+}
+function renderPhotos() {
+  const g = document.getElementById('photos-grid');
+  if (!allPhotos.length) { g.innerHTML = '<p class="no-data">No photos yet.</p>'; return; }
+  g.innerHTML = allPhotos.map(p => `
+    <div class="photo-card">
+      <img src="${p.url}" alt="${p.sport || ''}"/>
+      <div class="photo-card-info">
+        <div class="photo-sport">${p.sport || 'No sport'}</div>
+        <div class="photo-name">${p.file_name}</div>
       </div>
-      <div class="avail-grid" id="avail-dow">
-        <div class="avail-dow">Sun</div><div class="avail-dow">Mon</div><div class="avail-dow">Tue</div>
-        <div class="avail-dow">Wed</div><div class="avail-dow">Thu</div><div class="avail-dow">Fri</div><div class="avail-dow">Sat</div>
+      <div class="photo-actions">
+        <button class="tog-hp ${p.show_on_homepage ? 'on' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage ? 'On HP' : 'Add HP'}</button>
+        <button class="del-btn" onclick="delPhoto('${p.id}','${p.storage_path}')">Delete</button>
       </div>
-      <div class="avail-grid" id="avail-grid"></div>
-      <div class="avail-legend">
-        <div class="avail-legend-item"><div class="avail-dot" style="background:#ff4d4d"></div>Unavailable</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:#f59e0b"></div>Partially available</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:#22c55e"></div>Available</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--b3)"></div>Not set</div>
+    </div>`).join('');
+}
+async function togHP(id, cur) { await sb.from('portfolio_photos').update({ show_on_homepage: !cur }).eq('id', id); await loadPhotos(); }
+async function delPhoto(id, path) {
+  if (!confirm('Delete this photo?')) return;
+  await sb.storage.from('photos').remove([path]);
+  await sb.from('portfolio_photos').delete().eq('id', id);
+  await loadPhotos(); toast('Photo deleted.');
+}
+
+// UPLOAD
+const dz = document.getElementById('drop-zone'), fi = document.getElementById('file-input');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fi.addEventListener('change', () => handleFiles(fi.files));
+async function handleFiles(files) {
+  if (!files.length) return;
+  const sport = document.getElementById('up-sport').value;
+  const galId = document.getElementById('up-gallery').value;
+  const hp = document.getElementById('up-hp').checked;
+  const pw = document.getElementById('prog-wrap'), pb = document.getElementById('prog-bar'), st = document.getElementById('up-status');
+  pw.style.display = 'block'; let done = 0;
+  for (const file of files) {
+    const ext = file.name.split('.').pop();
+    const path = `public/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    st.textContent = `Uploading ${file.name}...`;
+    const { error } = await sb.storage.from('photos').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) { st.textContent = `Error: ${error.message}`; continue; }
+    const { data: u } = sb.storage.from('photos').getPublicUrl(path);
+    await sb.from('portfolio_photos').insert({ file_name: file.name, storage_path: path, url: u.publicUrl, sport: sport || null, gallery_id: galId || null, show_on_homepage: hp });
+    done++; pb.style.width = `${(done / files.length) * 100}%`;
+  }
+  st.textContent = `${done} photo${done !== 1 ? 's' : ''} uploaded!`;
+  setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0'; st.textContent = ''; }, 3000);
+  fi.value = ''; await loadPhotos(); toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
+}
+
+// ── GALLERIES ──
+async function loadGalleries() {
+  const { data } = await sb.from('client_galleries').select('*').order('created_at', { ascending: false });
+  allGalleries = data || []; renderGalleries(); populateGalDrop();
+}
+function populateGalDrop() {
+  const s = document.getElementById('up-gallery'), cur = s.value;
+  s.innerHTML = '<option value="">Portfolio only</option>';
+  allGalleries.forEach(g => { const o = document.createElement('option'); o.value = g.id; o.textContent = g.name; if (g.id === cur) o.selected = true; s.appendChild(o); });
+}
+function renderGalleries() {
+  const l = document.getElementById('gal-list');
+  if (!allGalleries.length) { l.innerHTML = '<p class="no-data">No galleries yet.</p>'; return; }
+  l.innerHTML = allGalleries.map(g => {
+    const url = `${window.location.origin}/gallery.html?id=${g.slug}`;
+    const cnt = allPhotos.filter(p => p.gallery_id === g.id).length;
+    const isPaid = g.paid === true;
+    const hasWm = g.watermark !== false;
+    return `<div class="gal-row">
+      <div class="gal-info">
+        <h3 style="display:flex;align-items:center;gap:8px">
+          ${g.name}
+          <span class="paid-badge ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? 'Paid' : 'Unpaid'}</span>
+        </h3>
+        <p>${cnt} photo${cnt !== 1 ? 's' : ''} · Watermark: ${hasWm ? 'on' : 'off'}</p>
       </div>
+      <div class="gal-actions" style="flex-wrap:wrap">
+        <button class="pay-toggle ${isPaid ? 'paid' : ''}" onclick="togglePaid('${g.id}',${isPaid})">${isPaid ? 'Mark unpaid' : 'Mark paid'}</button>
+        <button class="wm-toggle ${hasWm ? 'wm-on' : 'wm-off'}" onclick="toggleWatermark('${g.id}',${hasWm})">${hasWm ? 'WM: on' : 'WM: off'}</button>
+        <button class="invoice-btn" onclick="generateInvoice('${g.id}')">Invoice PDF</button>
+        <button class="copy-btn" onclick="copyLink('${url}',this)">Copy link</button>
+        <a class="open-btn" href="${url}" target="_blank">Open</a>
+        <button class="del-gal-btn" onclick="delGallery('${g.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function togglePaid(id, cur) {
+  await sb.from('client_galleries').update({ paid: !cur }).eq('id', id);
+  await loadGalleries();
+  toast(cur ? 'Marked unpaid.' : '✓ Marked as paid!');
+}
+
+async function toggleWatermark(id, cur) {
+  await sb.from('client_galleries').update({ watermark: !cur }).eq('id', id);
+  await loadGalleries();
+  toast(cur ? 'Watermark removed — clients can now download clean photos.' : 'Watermark re-enabled.');
+}
+
+async function generateInvoice(galId) {
+  const gallery = allGalleries.find(g => g.id === galId);
+  if (!gallery) return;
+
+  // Find matching booking by name (best match)
+  const booking = allBookings.find(b =>
+    gallery.name.toLowerCase().includes((b.first_name || '').toLowerCase()) ||
+    gallery.name.toLowerCase().includes((b.last_name || '').toLowerCase())
+  );
+
+  const now = new Date();
+  const invoiceNum = 'ZRP-' + now.getFullYear() + '-' + String(allGalleries.indexOf(gallery) + 1).padStart(3, '0');
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Invoice ${invoiceNum}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111;padding:48px;max-width:680px;margin:0 auto;font-size:13px}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px}
+  .brand{font-size:18px;font-weight:600;letter-spacing:-.02em}
+  .brand-sub{font-size:11px;color:#888;margin-top:3px;letter-spacing:.04em}
+  .invoice-meta{text-align:right}
+  .invoice-meta h1{font-size:22px;font-weight:300;letter-spacing:-.02em;color:#111}
+  .invoice-meta p{font-size:11px;color:#888;margin-top:4px}
+  .divider{border:none;border-top:1px solid #e5e5e5;margin:24px 0}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:36px}
+  .col-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:6px}
+  .col-val{font-size:13px;color:#111;line-height:1.6}
+  table{width:100%;border-collapse:collapse;margin-bottom:24px}
+  thead th{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding:8px 0;text-align:left;border-bottom:1px solid #e5e5e5}
+  tbody td{padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#111;vertical-align:top}
+  .amount{text-align:right}
+  .totals{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:8px}
+  .total-row{display:flex;gap:48px;font-size:12px}
+  .total-row .label{color:#888}
+  .total-row .val{min-width:80px;text-align:right}
+  .total-row.big .label,.total-row.big .val{font-size:14px;font-weight:600;color:#111}
+  .deposit-row{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+  .deposit-row .label{font-size:12px;color:#16a34a;font-weight:500}
+  .deposit-row .val{font-size:14px;font-weight:600;color:#16a34a}
+  .footer-note{margin-top:48px;padding-top:20px;border-top:1px solid #e5e5e5;font-size:11px;color:#aaa;line-height:1.7}
+  @media print{body{padding:0}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Zachary Routsong Photography</div>
+    <div class="brand-sub">Sports Photography · Valdosta, GA</div>
+    <div style="margin-top:12px;font-size:11px;color:#888;line-height:1.7">
+      229-300-1006<br/>
+      @zacharyroutsongphotos<br/>
+      zrphotos.net
     </div>
   </div>
-
-  <!-- FORM -->
-  <div class="block">
-    <div class="sec-label">your details</div>
-    <div id="form-wrap">
-      <!-- Formspree endpoint — all hidden fields get submitted too -->
-      <form id="booking-form" action="https://formspree.io/f/xzdyygdl" method="POST">
-        <!-- Hidden fields populated by JS -->
-        <input type="hidden" name="Package"      id="h-pkg"/>
-        <input type="hidden" name="Add-Ons"      id="h-addons"/>
-        <input type="hidden" name="Total"        id="h-total"/>
-        <input type="hidden" name="Deposit Due"  id="h-deposit"/>
-        <input type="hidden" name="Travel Fee"   id="h-travel"/>
-        <!-- Formspree redirect back to same page with ?success=1 -->
-        <input type="hidden" name="_next" value="thanks.html"/>
-        <input type="hidden" name="_subject" value="New booking request — ZRP"/>
-        <input type="hidden" name="Booking Number" id="h-booking-num"/>
-
-        <div class="form-grid">
-          <div class="field"><label>First name</label><input type="text" name="First Name" id="fname" placeholder="Jordan" required/></div>
-          <div class="field"><label>Last name</label><input type="text" name="Last Name" id="lname" placeholder="Smith" required/></div>
-          <div class="field"><label>Email</label><input type="email" name="Email" id="email" placeholder="you@email.com" required/></div>
-          <div class="field"><label>Phone</label><input type="tel" name="Phone" id="phone" placeholder="(229) 555-0100"/></div>
-          <hr class="divider"/>
-          <div class="field"><label>Event date</label><input type="date" name="Event Date" id="edate" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
-          <div class="field"><label>Start time</label><input type="time" name="Start Time" id="etime" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/></div>
-          <div class="field">
-            <label>Sport / event type</label>
-            <select name="Sport" id="sport" required>
-              <option value="" disabled selected>Select...</option>
-              <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
-              <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
-              <option>Wrestling</option><option>Swimming</option><option>Other</option>
-            </select>
-          </div>
-          <div class="field"><label>Venue / location</label><input type="text" name="Venue" id="venue" placeholder="Valdosta High School Stadium" required/></div>
-          <hr class="divider"/>
-          <div class="field"><label>Player last name</label><input type="text" name="Player Last Name" id="player-name" placeholder="e.g. Smith"/></div>
-          <div class="field"><label>Player number</label><input type="text" name="Player Number" id="player-num" placeholder="e.g. 24"/></div>
-          <hr class="divider"/>
-          <div class="field full"><label>Selected package</label><input type="text" id="pkg-display" placeholder="Select a package above first" readonly style="cursor:default;color:var(--t3)"/></div>
-          <hr class="divider"/>
-          <div class="cost-box">
-            <div class="cost-label">Estimate</div>
-            <div id="cost-empty" class="cost-empty">Select a package to see your total.</div>
-            <div id="cost-lines" style="display:none">
-              <div class="cost-line" id="cl-pkg"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
-              <div class="cost-line hide" id="cl-photos"><span>Extra photos</span><span id="cl-photos-v"></span></div>
-              <div class="cost-line hide" id="cl-prints"><span>Printed 4×6</span><span id="cl-prints-v"></span></div>
-              <div class="cost-line hide" id="cl-travel"><span>Travel (fuel)</span><span id="cl-travel-v"></span></div>
-              <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
-              <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
-              <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
-              <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
-              <div class="cost-line hide" id="cl-coupon" style="color:#a78bfa"><span id="cl-coupon-label">Coupon</span><span id="cl-coupon-val"></span></div>
-              <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
-              <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
-            </div>
-          </div>
-          <hr class="divider"/>
-          <!-- COUPON -->
-          <div class="field full" style="margin:0">
-            <label>Coupon code (optional)</label>
-            <div class="coupon-input-wrap">
-              <input type="text" id="coupon-input" placeholder="e.g. SUMMER25" autocomplete="off" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyCoupon();}"/>
-              <button type="button" class="coupon-apply-btn" onclick="applyCoupon()">Apply</button>
-            </div>
-            <div class="coupon-status" id="coupon-status"></div>
-          </div>
-          <hr class="divider"/>
-          <div class="field full">
-            <label>How'd you find Zachary?</label>
-            <select name="Referral" id="referral" required>
-              <option value="" disabled selected>Select...</option>
-              <option>Instagram (@zacharyroutsongphotos)</option>
-              <option>Word of mouth / friend</option>
-              <option>Saw photos at an event</option>
-              <option>Google search</option>
-              <option>School / team recommendation</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="field full"><label>Anything else? (optional)</label><textarea name="Notes" id="notes" placeholder="Players to focus on, questions, etc."></textarea></div>
-          <div class="submit-wrap">
-            <button type="submit" class="submit-btn" id="submit-btn">Send booking request</button>
-          </div>
-        </div>
-      </form>
-    </div>
-
+  <div class="invoice-meta">
+    <h1>Invoice</h1>
+    <p>${invoiceNum}</p>
+    <p>${dateStr}</p>
   </div>
 </div>
-
-<footer>
-  <span>© 2025 Zachary Routsong Photography</span>
-  <div class="foot-links">
-    <a href="tel:2293001006">229-300-1006</a>
-    <a href="https://instagram.com/zacharyroutsongphotos" target="_blank">@zacharyroutsongphotos</a>
+<hr class="divider"/>
+<div class="two-col">
+  <div>
+    <div class="col-label">Bill to</div>
+    <div class="col-val">${gallery.name}</div>
   </div>
-</footer>
+  <div>
+    <div class="col-label">Event details</div>
+    <div class="col-val">
+      ${booking ? `${booking['Sport'] || booking.sport_type || '—'}<br/>${booking['Event Date'] || booking.event_date || ''} ${booking['Start Time'] || booking.event_time || ''}<br/>${booking['Venue'] || booking.event_location || ''}` : 'See booking form'}
+    </div>
+  </div>
+</div>
+<table>
+  <thead>
+    <tr><th>Description</th><th class="amount">Amount</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>${booking ? (booking['Package'] || booking.package_selected || 'Photography package') : 'Photography package'}</td>
+      <td class="amount">${booking ? (booking['Total'] || booking.total || '—') : '—'}</td>
+    </tr>
+    ${booking && (booking['Add-Ons'] || booking.addons) && (booking['Add-Ons'] || booking.addons) !== 'None' ? `
+    <tr>
+      <td style="color:#888;font-size:12px">Add-ons: ${booking['Add-Ons'] || booking.addons}</td>
+      <td class="amount">—</td>
+    </tr>` : ''}
+    ${booking && (booking['Travel Fee'] || booking.travel) && (booking['Travel Fee'] || booking.travel) !== 'None' ? `
+    <tr>
+      <td>Travel fee</td>
+      <td class="amount">${booking['Travel Fee'] || booking.travel}</td>
+    </tr>` : ''}
+  </tbody>
+</table>
+<div class="totals">
+  <div class="total-row big">
+    <span class="label">Total due</span>
+    <span class="val">${booking ? (booking['Total'] || booking.total || '—') : '—'}</span>
+  </div>
+</div>
+${booking && (booking['Deposit Due'] || booking.deposit) ? `
+<div class="deposit-row">
+  <span class="label">✓ Deposit paid</span>
+  <span class="val">${booking['Deposit Due'] || booking.deposit}</span>
+</div>` : ''}
+<div class="footer-note">
+  Thank you for booking with Zachary Routsong Photography!<br/>
+  Photos delivered via private gallery link · 5–7 day turnaround · Personal use license included<br/>
+  Questions? Call or text 229-300-1006 or DM @zacharyroutsongphotos
+</div>
+</body>
+</html>`;
 
-<script>
-// ── CONFIG ──
-// Origin: coordinates only, no address stored in source
-var ORIGIN   = { lat: 30.8876, lng: -83.3089 };
-var GAS      = 3.69;
-var MPG      = 22.5;
-var FREE_MI  = 15;
-
-// ── STATE ──
-var selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
-var travelCost = 0, travelReady = true;
-var acTimer = null, acResults = [], acIdx = -1;
-var activeCoupon = null; // {code, type, value}
-
-// ── FORM SUBMIT ──
-document.getElementById('booking-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  if (!selPkg) {
-    alert('Please select a package first.');
-    document.querySelector('.pkg-grid').scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
-  if (!travelReady) {
-    alert('Travel fee is still calculating — please wait a moment and try again.');
-    return;
-  }
-
-  var btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
-
-  syncHiddenFields();
-
-  // Generate booking number: ZRP-YYYY-XXX
-  var year = new Date().getFullYear();
-  var seq = Math.floor(Math.random() * 900) + 100; // fallback random if seq not available
-  var bookingNum = 'ZRP-' + year + '-' + String(seq).padStart(3, '0');
-
-  // Write to Supabase first to get a real sequential number
-  try {
-    var pc = qPhotos * 15, pr = qPrints * 3;
-    var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
-    var total = (selPkg ? selPkg.price : 0) + pc + pr + travelCost + at;
-    var deposit = Math.round(total * 50) / 100;
-
-    var insertData = {
-      first_name:     document.getElementById('fname').value,
-      last_name:      document.getElementById('lname').value,
-      email:          document.getElementById('email').value,
-      phone:          document.getElementById('phone').value,
-      event_date:     document.getElementById('edate').value,
-      event_time:     document.getElementById('etime').value,
-      sport_type:     document.getElementById('sport').value,
-      event_location: document.getElementById('venue').value,
-      package_selected: selPkg.name + ' — $' + selPkg.price,
-      addons:         document.getElementById('h-addons').value,
-      total:          '$' + total.toFixed(2),
-      deposit:        '$' + deposit.toFixed(2),
-      travel_fee:     travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None',
-      referral:       document.getElementById('referral').value,
-      notes:          document.getElementById('notes').value,
-      status:         'pending'
-    };
-
-    var result = await sb.from('bookings').insert(insertData).select('id').single();
-    if (result.data && result.data.id) {
-      // Use the Supabase row ID suffix as the booking number
-      var shortId = result.data.id.slice(-5).toUpperCase();
-      bookingNum = 'ZRP-' + year + '-' + shortId;
-      await sb.from('bookings').update({ booking_number: bookingNum }).eq('id', result.data.id);
-    }
-  } catch(err) {
-    console.warn('Supabase insert failed, continuing with Formspree only', err);
-  }
-
-  // Store booking number for thanks page
-  sessionStorage.setItem('zrp_booking_num', bookingNum);
-  document.getElementById('h-booking-num').value = bookingNum;
-
-  // Now submit to Formspree
-  var form = document.getElementById('booking-form');
-  var data = new FormData(form);
-  try {
-    await fetch(form.action, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    });
-  } catch(err) { console.warn('Formspree submit failed', err); }
-
-  window.location.href = 'thanks.html';
-});
-
-function syncHiddenFields() {
-  var pc = qPhotos * 15, pr = qPrints * 3;
-  var at = addons.reduce(function(s, a) { return s + a.p; }, 0);
-  var effectiveTravel = (activeCoupon && activeCoupon.type === 'travel') ? 0 : travelCost;
-  var subtotal = (selPkg ? selPkg.price : 0) + pc + pr + effectiveTravel + at;
-  var discount = 0;
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent') discount = Math.floor(subtotal * (activeCoupon.value / 100) * 100) / 100;
-    else if (activeCoupon.type === 'fixed') discount = Math.min(parseFloat(activeCoupon.value), subtotal);
-    else if (activeCoupon.type === 'travel') discount = travelCost;
-  }
-  var total   = Math.max(0, subtotal - discount);
-  var deposit = Math.round(total * 50) / 100;
-  var an = [];
-  if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
-  if (qPrints > 0) an.push('Prints x' + qPrints);
-  if (travelCost > 0) an.push('Travel $' + travelCost.toFixed(2));
-  addons.forEach(function(a) { an.push(a.n); });
-
-  document.getElementById('h-pkg').value     = selPkg ? selPkg.name + ' — $' + selPkg.price : '';
-  document.getElementById('h-addons').value  = an.join(', ') || 'None';
-  document.getElementById('h-total').value   = '$' + total.toFixed(2);
-  document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
-  document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
-  if (activeCoupon) {
-    // Atomically increment uses by 1
-    sb.rpc('increment_coupon_uses', { coupon_id: activeCoupon.id });
-  }
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 600);
 }
 
-// ── ADDRESS SEARCH ──
-function onAddrInput(v) {
-  clearTimeout(acTimer);
-  document.getElementById('travel-err').style.display = 'none';
-  document.getElementById('travel-result').classList.remove('show');
-  document.getElementById('travel-calc-status').style.display = 'none';
-  travelCost = 0; travelReady = true;
-  updateCost();
-  if (v.length < 3) { closeDD(); return; }
-  acTimer = setTimeout(function() { fetchAddr(v); }, 400);
+async function createGallery() {
+  const name = document.getElementById('new-gal-name').value.trim();
+  if (!name) { toast('Enter a client name first.'); return; }
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
+  await sb.from('client_galleries').insert({ name, slug });
+  document.getElementById('new-gal-name').value = '';
+  await loadGalleries(); toast('Gallery created!');
+}
+async function delGallery(id) {
+  if (!confirm('Delete this gallery? Photos stay in your portfolio.')) return;
+  await sb.from('client_galleries').delete().eq('id', id);
+  await loadGalleries(); toast('Gallery deleted.');
+}
+function copyLink(url, btn) {
+  navigator.clipboard.writeText(url);
+  btn.textContent = 'Copied!'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
 }
 
-async function fetchAddr(q) {
-  try {
-    var r = await fetch(
-      'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q),
-      { headers: { 'Accept-Language': 'en-US', 'User-Agent': 'ZRPBooking/1.0' } }
-    );
-    var d = await r.json();
-    acResults = d; acIdx = -1;
-    if (!d.length) { document.getElementById('travel-err').style.display = 'block'; closeDD(); return; }
-    var dd = document.getElementById('addr-drop');
-    dd.innerHTML = d.map(function(item, i) {
-      var p = item.display_name.split(', ');
-      return '<div class="addr-item" onmousedown="pickAddr(' + i + ')">'
-        + '<div class="addr-main">' + p.slice(0, 2).join(', ') + '</div>'
-        + '<div class="addr-sub">' + p.slice(2, 5).join(', ') + '</div>'
-        + '</div>';
-    }).join('');
-    dd.classList.add('open');
-  } catch(e) { closeDD(); }
+// ── BOOKINGS ──
+async function loadBookings() {
+  const { data } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
+  allBookings = data || [];
+  renderBookings('all-bookings', allBookings);
+  renderBookings('ov-bookings', allBookings.slice(0, 4));
 }
 
-function pickAddr(i) {
-  var r = acResults[i]; if (!r) return;
-  var label = r.display_name.split(', ').slice(0, 3).join(', ');
-  document.getElementById('addr-input').value = label;
-  var vf = document.getElementById('venue');
-  if (vf && !vf.value) vf.value = label;
-  closeDD();
-  calcTravel(parseFloat(r.lat), parseFloat(r.lon));
+function renderBookings(id, list) {
+  const el = document.getElementById(id);
+  if (!list.length) { el.innerHTML = '<p class="no-data">No bookings yet.</p>'; return; }
+  el.innerHTML = list.map(b => {
+    const status = b.status || 'pending';
+    const statusColor = status === 'approved' ? 'var(--green)' : status === 'pending' ? 'var(--yellow)' : 'var(--red)';
+    const isPending = status === 'pending';
+    const isApproved = status === 'approved';
+    return `<div class="booking-card">
+      <div class="booking-head">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="booking-name">${b.first_name || ''} ${b.last_name || ''}</span>
+          ${b.booking_number ? `<span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--t3)">${b.booking_number}</span>` : ''}
+          <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid;color:${statusColor};border-color:${statusColor};background:${statusColor}18">${status}</span>
+        </div>
+        <span class="booking-pkg">${b.package_selected || '—'}</span>
+      </div>
+      <div class="booking-details">
+        <div class="booking-detail"><strong>Email</strong>${b.email || '—'}</div>
+        <div class="booking-detail"><strong>Phone</strong>${b.phone || '—'}</div>
+        <div class="booking-detail"><strong>Date</strong>${b.event_date || '—'} ${b.event_time || ''}</div>
+        <div class="booking-detail"><strong>Sport</strong>${b.sport_type || '—'}</div>
+        <div class="booking-detail"><strong>Venue</strong>${b.event_location || '—'}</div>
+        <div class="booking-detail"><strong>Total / Deposit</strong>${b.total || '—'} / ${b.deposit || '—'}</div>
+        ${b.travel_fee && b.travel_fee !== 'None' ? `<div class="booking-detail"><strong>Travel</strong>${b.travel_fee}</div>` : ''}
+        ${b.addons && b.addons !== 'None' ? `<div class="booking-detail"><strong>Add-ons</strong>${b.addons}</div>` : ''}
+        ${b.notes ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Notes</strong>${b.notes}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+        ${isPending ? `
+          <button class="acc-btn" style="padding:6px 14px;font-size:11px;background:var(--green)" onclick="approveBooking('${b.id}')">✓ Approve</button>
+          <button class="acc-btn" style="padding:6px 14px;font-size:11px;background:var(--red)" onclick="declineBooking('${b.id}')">✕ Decline</button>
+        ` : ''}
+        ${isApproved ? `
+          <button class="invoice-btn" onclick="generateInvoiceFromBooking('${b.id}')">Invoice PDF</button>
+          ${b.gallery_id ? `<a class="open-btn" href="gallery.html?id=${b.gallery_id}" target="_blank">View gallery</a>` : ''}
+        ` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function onAddrKey(e) {
-  var items = document.querySelectorAll('.addr-item');
-  if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx + 1, items.length - 1); items.forEach(function(el, i) { el.classList.toggle('focused', i === acIdx); }); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx - 1, 0); items.forEach(function(el, i) { el.classList.toggle('focused', i === acIdx); }); }
-  else if (e.key === 'Enter') { e.preventDefault(); if (acIdx >= 0 && items[acIdx]) items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
-  else if (e.key === 'Escape') closeDD();
+async function approveBooking(id) {
+  const booking = allBookings.find(b => b.id === id);
+  if (!booking) return;
+
+  // Create gallery linked to this booking
+  const slug = (booking.first_name + '-' + booking.last_name + '-' + (booking.event_date || '')).toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString(36);
+  const galName = (booking.first_name || '') + ' ' + (booking.last_name || '') + (booking.event_date ? ' — ' + booking.event_date : '');
+
+  const { data: gal } = await sb.from('client_galleries').insert({ name: galName, slug, paid: false, watermark: true }).select('id,slug').single();
+
+  // Update booking status and link gallery
+  await sb.from('bookings').update({ status: 'approved', gallery_id: gal ? gal.id : null }).eq('id', id);
+
+  await loadBookings();
+  await loadGalleries();
+  toast('✓ Booking approved — gallery created!');
+
+  // Auto-generate invoice
+  if (booking) generateInvoiceFromBooking(id);
 }
-function closeDD() { var dd = document.getElementById('addr-drop'); dd.classList.remove('open'); dd.innerHTML = ''; }
-document.addEventListener('click', function(e) { if (!e.target.closest('.addr-wrap')) closeDD(); });
 
-// ── PUBLIC AVAILABILITY CALENDAR ──
-let calYear, calMonth, calBlocks = [], pickedDate = null;
+async function declineBooking(id) {
+  if (!confirm('Decline and delete this booking? This cannot be undone.')) return;
+  await sb.from('bookings').delete().eq('id', id);
+  await loadBookings();
+  toast('Booking declined and deleted.');
+}
 
-async function initCalendar() {
+async function generateInvoiceFromBooking(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b) return;
+
   const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
-  const { data } = await fetch_blocks();
-  calBlocks = data || [];
-  renderPublicCal();
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const num = b.booking_number || 'ZRP-' + now.getFullYear() + '-' + id.slice(-5).toUpperCase();
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Invoice ${num}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#111;padding:48px;max-width:680px;margin:0 auto;font-size:13px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px}
+.brand{font-size:18px;font-weight:600;letter-spacing:-.02em}
+.brand-sub{font-size:11px;color:#888;margin-top:3px}
+.contact-info{margin-top:12px;font-size:11px;color:#888;line-height:1.8}
+.inv-meta{text-align:right}
+.inv-meta h1{font-size:22px;font-weight:300;color:#111}
+.inv-meta p{font-size:11px;color:#888;margin-top:4px}
+hr{border:none;border-top:1px solid #e5e5e5;margin:24px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:36px}
+.col-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;margin-bottom:6px}
+.col-val{font-size:13px;color:#111;line-height:1.7}
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+thead th{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa;padding:8px 0;text-align:left;border-bottom:1px solid #e5e5e5}
+td{padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-align:top}
+.right{text-align:right}
+.totals{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:8px}
+.tot-row{display:flex;gap:48px;font-size:12px}
+.tot-row span:first-child{color:#888}
+.tot-row span:last-child{min-width:80px;text-align:right}
+.tot-row.big span{font-size:15px;font-weight:600;color:#111}
+.deposit-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;margin-top:16px}
+.deposit-box span:first-child{font-size:12px;color:#16a34a;font-weight:500}
+.deposit-box span:last-child{font-size:14px;font-weight:600;color:#16a34a}
+.footer-note{margin-top:48px;padding-top:20px;border-top:1px solid #e5e5e5;font-size:11px;color:#aaa;line-height:1.7}
+@media print{body{padding:0}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Zachary Routsong Photography</div>
+    <div class="brand-sub">Sports Photography · Valdosta, GA</div>
+    <div class="contact-info">229-300-1006<br/>@zacharyroutsongphotos<br/>zrphotos.net</div>
+  </div>
+  <div class="inv-meta">
+    <h1>Invoice</h1>
+    <p>${num}</p>
+    <p>${dateStr}</p>
+  </div>
+</div>
+<hr/>
+<div class="two-col">
+  <div>
+    <div class="col-label">Bill to</div>
+    <div class="col-val">
+      ${(b.first_name || '') + ' ' + (b.last_name || '')}<br/>
+      ${b.email || ''}<br/>
+      ${b.phone || ''}
+    </div>
+  </div>
+  <div>
+    <div class="col-label">Event details</div>
+    <div class="col-val">
+      ${b.sport_type || '—'}<br/>
+      ${b.event_date || ''} ${b.event_time || ''}<br/>
+      ${b.event_location || ''}
+    </div>
+  </div>
+</div>
+<table>
+  <thead><tr><th>Description</th><th class="right">Amount</th></tr></thead>
+  <tbody>
+    <tr><td>${b.package_selected || 'Photography package'}</td><td class="right">${b.total || '—'}</td></tr>
+    ${b.addons && b.addons !== 'None' ? `<tr><td style="color:#888;font-size:12px">Add-ons: ${b.addons}</td><td class="right">—</td></tr>` : ''}
+    ${b.travel_fee && b.travel_fee !== 'None' ? `<tr><td>Travel fee</td><td class="right">${b.travel_fee}</td></tr>` : ''}
+  </tbody>
+</table>
+<div class="totals">
+  <div class="tot-row big"><span>Total due</span><span>${b.total || '—'}</span></div>
+</div>
+${b.deposit ? `<div class="deposit-box"><span>✓ Deposit paid</span><span>${b.deposit}</span></div>` : ''}
+<div class="footer-note">
+  Thank you for booking with Zachary Routsong Photography!<br/>
+  Photos delivered via private gallery link · 5–7 day turnaround · Personal use license included<br/>
+  Questions? Call or text 229-300-1006 or DM @zacharyroutsongphotos
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
 }
 
-async function fetch_blocks() {
-  // fetch 2 months worth to cover navigation
-  const from = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-01`;
-  const nextM = calMonth === 11 ? 1 : calMonth + 2;
-  const nextY = calMonth === 11 ? calYear + 1 : calYear;
-  const to = `${nextY}-${String(nextM).padStart(2,'0')}-01`;
-  return await sb.from('availability').select('*').gte('date', from).lt('date', to);
+function updateStats() {
+  document.getElementById('st-photos').textContent = allPhotos.length;
+  document.getElementById('st-galleries').textContent = allGalleries.length;
+  document.getElementById('st-bookings').textContent = allBookings.length;
+  document.getElementById('st-hp').textContent = allPhotos.filter(p => p.show_on_homepage).length;
 }
 
-async function shiftCalMonth(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  const { data } = await fetch_blocks();
-  calBlocks = data || [];
-  renderPublicCal();
+// ── CALENDAR / AVAILABILITY ──
+let calYear, calMonth, selectedDate = null, selectedBlockType = null;
+
+async function loadBlocks() {
+  const { data } = await sb.from('availability').select('*').order('date').order('start_time');
+  allBlocks = data || [];
 }
 
-function getPublicStatus(dateStr) {
-  const blocks = calBlocks.filter(b => b.date === dateStr);
+function getBlocksForDate(dateStr) {
+  return allBlocks.filter(b => b.date === dateStr);
+}
+
+function getDateStatus(dateStr) {
+  const blocks = getBlocksForDate(dateStr);
   if (!blocks.length) return null;
   if (blocks.some(b => b.status === 'unavailable' && !b.start_time)) return 'unavailable';
   if (blocks.some(b => b.status === 'partial')) return 'partial';
@@ -653,273 +819,250 @@ function getPublicStatus(dateStr) {
   return null;
 }
 
-function renderPublicCal() {
+function renderCalendar() {
   const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  const label = new Date(calYear, calMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-  document.getElementById('avail-month').textContent = label;
+  if (!calYear) { calYear = now.getFullYear(); calMonth = now.getMonth(); }
 
-  const grid = document.getElementById('avail-grid');
+  const label = new Date(calYear, calMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-month-label').textContent = label;
+
+  const grid = document.getElementById('cal-grid');
   grid.innerHTML = '';
+
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = now.toISOString().slice(0, 10);
 
+  // empty cells
   for (let i = 0; i < firstDay; i++) {
     const el = document.createElement('div');
-    el.className = 'avail-day empty';
+    el.className = 'cal-day empty';
     grid.appendChild(el);
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const status = getPublicStatus(dateStr);
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const status = getDateStatus(dateStr);
     const isPast = dateStr < today;
     const isToday = dateStr === today;
-    const isPicked = dateStr === pickedDate;
+    const isSelected = dateStr === selectedDate;
 
     const el = document.createElement('div');
-    let cls = 'avail-day';
+    let cls = 'cal-day';
     if (isPast) cls += ' past';
-    else cls += ' clickable';
     if (isToday) cls += ' today';
-    if (isPicked) cls += ' picked';
+    if (isSelected) cls += ' selected';
     if (status) cls += ' ' + status;
     el.className = cls;
     el.innerHTML = `<span>${d}</span>`;
-
     if (status) {
       const dot = document.createElement('div');
-      dot.className = 'avail-dot-sm';
-      dot.style.background = status === 'unavailable' ? '#ff4d4d' : status === 'partial' ? '#f59e0b' : '#22c55e';
+      dot.className = 'cal-dot ' + (status === 'unavailable' ? 'red' : status === 'partial' ? 'yellow' : 'green');
       el.appendChild(dot);
     }
-
-    if (!isPast && status !== 'unavailable') {
-      el.addEventListener('click', () => {
-        pickedDate = dateStr;
-        const edateInput = document.getElementById('edate');
-        if (edateInput) edateInput.value = dateStr;
-        renderPublicCal();
-        document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
-      });
-    }
-
+    if (!isPast) el.addEventListener('click', () => openEditor(dateStr));
     grid.appendChild(el);
   }
+
+  renderBlocksList();
 }
 
-// Load Supabase for public calendar
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-initCalendar();
+function shiftMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  closeEditor();
+  renderCalendar();
+}
 
-async function calcTravel(lat, lng) {
-  travelReady = false;
-  travelCost  = 0;
-  var statusEl = document.getElementById('travel-calc-status');
-  var resultEl = document.getElementById('travel-result');
+// ── DAY EDITOR ──
+function openEditor(dateStr) {
+  selectedDate = dateStr;
+  selectedBlockType = null;
+  const d = new Date(dateStr + 'T00:00:00');
+  const label = d.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' });
+  document.getElementById('editor-title').textContent = label;
+  document.getElementById('block-note').value = '';
+  document.getElementById('block-start').value = '09:00';
+  document.getElementById('block-end').value = '17:00';
+  document.querySelectorAll('.block-type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('time-row').classList.add('hidden');
+  document.getElementById('day-editor').classList.add('open');
+  renderCalendar();
+}
 
-  statusEl.style.display = 'block';
-  resultEl.classList.remove('show');
-  document.getElementById('tr-fee-row').style.display = 'none';
-  document.getElementById('tr-free').style.display = 'none';
+function closeEditor() {
+  selectedDate = null;
+  selectedBlockType = null;
+  document.getElementById('day-editor').classList.remove('open');
+  renderCalendar();
+}
 
-  var onewayMi = null;
-  try {
-    var controller = new AbortController();
-    var osrmTimeout = setTimeout(function() { controller.abort(); }, 5000);
-    var url = 'https://router.project-osrm.org/route/v1/driving/'
-      + ORIGIN.lng + ',' + ORIGIN.lat + ';'
-      + lng + ',' + lat + '?overview=false';
-    var resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(osrmTimeout);
-    var data = await resp.json();
-    if (data.code === 'Ok' && data.routes && data.routes.length) {
-      onewayMi = data.routes[0].distance * 0.000621371;
+function setBlockType(type) {
+  selectedBlockType = type;
+  document.querySelectorAll('.block-type-btn').forEach(b => b.classList.remove('active'));
+  const map = { unavailable: 'btn-unavail', partial: 'btn-partial', available: 'btn-avail', clear: 'btn-clear' };
+  document.getElementById(map[type]).classList.add('active');
+  document.getElementById('time-row').classList.toggle('hidden', type !== 'partial');
+}
+
+async function saveBlock() {
+  if (!selectedDate || !selectedBlockType) { toast('Pick a block type first.'); return; }
+
+  if (selectedBlockType === 'clear') {
+    await sb.from('availability').delete().eq('date', selectedDate);
+    toast('Cleared.');
+  } else {
+    const startTime = selectedBlockType === 'partial' ? document.getElementById('block-start').value : null;
+    const endTime = selectedBlockType === 'partial' ? document.getElementById('block-end').value : null;
+    const note = document.getElementById('block-note').value.trim() || null;
+
+    // For full day blocks, delete existing first
+    if (selectedBlockType !== 'partial') {
+      await sb.from('availability').delete().eq('date', selectedDate).is('start_time', null);
     }
-  } catch(e) {
-    console.warn('OSRM unavailable or timed out, using haversine fallback');
+
+    await sb.from('availability').insert({
+      date: selectedDate,
+      status: selectedBlockType,
+      start_time: startTime,
+      end_time: endTime,
+      note: note
+    });
+    toast('Saved!');
   }
 
-  if (!onewayMi) {
-    onewayMi = haversine(ORIGIN.lat, ORIGIN.lng, lat, lng) * 1.3;
-  }
+  await loadBlocks();
+  closeEditor();
+}
 
-  var roundTrip = onewayMi * 2;
-  var gallons   = roundTrip / MPG;
+function renderBlocksList() {
+  const list = document.getElementById('blocks-list');
+  const monthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  const monthBlocks = allBlocks.filter(b => b.date.startsWith(monthStr));
 
-  document.getElementById('tr-mi').textContent  = onewayMi.toFixed(1) + ' mi (driving)';
-  document.getElementById('tr-gal').textContent = gallons.toFixed(2) + ' gal';
-  statusEl.style.display = 'none';
+  if (!monthBlocks.length) { list.innerHTML = '<p class="no-data">No blocks set for this month.</p>'; return; }
 
-  if (onewayMi <= FREE_MI) {
-    travelCost = 0;
-    document.getElementById('tr-fee-row').style.display = 'none';
-    document.getElementById('tr-free').style.display = 'flex';
+  list.innerHTML = monthBlocks.map(b => {
+    const d = new Date(b.date + 'T00:00:00');
+    const dateLabel = d.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' });
+    const timeLabel = b.start_time ? `${b.start_time} – ${b.end_time}` : 'Full day';
+    return `<div class="block-row">
+      <div class="block-row-info">
+        <strong>${dateLabel}</strong>${timeLabel}${b.note ? ' · ' + b.note : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="block-status ${b.status}">${b.status}</span>
+        <button class="del-block-btn" onclick="deleteBlock('${b.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteBlock(id) {
+  await sb.from('availability').delete().eq('id', id);
+  await loadBlocks();
+  renderCalendar();
+  toast('Block removed.');
+}
+
+// Init calendar month
+const _now = new Date();
+calYear = _now.getFullYear();
+calMonth = _now.getMonth();
+
+// ── COUPONS ──
+let allCoupons = [];
+
+async function loadCoupons() {
+  const { data } = await sb.from('coupons').select('*').order('created_at', { ascending: false });
+  allCoupons = data || [];
+  renderCoupons();
+}
+
+function onCouponTypeChange() {
+  const type = document.getElementById('cp-type').value;
+  const wrap = document.getElementById('cp-value-wrap');
+  const lbl  = document.getElementById('cp-value-label');
+  if (type === 'travel') {
+    wrap.style.display = 'none';
   } else {
-    travelCost = Math.floor(gallons * GAS * 10) / 10;
-    document.getElementById('tr-fee-row').style.display = 'flex';
-    document.getElementById('tr-free').style.display = 'none';
-    document.getElementById('tr-fee').textContent = '$' + travelCost.toFixed(2);
+    wrap.style.display = 'flex';
+    lbl.textContent = type === 'percent' ? 'Discount %' : 'Discount $';
   }
-
-  resultEl.classList.add('show');
-  travelReady = true;
-  updateCost();
 }
 
-function haversine(a, b, c, d) {
-  var R = 3958.8, dL = (c - a) * Math.PI / 180, dN = (d - b) * Math.PI / 180;
-  var x = Math.sin(dL/2)*Math.sin(dL/2) + Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-}
+async function createCoupon() {
+  const code     = document.getElementById('cp-code').value.trim().toUpperCase();
+  const type     = document.getElementById('cp-type').value;
+  const value    = type !== 'travel' ? parseFloat(document.getElementById('cp-value').value) : null;
+  const expires  = document.getElementById('cp-expires').value || null;
+  const maxUses  = document.getElementById('cp-max-uses').value ? parseInt(document.getElementById('cp-max-uses').value) : null;
 
-// ── PACKAGES ──
-function selectPkg(card) {
-  document.querySelectorAll('.pkg-card').forEach(function(c) { c.classList.remove('selected'); });
-  card.classList.add('selected');
-  selPkg = { name: card.dataset.package, price: parseFloat(card.dataset.price) };
-  var d = document.getElementById('pkg-display');
-  d.value = selPkg.name + ' — $' + selPkg.price; d.style.color = 'var(--t1)';
-  updateCost();
-}
+  if (!code) { toast('Enter a coupon code.'); return; }
+  if (type !== 'travel' && (!value || value <= 0)) { toast('Enter a valid discount value.'); return; }
+  if (type === 'percent' && value > 100) { toast('Percentage can\'t exceed 100%.'); return; }
 
-// ── QTY ──
-function chQty(t, d) {
-  if (t === 'photos') {
-    qPhotos = Math.max(0, qPhotos + d);
-    document.getElementById('qv-photos').textContent = qPhotos;
-    document.getElementById('qs-photos').textContent = qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · $' + (qPhotos * 15).toFixed(2);
-    document.getElementById('qp-photos').classList.toggle('active', qPhotos > 0);
-  } else {
-    qPrints = Math.max(0, qPrints + d);
-    document.getElementById('qv-prints').textContent = qPrints;
-    document.getElementById('qs-prints').textContent = qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · $' + (qPrints * 3).toFixed(2);
-    document.getElementById('qp-prints').classList.toggle('active', qPrints > 0);
-  }
-  updateCost();
-}
-
-// ── TOGGLES ──
-function togAddon(pill) {
-  pill.classList.toggle('active');
-  var n = pill.dataset.addon, p = parseFloat(pill.dataset.price);
-  if (pill.classList.contains('active')) addons.push({ n: n, p: p });
-  else addons = addons.filter(function(a) { return a.n !== n; });
-  updateCost();
-}
-
-// ── COUPON ──
-async function applyCoupon() {
-  var code = document.getElementById('coupon-input').value.trim().toUpperCase();
-  var statusEl = document.getElementById('coupon-status');
-  statusEl.className = 'coupon-status';
-  statusEl.textContent = '';
-
-  if (!code) { statusEl.className = 'coupon-status err'; statusEl.textContent = 'Enter a code first.'; return; }
-
-  var result = await sb.from('coupons').select('*').eq('code', code).eq('active', true).single();
-
-  if (result.error || !result.data) {
-    activeCoupon = null;
-    statusEl.className = 'coupon-status err';
-    statusEl.textContent = 'Invalid or expired code.';
-    updateCost(); return;
-  }
-
-  var c = result.data;
-
-  // Check expiry
-  if (c.expires_at && new Date(c.expires_at) < new Date()) {
-    activeCoupon = null;
-    statusEl.className = 'coupon-status err';
-    statusEl.textContent = 'This code has expired.';
-    updateCost(); return;
-  }
-
-  // Check max uses
-  if (c.max_uses !== null && c.uses >= c.max_uses) {
-    activeCoupon = null;
-    statusEl.className = 'coupon-status err';
-    statusEl.textContent = 'This code has reached its usage limit.';
-    updateCost(); return;
-  }
-
-  activeCoupon = c;
-  statusEl.className = 'coupon-status ok';
-  statusEl.textContent = c.type === 'percent' ? '✓ ' + c.value + '% off applied!'
-    : c.type === 'fixed' ? '✓ $' + c.value + ' off applied!'
-    : '✓ Travel fee waived!';
-  updateCost();
-}
-
-
-function showLine(id, show, vid, val) {
-  var r = document.getElementById(id);
-  if (show) { r.classList.remove('hide'); if (vid) document.getElementById(vid).textContent = val; }
-  else r.classList.add('hide');
-}
-
-function updateCost() {
-  if (!selPkg) {
-    document.getElementById('cost-empty').style.display = 'block';
-    document.getElementById('cost-lines').style.display = 'none';
+  const { error } = await sb.from('coupons').insert({ code, type, value, expires_at: expires, max_uses: maxUses, active: true });
+  if (error) {
+    if (error.code === '23505') toast('That code already exists.');
+    else toast('Error creating coupon.');
     return;
   }
-  document.getElementById('cost-empty').style.display = 'none';
-  document.getElementById('cost-lines').style.display = 'block';
 
-  var pc = qPhotos * 15, pr = qPrints * 3;
-  document.getElementById('cl-pkg-n').textContent = selPkg.name + ' package';
-  document.getElementById('cl-pkg-p').textContent = '$' + selPkg.price.toFixed(2);
-  showLine('cl-photos', qPhotos > 0, 'cl-photos-v', qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · +$' + pc.toFixed(2));
-  showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
+  // Reset form
+  document.getElementById('cp-code').value = '';
+  document.getElementById('cp-value').value = '';
+  document.getElementById('cp-expires').value = '';
+  document.getElementById('cp-max-uses').value = '';
 
-  // Travel — waived if travel coupon applied
-  var effectiveTravel = (activeCoupon && activeCoupon.type === 'travel') ? 0 : travelCost;
-  showLine('cl-travel', effectiveTravel > 0, 'cl-travel-v', '+$' + effectiveTravel.toFixed(2));
+  await loadCoupons();
+  toast('Coupon created!');
+}
 
-  var at = 0;
-  ['cl-a0','cl-a1','cl-a2'].forEach(function(id, i) {
-    var row = document.getElementById(id), a = addons[i];
-    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.n; row.children[1].textContent = '+$' + a.p.toFixed(2); at += a.p; }
-    else row.classList.add('hide');
-  });
+function renderCoupons() {
+  const el = document.getElementById('coupons-list');
+  if (!allCoupons.length) { el.innerHTML = '<p class="no-data">No coupons yet.</p>'; return; }
 
-  var subtotal = selPkg.price + pc + pr + effectiveTravel + at;
+  el.innerHTML = allCoupons.map(c => {
+    const typeLabel = c.type === 'percent' ? c.value + '% off'
+      : c.type === 'fixed' ? '$' + c.value + ' off'
+      : 'Travel waived';
+    const expires = c.expires_at ? 'Expires ' + c.expires_at : 'No expiry';
+    const uses = c.max_uses ? c.uses + ' / ' + c.max_uses + ' uses' : c.uses + ' uses';
+    const expired = c.expires_at && new Date(c.expires_at) < new Date();
 
-  // Coupon discount
-  var discount = 0;
-  var couponRow = document.getElementById('cl-coupon');
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent') {
-      discount = Math.floor(subtotal * (activeCoupon.value / 100) * 100) / 100;
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' (' + activeCoupon.value + '% off)';
-      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
-    } else if (activeCoupon.type === 'fixed') {
-      discount = Math.min(parseFloat(activeCoupon.value), subtotal);
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' ($' + activeCoupon.value + ' off)';
-      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
-    } else if (activeCoupon.type === 'travel' && travelCost > 0) {
-      discount = travelCost;
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent = activeCoupon.code + ' (travel waived)';
-      document.getElementById('cl-coupon-val').textContent = '−$' + discount.toFixed(2);
-    } else {
-      couponRow.classList.add('hide');
-    }
-  } else {
-    couponRow.classList.add('hide');
-  }
+    return `<div class="coupon-row ${!c.active ? 'inactive' : ''}">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="coupon-code">${c.code}</span>
+          <div class="coupon-badges">
+            <span class="coupon-badge ${c.type}">${typeLabel}</span>
+            ${expired ? '<span class="coupon-badge" style="color:var(--red);border-color:rgba(255,77,77,.3);background:rgba(255,77,77,.08)">Expired</span>' : ''}
+            ${!c.active ? '<span class="coupon-badge" style="color:var(--t3);border-color:var(--b3)">Inactive</span>' : ''}
+          </div>
+        </div>
+        <div class="coupon-meta">${expires} · ${uses}</div>
+      </div>
+      <div class="coupon-actions">
+        <button class="toggle-active-btn" onclick="toggleCoupon('${c.id}',${c.active})">${c.active ? 'Disable' : 'Enable'}</button>
+        <button class="del-coupon-btn" onclick="deleteCoupon('${c.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  var total   = Math.max(0, subtotal - discount);
-  var deposit = Math.round(total * 50) / 100;
-  var balance = total - deposit;
+async function toggleCoupon(id, cur) {
+  await sb.from('coupons').update({ active: !cur }).eq('id', id);
+  await loadCoupons();
+  toast(cur ? 'Coupon disabled.' : 'Coupon enabled!');
+}
 
-  document.getElementById('cl-total').textContent   = '$' + subtotal.toFixed(2) + (discount > 0 ? ' → $' + total.toFixed(2) : '');
-  document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
-  document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
+async function deleteCoupon(id) {
+  if (!confirm('Delete this coupon permanently?')) return;
+  await sb.from('coupons').delete().eq('id', id);
+  await loadCoupons();
+  toast('Coupon deleted.');
 }
 </script>
 </body>
