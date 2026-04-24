@@ -80,13 +80,23 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 .prog-wrap{height:2px;background:var(--b2);border-radius:2px;margin-bottom:8px;display:none}
 .prog-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;width:0}
 .upload-status{font-size:11px;color:var(--t2);min-height:16px;margin-bottom:16px}
-.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:16px}
-.photo-card{background:var(--s1);border:1px solid var(--b1);border-radius:6px;overflow:hidden}
+.photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:0}
+.photo-card{background:var(--s1);border:1px solid var(--b1);border-radius:6px;overflow:hidden;position:relative;transition:border-color .15s}
+.photo-card.selected{border-color:var(--accent);outline:1px solid var(--accent)}
+.photo-cb-wrap{position:absolute;top:6px;left:6px;z-index:2;line-height:0}
+.photo-cb{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
 .photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 .photo-card-info{padding:6px 8px}
 .photo-sport{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
 .photo-name{font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .photo-actions{display:flex;gap:4px;padding:0 8px 8px}
+.bulk-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);margin-bottom:10px;flex-wrap:wrap}
+.bulk-left{display:flex;align-items:center;gap:10px}
+.bulk-select-all{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--t2);user-select:none}
+.bulk-select-all input{width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.bulk-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bulk-select{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--t1);background:var(--s2);border:1px solid var(--b2);border-radius:6px;padding:5px 26px 5px 8px;height:30px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.bulk-select option{background:#111}
 
 /* GALLERIES */
 .gal-form{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end}
@@ -281,6 +291,35 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
     <p class="upload-status" id="up-status"></p>
     <div class="sec-label">all photos</div>
+
+    <!-- BULK ACTION BAR -->
+    <div class="bulk-bar" id="bulk-bar">
+      <div class="bulk-left">
+        <label class="bulk-select-all">
+          <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)"/>
+          <span id="bulk-count">0 selected</span>
+        </label>
+      </div>
+      <div class="bulk-actions" id="bulk-actions" style="display:none">
+        <div class="field" style="margin:0;flex-direction:row;align-items:center;gap:6px">
+          <select id="bulk-sport" class="bulk-select">
+            <option value="">Change sport...</option>
+            <option>Football</option><option>Basketball</option><option>Baseball</option>
+            <option>Softball</option><option>Soccer</option><option>Track &amp; Field</option>
+            <option>Volleyball</option><option>Wrestling</option><option>Swimming</option><option>Other</option>
+          </select>
+          <button class="btn-sm accent" onclick="bulkChangeSport()">Apply</button>
+        </div>
+        <div class="field" style="margin:0;flex-direction:row;align-items:center;gap:6px">
+          <select id="bulk-gallery" class="bulk-select">
+            <option value="">Add to gallery...</option>
+          </select>
+          <button class="btn-sm accent" onclick="bulkAddToGallery()">Apply</button>
+        </div>
+        <button class="btn-sm danger" onclick="bulkDelete()">Delete selected</button>
+      </div>
+    </div>
+
     <div class="photos-grid" id="photos-grid"><p class="no-data">No photos yet.</p></div>
   </div>
 
@@ -438,21 +477,99 @@ async function loadPhotos() {
   populateGalDrop();
 }
 
+// ── SELECTION STATE ──
+let selectedPhotoIds = new Set();
+
+function togglePhotoSelect(id, checked) {
+  if (checked) selectedPhotoIds.add(id);
+  else selectedPhotoIds.delete(id);
+  const card = document.getElementById('pc-' + id);
+  if (card) {
+    card.classList.toggle('selected', checked);
+    const cb = card.querySelector('.photo-cb');
+    if (cb) cb.checked = checked;
+  }
+  updateBulkBar();
+}
+
+function toggleSelectAll(checked) {
+  allPhotos.forEach(p => togglePhotoSelect(p.id, checked));
+}
+
+function updateBulkBar() {
+  const count = selectedPhotoIds.size;
+  document.getElementById('bulk-count').textContent = count + ' selected';
+  document.getElementById('bulk-actions').style.display = count > 0 ? 'flex' : 'none';
+  const allCb = document.getElementById('select-all-cb');
+  if (allCb) allCb.checked = count > 0 && count === allPhotos.length;
+  // Keep bulk gallery dropdown in sync with gallery list
+  const bg = document.getElementById('bulk-gallery');
+  if (bg && bg.options.length <= 1) {
+    allGalleries.forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.id; o.textContent = g.name;
+      bg.appendChild(o);
+    });
+  }
+}
+
 function renderPhotos() {
   const g = document.getElementById('photos-grid');
-  if (!allPhotos.length) { g.innerHTML = '<p class="no-data">No photos yet.</p>'; return; }
+  if (!allPhotos.length) { g.innerHTML = '<p class="no-data">No photos yet.</p>'; updateBulkBar(); return; }
   g.innerHTML = allPhotos.map(p => `
-    <div class="photo-card">
-      <img src="${p.url}" alt="${p.sport || ''}" loading="lazy"/>
+    <div class="photo-card ${selectedPhotoIds.has(p.id) ? 'selected' : ''}" id="pc-${p.id}">
+      <div class="photo-cb-wrap">
+        <input type="checkbox" class="photo-cb" ${selectedPhotoIds.has(p.id) ? 'checked' : ''}
+          onchange="togglePhotoSelect('${p.id}',this.checked)" onclick="event.stopPropagation()"/>
+      </div>
+      <img src="${p.url}" alt="${p.sport||''}" loading="lazy"
+        onclick="togglePhotoSelect('${p.id}',!selectedPhotoIds.has('${p.id}'))" style="cursor:pointer"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${p.sport || 'No sport'}</div>
+        <div class="photo-sport">${p.sport||'No sport'}</div>
         <div class="photo-name">${p.file_name}</div>
       </div>
       <div class="photo-actions">
         <button class="btn-sm ${p.show_on_homepage ? 'on-accent' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage ? 'On HP' : 'Add HP'}</button>
-        <button class="btn-sm red" onclick="delPhoto('${p.id}','${p.storage_path}')">Delete</button>
+        <button class="btn-sm red" onclick="delPhoto('${p.id}','${p.storage_path}')">Del</button>
       </div>
     </div>`).join('');
+  updateBulkBar();
+}
+
+// ── BULK ACTIONS ──
+async function bulkChangeSport() {
+  const sport = document.getElementById('bulk-sport').value;
+  if (!sport) { toast('Pick a sport first.'); return; }
+  if (!selectedPhotoIds.size) { toast('No photos selected.'); return; }
+  const ids = [...selectedPhotoIds];
+  await sb.from('portfolio_photos').update({ sport }).in('id', ids);
+  toast(`✓ Sport updated on ${ids.length} photo${ids.length !== 1 ? 's' : ''}.`);
+  document.getElementById('bulk-sport').value = '';
+  await loadPhotos();
+}
+
+async function bulkAddToGallery() {
+  const galId = document.getElementById('bulk-gallery').value;
+  if (!galId) { toast('Pick a gallery first.'); return; }
+  if (!selectedPhotoIds.size) { toast('No photos selected.'); return; }
+  const ids = [...selectedPhotoIds];
+  await sb.from('portfolio_photos').update({ gallery_id: galId }).in('id', ids);
+  const gal = allGalleries.find(g => g.id === galId);
+  toast(`✓ Added ${ids.length} photo${ids.length !== 1 ? 's' : ''} to ${gal ? gal.name : 'gallery'}.`);
+  document.getElementById('bulk-gallery').value = '';
+  await loadPhotos();
+}
+
+async function bulkDelete() {
+  const ids = [...selectedPhotoIds];
+  if (!ids.length) { toast('No photos selected.'); return; }
+  if (!confirm(`Delete ${ids.length} photo${ids.length !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+  const paths = allPhotos.filter(p => ids.includes(p.id)).map(p => p.storage_path);
+  if (paths.length) await sb.storage.from('photos').remove(paths);
+  await sb.from('portfolio_photos').delete().in('id', ids);
+  selectedPhotoIds.clear();
+  toast(`Deleted ${ids.length} photo${ids.length !== 1 ? 's' : ''}.`);
+  await loadPhotos();
 }
 
 async function togHP(id, cur) {
@@ -494,7 +611,7 @@ async function handleFiles(files) {
   }
   st.textContent = `${done} photo${done !== 1 ? 's' : ''} uploaded!`;
   setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0'; st.textContent = ''; }, 3000);
-  fi.value = ''; await loadPhotos(); toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
+  fi.value = ''; selectedPhotoIds.clear(); await loadPhotos(); toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
 }
 
 // ── GALLERIES ──
@@ -514,6 +631,18 @@ function populateGalDrop() {
     if (g.id === cur) o.selected = true;
     s.appendChild(o);
   });
+  // Also populate bulk gallery dropdown
+  const bg = document.getElementById('bulk-gallery');
+  if (bg) {
+    const bcur = bg.value;
+    bg.innerHTML = '<option value="">Add to gallery...</option>';
+    allGalleries.forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.id; o.textContent = g.name;
+      if (g.id === bcur) o.selected = true;
+      bg.appendChild(o);
+    });
+  }
 }
 
 function renderGalleries() {
