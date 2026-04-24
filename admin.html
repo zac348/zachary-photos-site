@@ -438,17 +438,21 @@ function renderGalleries() {
     const cnt = allPhotos.filter(p => p.gallery_id === g.id).length;
     const isPaid = g.paid === true;
     const hasWm = g.watermark !== false;
+    const isDelivered = g.delivered === true;
+
     return `<div class="gal-row">
       <div class="gal-info">
-        <h3 style="display:flex;align-items:center;gap:8px">
+        <h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           ${g.name}
           <span class="paid-badge ${isPaid ? 'paid' : 'unpaid'}">${isPaid ? 'Paid' : 'Unpaid'}</span>
+          ${isDelivered ? '<span class="paid-badge paid" style="color:var(--accent);border-color:var(--accent-border);background:var(--accent-bg)">Delivered</span>' : ''}
         </h3>
         <p>${cnt} photo${cnt !== 1 ? 's' : ''} · Watermark: ${hasWm ? 'on' : 'off'}</p>
       </div>
       <div class="gal-actions" style="flex-wrap:wrap">
         <button class="pay-toggle ${isPaid ? 'paid' : ''}" onclick="togglePaid('${g.id}',${isPaid})">${isPaid ? 'Mark unpaid' : 'Mark paid'}</button>
         <button class="wm-toggle ${hasWm ? 'wm-on' : 'wm-off'}" onclick="toggleWatermark('${g.id}',${hasWm})">${hasWm ? 'WM: on' : 'WM: off'}</button>
+        ${!isDelivered ? `<button class="acc-btn" style="padding:5px 12px;font-size:10px;background:var(--accent)" onclick="markDelivered('${g.id}')">Mark delivered</button>` : '<span style="font-size:10px;color:var(--accent);font-family:\'DM Mono\',monospace;letter-spacing:.06em">✓ Complete</span>'}
         <button class="invoice-btn" onclick="generateInvoice('${g.id}')">Invoice PDF</button>
         <button class="copy-btn" onclick="copyLink('${url}',this)">Copy link</button>
         <a class="open-btn" href="${url}" target="_blank">Open</a>
@@ -622,18 +626,41 @@ async function loadBookings() {
 
 function renderBookings(id, list) {
   const el = document.getElementById(id);
-  if (!list.length) { el.innerHTML = '<p class="no-data">No bookings yet.</p>'; return; }
-  el.innerHTML = list.map(b => {
+  const now = new Date();
+
+  // Filter out delivered bookings older than 72 hours
+  const visible = list.filter(b => {
+    if (b.status === 'delivered' && b.delivered_at) {
+      const hrs = (now - new Date(b.delivered_at)) / 36e5;
+      return hrs < 72;
+    }
+    return true;
+  });
+
+  if (!visible.length) { el.innerHTML = '<p class="no-data">No bookings yet.</p>'; return; }
+
+  el.innerHTML = visible.map(b => {
     const status = b.status || 'pending';
-    const statusColor = status === 'approved' ? 'var(--green)' : status === 'pending' ? 'var(--yellow)' : 'var(--red)';
-    const isPending = status === 'pending';
-    const isApproved = status === 'approved';
+    const isPending   = status === 'pending';
+    const isApproved  = status === 'approved';
+    const isDelivered = status === 'delivered';
+
+    const statusColor = isPending ? 'var(--yellow)' : isDelivered ? 'var(--accent)' : 'var(--green)';
+    const statusLabel = isPending ? 'pending' : isDelivered ? 'delivered' : 'in progress';
+
+    // Time remaining before auto-hide (delivered only)
+    let timeLeft = '';
+    if (isDelivered && b.delivered_at) {
+      const hrs = Math.max(0, 72 - (now - new Date(b.delivered_at)) / 36e5);
+      timeLeft = ` · hides in ${Math.floor(hrs)}h`;
+    }
+
     return `<div class="booking-card">
       <div class="booking-head">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span class="booking-name">${b.first_name || ''} ${b.last_name || ''}</span>
           ${b.booking_number ? `<span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--t3)">${b.booking_number}</span>` : ''}
-          <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid;color:${statusColor};border-color:${statusColor};background:${statusColor}18">${status}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid;color:${statusColor};border-color:${statusColor};background:${statusColor}18">${statusLabel}${timeLeft}</span>
         </div>
         <span class="booking-pkg">${b.package_selected || '—'}</span>
       </div>
@@ -653,7 +680,7 @@ function renderBookings(id, list) {
           <button class="acc-btn" style="padding:6px 14px;font-size:11px;background:var(--green)" onclick="approveBooking('${b.id}')">✓ Approve</button>
           <button class="acc-btn" style="padding:6px 14px;font-size:11px;background:var(--red)" onclick="declineBooking('${b.id}')">✕ Decline</button>
         ` : ''}
-        ${isApproved ? `
+        ${isApproved || isDelivered ? `
           <button class="invoice-btn" onclick="generateInvoiceFromBooking('${b.id}')">Invoice PDF</button>
           ${b.gallery_id ? `<a class="open-btn" href="gallery.html?id=${b.gallery_id}" target="_blank">View gallery</a>` : ''}
         ` : ''}
@@ -688,6 +715,20 @@ async function declineBooking(id) {
   await sb.from('bookings').delete().eq('id', id);
   await loadBookings();
   toast('Booking declined and deleted.');
+}
+
+async function markDelivered(galId) {
+  const now = new Date().toISOString();
+  // Mark gallery delivered
+  await sb.from('client_galleries').update({ delivered: true, delivered_at: now }).eq('id', galId);
+  // Find linked booking and mark delivered
+  const booking = allBookings.find(b => b.gallery_id === galId);
+  if (booking) {
+    await sb.from('bookings').update({ status: 'delivered', delivered_at: now }).eq('id', booking.id);
+  }
+  await loadBookings();
+  await loadGalleries();
+  toast('✓ Marked as delivered!');
 }
 
 async function generateInvoiceFromBooking(id) {
