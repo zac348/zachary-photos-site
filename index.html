@@ -69,6 +69,17 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .lb-close{position:absolute;top:18px;right:22px;font-size:24px;color:var(--t3);cursor:pointer;background:none;border:none;transition:color .15s}
 .lb-close:hover{color:var(--t1)}
 
+@media(max-width:600px){
+  nav{padding:0 16px;height:54px}
+  .nav-cta{padding:7px 13px;font-size:12px}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .about-grid{grid-template-columns:1fr;gap:24px}
+  .stats{grid-template-columns:1fr 1fr}
+  .sports-tags{gap:6px}
+  .sport-tag{font-size:8px;padding:4px 8px}
+  .section{padding:0 16px 44px}
+  .sports-inner{padding:0 16px}
+}
 footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 footer span{font-size:11px;color:var(--t3)}
 .foot-links{display:flex;gap:16px}

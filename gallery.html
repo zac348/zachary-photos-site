@@ -63,6 +63,15 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
 .lb-nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 #lb-prev{left:16px}#lb-next{right:16px}
 @media(max-width:600px){.lb-nav{display:none}}
+@media(max-width:600px){
+  nav{padding:0 16px;height:54px}
+  .photo-grid{grid-template-columns:repeat(2,1fr);gap:2px}
+  .page{padding:20px 14px 60px}
+  .gallery-title{font-size:20px}
+  .dl-all{font-size:11px;padding:8px 14px}
+  .lb-actions{gap:8px}
+  .lb-btn{padding:7px 12px;font-size:8px}
+}
 footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 footer span{font-size:11px;color:var(--t3)}
 .foot-links{display:flex;gap:16px}
@@ -209,7 +218,7 @@ async function load() {
     document.getElementById('wm-notice').style.display = 'block';
     document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — preview watermarks shown`;
   } else {
-    document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — click any to view or download`;
+    document.getElementById('g-meta').innerHTML = `<span>${photos.length}</span> photo${photos.length !== 1 ? 's' : ''} — original files, click any to view or download`;
   }
 
   if (photos.length) {
@@ -263,23 +272,36 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') navLB(-1);
 });
 
-// ── DOWNLOAD — canvas blob so watermark is baked in ──
+// ── DOWNLOAD — original if paid, watermarked canvas if not ──
 function downloadPhoto(i) {
-  const tmpCanvas = document.createElement('canvas');
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    applyWatermark(img, tmpCanvas);
-    tmpCanvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = photos[i].file_name || `photo-${i + 1}.jpg`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }, 'image/jpeg', 0.92);
-  };
-  img.src = photos[i].url;
+  const p = photos[i];
+  if (!useWatermark) {
+    // Paid — download original file directly
+    const a = document.createElement('a');
+    a.href = p.url;
+    a.download = p.file_name || `photo-${i + 1}.jpg`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else {
+    // Unpaid — bake watermark into canvas and download that
+    const tmpCanvas = document.createElement('canvas');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      applyWatermark(img, tmpCanvas);
+      tmpCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = p.file_name || `photo-${i + 1}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.92);
+    };
+    img.src = p.url;
+  }
 }
 
 function downloadCurrent() { downloadPhoto(lbIdx); }

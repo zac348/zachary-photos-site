@@ -526,10 +526,18 @@ function updateBulkBar() {
   }
 }
 
+// ── PHOTO PAGINATION ──
+const PHOTOS_PER_PAGE = 24;
+let photoPage = 0;
+
 function renderPhotos() {
   const g = document.getElementById('photos-grid');
-  if (!allPhotos.length) { g.innerHTML = '<p class="no-data">No photos yet.</p>'; updateBulkBar(); return; }
-  g.innerHTML = allPhotos.map(p => `
+  if (!allPhotos.length) { g.innerHTML = '<p class="no-data">No photos yet.</p>'; updateBulkBar(); renderPhotoPager(); return; }
+
+  const start = photoPage * PHOTOS_PER_PAGE;
+  const page  = allPhotos.slice(start, start + PHOTOS_PER_PAGE);
+
+  g.innerHTML = page.map(p => `
     <div class="photo-card ${selectedPhotoIds.has(p.id) ? 'selected' : ''}" id="pc-${p.id}">
       <div class="photo-cb-wrap">
         <input type="checkbox" class="photo-cb" ${selectedPhotoIds.has(p.id) ? 'checked' : ''}
@@ -546,7 +554,42 @@ function renderPhotos() {
         <button class="btn-sm red" onclick="delPhoto('${p.id}','${p.storage_path}')">Del</button>
       </div>
     </div>`).join('');
+
   updateBulkBar();
+  renderPhotoPager();
+}
+
+function renderPhotoPager() {
+  let pager = document.getElementById('photo-pager');
+  const totalPages = Math.ceil(allPhotos.length / PHOTOS_PER_PAGE);
+  if (!pager) {
+    pager = document.createElement('div');
+    pager.id = 'photo-pager';
+    pager.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:8px;flex-wrap:wrap';
+    document.getElementById('photos-grid').after(pager);
+  }
+  if (totalPages <= 1) { pager.innerHTML = ''; return; }
+  pager.innerHTML = `
+    <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--t3)">
+      ${photoPage * PHOTOS_PER_PAGE + 1}–${Math.min((photoPage + 1) * PHOTOS_PER_PAGE, allPhotos.length)} of ${allPhotos.length} photos
+    </span>
+    <div style="display:flex;gap:6px">
+      <button class="btn-sm" onclick="setPhotoPage(${photoPage - 1})" ${photoPage === 0 ? 'disabled style="opacity:.3"' : ''}>← Prev</button>
+      <button class="btn-sm" onclick="setPhotoPage(${photoPage + 1})" ${photoPage >= totalPages - 1 ? 'disabled style="opacity:.3"' : ''}>Next →</button>
+    </div>`;
+}
+
+function setPhotoPage(p) {
+  photoPage = p;
+  renderPhotos();
+  document.getElementById('tab-upload').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function loadPhotos() {
+  const { data } = await sb.from('portfolio_photos').select('*').order('created_at', { ascending: false });
+  allPhotos = data || [];
+  renderPhotos();
+  populateGalDrop();
 }
 
 // ── BULK ACTIONS ──
@@ -558,7 +601,7 @@ async function bulkChangeSport() {
   await sb.from('portfolio_photos').update({ sport }).in('id', ids);
   toast(`✓ Sport updated on ${ids.length} photo${ids.length !== 1 ? 's' : ''}.`);
   document.getElementById('bulk-sport').value = '';
-  await loadPhotos();
+  photoPage = 0; await loadPhotos();
 }
 
 async function bulkAddToGallery() {
@@ -570,7 +613,7 @@ async function bulkAddToGallery() {
   const gal = allGalleries.find(g => g.id === galId);
   toast(`✓ Added ${ids.length} photo${ids.length !== 1 ? 's' : ''} to ${gal ? gal.name : 'gallery'}.`);
   document.getElementById('bulk-gallery').value = '';
-  await loadPhotos();
+  photoPage = 0; await loadPhotos();
 }
 
 async function bulkDelete() {
@@ -582,7 +625,7 @@ async function bulkDelete() {
   await sb.from('portfolio_photos').delete().in('id', ids);
   selectedPhotoIds.clear();
   toast(`Deleted ${ids.length} photo${ids.length !== 1 ? 's' : ''}.`);
-  await loadPhotos();
+  photoPage = 0; await loadPhotos();
 }
 
 async function togHP(id, cur) {
@@ -624,7 +667,7 @@ async function handleFiles(files) {
   }
   st.textContent = `${done} photo${done !== 1 ? 's' : ''} uploaded!`;
   setTimeout(() => { pw.style.display = 'none'; pb.style.width = '0'; st.textContent = ''; }, 3000);
-  fi.value = ''; selectedPhotoIds.clear(); await loadPhotos(); toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
+  fi.value = ''; selectedPhotoIds.clear(); photoPage = 0; await loadPhotos(); toast(`${done} photo${done !== 1 ? 's' : ''} uploaded!`);
 }
 
 // ── GALLERIES ──

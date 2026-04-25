@@ -195,6 +195,24 @@ input[type="date"],input[type="time"]{cursor:pointer}
 .success h3{font-size:16px;font-weight:500;margin-bottom:6px}
 .success p{font-size:12px;color:var(--t2)}
 
+@media(max-width:600px){
+  .pkg-header,.pkg-grid{grid-template-columns:1fr}
+  .pkg-header-cell{border-bottom:1px solid var(--b1)}
+  .addons-grid{grid-template-columns:1fr}
+  .addons-toggles{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .field.full,.rule,.submit-wrap,.cost-box{grid-column:1}
+  .avail-day{font-size:10px}
+  .pkg-price{font-size:22px}
+  .block{margin-bottom:28px}
+  .page{padding:20px 14px 64px}
+  nav{padding:0 16px;height:54px}
+  .travel-hint{font-size:10px}
+  .coupon-apply-btn{padding:0 12px;font-size:11px}
+}
+@media(max-width:380px){
+  .addons-toggles{grid-template-columns:1fr}
+}
 footer{border-top:1px solid var(--b1);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 footer span{font-size:11px;color:var(--t3)}
 .foot-links{display:flex;gap:16px}
