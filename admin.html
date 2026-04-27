@@ -550,7 +550,7 @@ function renderPhotos() {
         <div class="photo-name">${p.file_name}</div>
       </div>
       <div class="photo-actions">
-        <button class="btn-sm ${p.show_on_homepage ? 'on-accent' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage ? 'On HP' : 'Add HP'}</button>
+        <button class="btn-sm ${p.show_on_homepage ? 'on-accent' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">${p.show_on_homepage ? 'In shuffle' : 'Add to shuffle'}</button>
         <button class="btn-sm red" onclick="delPhoto('${p.id}','${p.storage_path}')">Del</button>
       </div>
     </div>`).join('');
