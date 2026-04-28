@@ -1309,7 +1309,7 @@ function drawEnvelopeToCanvas(canvas, scale) {
   // Main name
   ctx.textAlign = 'center';
   ctx.fillStyle = dark ? '#f0f4f8' : '#111111';
-  ctx.font = `bold ${16 * scale}px Helvetica, Arial, sans-serif`;
+  ctx.font = `bold ${20 * scale}px Helvetica, Arial, sans-serif`;
   ctx.fillText('Zachary Routsong Photography', cx, mid + 6 * scale);
 
   // Rule
@@ -1317,14 +1317,14 @@ function drawEnvelopeToCanvas(canvas, scale) {
   ctx.strokeStyle = dark ? '#333333' : '#dddddd';
   ctx.lineWidth = 0.5 * scale;
   ctx.beginPath();
-  ctx.moveTo(cx - ruleW, mid + 14 * scale);
-  ctx.lineTo(cx + ruleW, mid + 14 * scale);
+  ctx.moveTo(cx - ruleW, mid + 16 * scale);
+  ctx.lineTo(cx + ruleW, mid + 16 * scale);
   ctx.stroke();
 
   // Message
-  ctx.fillStyle = dark ? '#666666' : '#999999';
-  ctx.font = `${8 * scale}px Helvetica, Arial, sans-serif`;
-  ctx.fillText(s.msg, cx, mid + 26 * scale);
+  ctx.fillStyle = dark ? '#666666' : '#888888';
+  ctx.font = `${10 * scale}px Helvetica, Arial, sans-serif`;
+  ctx.fillText(s.msg, cx, mid + 30 * scale);
 
   // Bottom — domain + insta
   const botY = H - 22 * scale;
