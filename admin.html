@@ -86,10 +86,10 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
 .photo-cb-wrap{position:absolute;top:6px;left:6px;z-index:2;line-height:0}
 .photo-cb{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
 .photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.photo-card-info{padding:6px 8px}
+.photo-card-info{padding:5px 7px 3px}
 .photo-sport{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
-.photo-name{font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
-.photo-actions{display:flex;gap:4px;padding:0 8px 8px}
+.photo-name{font-size:10px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.photo-actions{display:flex;gap:4px;padding:4px 7px 7px}
 .bulk-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);margin-bottom:10px;flex-wrap:wrap}
 .bulk-left{display:flex;align-items:center;gap:10px}
 .bulk-select-all{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--t2);user-select:none}
@@ -252,6 +252,9 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     </button>
     <button class="sb-link" onclick="switchTab('pricing',this)">
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pricing
+    </button>
+    <button class="sb-link" onclick="switchTab('envelope',this)">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Envelopes
     </button>
     <a class="sb-link" href="index.html" target="_blank">
       <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View site
@@ -432,6 +435,50 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
     <div id="pricing-list"><p class="no-data">Loading...</p></div>
     <div class="sec-label" style="margin-top:24px">add-ons</div>
     <div id="addon-list"><p class="no-data">Loading...</p></div>
+  </div>
+
+  <!-- ENVELOPE GENERATOR -->
+  <div class="tab" id="tab-envelope">
+    <h1 class="main-title">Envelope Generator</h1>
+    <p class="main-sub">Create a print-ready 4×6 envelope front for client photo deliveries.</p>
+
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start">
+
+      <!-- CONTROLS -->
+      <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px">
+        <div class="sec-label" style="margin-bottom:4px">customize</div>
+
+        <div class="field" style="margin:0">
+          <label class="field-label">Client name (optional)</label>
+          <input type="text" id="env-client" placeholder="e.g. Smith Family" oninput="renderEnvelope()"/>
+        </div>
+
+        <div class="field" style="margin:0">
+          <label class="field-label">Style</label>
+          <select id="env-style" onchange="renderEnvelope()">
+            <option value="minimal">Minimal — white</option>
+            <option value="dark">Dark — black</option>
+            <option value="accent">Accent — cyan line</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin:0">
+          <label class="field-label">Message (optional)</label>
+          <input type="text" id="env-msg" placeholder="Thank you for your order!" oninput="renderEnvelope()" maxlength="60"/>
+        </div>
+
+        <button class="btn-accent" style="width:100%;margin-top:4px" onclick="downloadEnvelope()">Download PDF</button>
+        <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:2px">Print at 6×4 inches, no scaling</p>
+      </div>
+
+      <!-- PREVIEW -->
+      <div>
+        <div class="sec-label" style="margin-bottom:12px">preview <span style="font-size:9px;opacity:.6;letter-spacing:0;text-transform:none;font-family:'DM Sans',sans-serif">(scaled)</span></div>
+        <div style="border:1px solid var(--b1);border-radius:var(--radius);overflow:hidden;aspect-ratio:6/4;position:relative">
+          <canvas id="env-canvas" style="width:100%;height:100%;display:block"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -1172,7 +1219,131 @@ async function saveAddonAvailability(id, available) {
   toast(available ? '✓ Add-on enabled.' : '⚠ Add-on marked unavailable.');
 }
 
-// ── COUPONS ──
+// ── ENVELOPE GENERATOR ──
+function getEnvSettings() {
+  return {
+    client:  document.getElementById('env-client').value.trim(),
+    style:   document.getElementById('env-style').value,
+    msg:     document.getElementById('env-msg').value.trim() || 'Thank you for your order.',
+  };
+}
+
+function drawEnvelopeToCanvas(canvas, scale) {
+  const s = getEnvSettings();
+  // 4x6 at 96dpi = 576x384px logical, scaled
+  const W = 576 * scale, H = 384 * scale;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const dark   = s.style === 'dark';
+  const accent = s.style === 'accent';
+
+  // Background
+  ctx.fillStyle = dark ? '#111111' : '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Accent line top (accent style)
+  if (accent) {
+    ctx.fillStyle = '#00b7e3';
+    ctx.fillRect(0, 0, W, 3 * scale);
+  }
+
+  const cx = W / 2;
+  const mid = H / 2;
+
+  // Client name — top left if present
+  if (s.client) {
+    ctx.fillStyle = dark ? '#777777' : '#aaaaaa';
+    ctx.font = `${9 * scale}px Helvetica, Arial, sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('for', 28 * scale, 34 * scale);
+    ctx.fillStyle = dark ? '#f0f4f8' : '#111111';
+    ctx.font = `bold ${12 * scale}px Helvetica, Arial, sans-serif`;
+    ctx.fillText(s.client, 28 * scale, 50 * scale);
+  }
+
+  // Main name
+  ctx.textAlign = 'center';
+  ctx.fillStyle = dark ? '#f0f4f8' : '#111111';
+  ctx.font = `bold ${16 * scale}px Helvetica, Arial, sans-serif`;
+  ctx.fillText('Zachary Routsong Photography', cx, mid + 6 * scale);
+
+  // Rule
+  const ruleW = 120 * scale;
+  ctx.strokeStyle = dark ? '#333333' : '#dddddd';
+  ctx.lineWidth = 0.5 * scale;
+  ctx.beginPath();
+  ctx.moveTo(cx - ruleW, mid + 14 * scale);
+  ctx.lineTo(cx + ruleW, mid + 14 * scale);
+  ctx.stroke();
+
+  // Message
+  ctx.fillStyle = dark ? '#666666' : '#999999';
+  ctx.font = `${8 * scale}px Helvetica, Arial, sans-serif`;
+  ctx.fillText(s.msg, cx, mid + 26 * scale);
+
+  // Bottom — domain + insta
+  const botY = H - 22 * scale;
+  ctx.fillStyle = accent ? '#00b7e3' : (dark ? '#555555' : '#aaaaaa');
+  ctx.font = `${8 * scale}px Helvetica, Arial, sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText('zrphotos.net', 28 * scale, botY);
+
+  ctx.fillStyle = dark ? '#555555' : '#aaaaaa';
+  ctx.textAlign = 'right';
+  ctx.fillText('@zacharyroutsongphotos', W - 28 * scale, botY);
+
+  // Accent line bottom
+  if (accent) {
+    ctx.fillStyle = '#00b7e3';
+    ctx.fillRect(0, H - 3 * scale, W, 3 * scale);
+  }
+}
+
+function renderEnvelope() {
+  const canvas = document.getElementById('env-canvas');
+  if (!canvas) return;
+  // Get container width for scale
+  const container = canvas.parentElement;
+  const displayW = container.clientWidth || 480;
+  const scale = displayW / 576;
+  drawEnvelopeToCanvas(canvas, scale);
+}
+
+async function downloadEnvelope() {
+  // Load jsPDF if not already loaded
+  if (!window.jspdf) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  // Render at high res (2x for crisp print)
+  const offscreen = document.createElement('canvas');
+  drawEnvelopeToCanvas(offscreen, 2);
+
+  const imgData = offscreen.toDataURL('image/png', 1.0);
+  const { jsPDF } = window.jspdf;
+  // 6x4 inches
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'in', format: [6, 4] });
+  doc.addImage(imgData, 'PNG', 0, 0, 6, 4);
+
+  const client = document.getElementById('env-client').value.trim();
+  const filename = client ? `ZRP-envelope-${client.replace(/\s+/g,'-')}.pdf` : 'ZRP-envelope.pdf';
+  doc.save(filename);
+  toast('✓ Envelope downloaded!');
+}
+
+// Init envelope preview when tab opens
+const _origSwitch = switchTab;
+function switchTab(name, btn) {
+  _origSwitch(name, btn);
+  if (name === 'envelope') setTimeout(renderEnvelope, 50);
+}
+
 async function loadCoupons() {
   const { data } = await sb.from('coupons').select('*').order('created_at', { ascending: false });
   allCoupons = data || [];
