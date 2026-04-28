@@ -1328,12 +1328,12 @@ function drawEnvelopeToCanvas(canvas, scale) {
 
   // Bottom — domain + insta
   const botY = H - 22 * scale;
-  ctx.fillStyle = accent ? '#00b7e3' : (dark ? '#555555' : '#aaaaaa');
-  ctx.font = `${8 * scale}px Helvetica, Arial, sans-serif`;
+  ctx.fillStyle = accent ? '#00b7e3' : (dark ? '#aaaaaa' : '#555555');
+  ctx.font = `${10 * scale}px Helvetica, Arial, sans-serif`;
   ctx.textAlign = 'left';
   ctx.fillText('zrphotos.net', 28 * scale, botY);
 
-  ctx.fillStyle = dark ? '#555555' : '#aaaaaa';
+  ctx.fillStyle = dark ? '#aaaaaa' : '#555555';
   ctx.textAlign = 'right';
   ctx.fillText('@zacharyroutsongphotos', W - 28 * scale, botY);
 
