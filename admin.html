@@ -277,6 +277,18 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);cursor:
       <div class="stat"><div class="stat-n" id="st-galleries">—</div><div class="stat-l">Galleries</div></div>
       <div class="stat"><div class="stat-n" id="st-bookings">—</div><div class="stat-l">Bookings</div></div>
       <div class="stat"><div class="stat-n" id="st-pending">—</div><div class="stat-l">Pending</div></div>
+      <div class="stat"><div class="stat-n" id="st-storage">—</div><div class="stat-l">Storage used</div></div>
+    </div>
+    <!-- STORAGE BAR -->
+    <div id="storage-bar-wrap" style="display:none;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 16px;margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)">Supabase storage</span>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--t3)" id="storage-detail">— of 1 GB free</span>
+      </div>
+      <div style="height:6px;background:var(--b2);border-radius:3px;overflow:hidden">
+        <div id="storage-prog" style="height:100%;border-radius:3px;background:var(--accent);width:0%;transition:width .5s ease"></div>
+      </div>
+      <p id="storage-warn" style="display:none;font-size:11px;color:var(--yellow);margin-top:8px">⚠ Getting full — consider removing unused photos.</p>
     </div>
     <div class="sec-label">recent bookings</div>
     <div class="booking-list" id="ov-bookings"><p class="no-data">No bookings yet.</p></div>
@@ -504,6 +516,7 @@ function switchTab(name, btn) {
   document.getElementById('tab-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
   if (name === 'calendar') renderCalendar();
+  if (name === 'envelope') setTimeout(renderEnvelope, 50);
 }
 
 // ── TOAST ──
@@ -527,6 +540,37 @@ function updateStats() {
   document.getElementById('st-galleries').textContent = allGalleries.length;
   document.getElementById('st-bookings').textContent = allBookings.length;
   document.getElementById('st-pending').textContent = allBookings.filter(b => b.status === 'pending').length;
+  loadStorageUsage();
+}
+
+async function loadStorageUsage() {
+  try {
+    // List all files in the photos bucket
+    const { data, error } = await sb.storage.from('photos').list('public', { limit: 10000 });
+    if (error || !data) return;
+
+    const totalBytes = data.reduce((sum, f) => sum + (f.metadata?.size || 0), 0);
+    const totalMB = totalBytes / (1024 * 1024);
+    const totalGB = totalMB / 1024;
+    const FREE_GB = 1;
+    const pct = Math.min((totalGB / FREE_GB) * 100, 100);
+
+    // Display label
+    let label;
+    if (totalMB < 1) label = (totalBytes / 1024).toFixed(1) + ' KB';
+    else if (totalMB < 1000) label = totalMB.toFixed(1) + ' MB';
+    else label = totalGB.toFixed(2) + ' GB';
+
+    document.getElementById('st-storage').textContent = label;
+    document.getElementById('st-storage').style.color = pct > 80 ? 'var(--red)' : pct > 60 ? 'var(--yellow)' : 'var(--accent)';
+    document.getElementById('storage-detail').textContent = label + ' of 1 GB free';
+    document.getElementById('storage-prog').style.width = pct.toFixed(1) + '%';
+    document.getElementById('storage-prog').style.background = pct > 80 ? 'var(--red)' : pct > 60 ? 'var(--yellow)' : 'var(--accent)';
+    document.getElementById('storage-bar-wrap').style.display = 'block';
+    document.getElementById('storage-warn').style.display = pct > 70 ? 'block' : 'none';
+  } catch(e) {
+    document.getElementById('st-storage').textContent = '—';
+  }
 }
 
 // ── PHOTOS ──
@@ -1335,13 +1379,6 @@ async function downloadEnvelope() {
   const filename = client ? `ZRP-envelope-${client.replace(/\s+/g,'-')}.pdf` : 'ZRP-envelope.pdf';
   doc.save(filename);
   toast('✓ Envelope downloaded!');
-}
-
-// Init envelope preview when tab opens
-const _origSwitch = switchTab;
-function switchTab(name, btn) {
-  _origSwitch(name, btn);
-  if (name === 'envelope') setTimeout(renderEnvelope, 50);
 }
 
 async function loadCoupons() {
